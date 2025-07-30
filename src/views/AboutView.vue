@@ -1,15 +1,24 @@
 <template>
   <div class="about">
-    <h1>This is an about page</h1>
+    <h1>About Page</h1>
+    <p>This is the about page placeholder. Information about the Lab System will go here.</p>
+    <!-- About page content will go here -->
   </div>
 </template>
 
-<style>
-@media (min-width: 1024px) {
-  .about {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-  }
+<style scoped>
+.about {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.about h1 {
+  color: var(--color-heading);
+  margin-bottom: 1rem;
+}
+
+.about p {
+  color: var(--color-text);
+  line-height: 1.6;
 }
 </style>
