@@ -3,49 +3,18 @@ import { RouterView } from 'vue-router'
 </script>
 
 <template>
-  <div id="app">
-    <header>
-      <h1>Lab System Frontend</h1>
+  <div id="app" class="min-h-screen flex flex-col">
+    <header class="bg-gray-50 dark:bg-gray-800 p-4 border-b border-gray-200 dark:border-gray-700">
+      <h1 class="m-0 text-gray-900 dark:text-white text-xl font-semibold">Lab System Frontend</h1>
       <!-- Navigation will go here -->
     </header>
 
-    <main>
+    <main class="flex-1 p-8">
       <RouterView />
     </main>
 
-    <footer>
+    <footer class="bg-gray-50 dark:bg-gray-800 p-4 border-t border-gray-200 dark:border-gray-700 text-center">
       <!-- Footer content will go here -->
     </footer>
   </div>
 </template>
-
-<style scoped>
-#app {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-header {
-  background-color: var(--color-background-soft);
-  padding: 1rem;
-  border-bottom: 1px solid var(--color-border);
-}
-
-header h1 {
-  margin: 0;
-  color: var(--color-heading);
-}
-
-main {
-  flex: 1;
-  padding: 2rem;
-}
-
-footer {
-  background-color: var(--color-background-soft);
-  padding: 1rem;
-  border-top: 1px solid var(--color-border);
-  text-align: center;
-}
-</style>

@@ -3,13 +3,7 @@ import TheWelcome from '../components/TheWelcome.vue'
 </script>
 
 <template>
-  <div class="home">
+  <div class="w-full">
     <TheWelcome />
   </div>
 </template>
-
-<style scoped>
-.home {
-  width: 100%;
-}
-</style>

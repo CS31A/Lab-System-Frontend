@@ -9,58 +9,17 @@ defineProps<Props>()
 </script>
 
 <template>
-  <div class="lab-card">
-    <div class="lab-card-header">
-      <div class="lab-card-icon" v-if="icon">
+  <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 mb-4 bg-white dark:bg-gray-900 transition-shadow duration-300 hover:shadow-lg">
+    <div class="flex items-center mb-4 pb-2 border-b border-gray-200 dark:border-gray-700">
+      <div v-if="icon" class="w-6 h-6 mr-2 flex items-center justify-center text-lg">
         {{ icon }}
       </div>
-      <h3 class="lab-card-title">{{ title }}</h3>
+      <h3 class="m-0 text-gray-900 dark:text-white text-lg font-semibold">
+        {{ title }}
+      </h3>
     </div>
-    <div class="lab-card-content">
+    <div class="text-gray-700 dark:text-gray-300">
       <slot />
     </div>
   </div>
 </template>
-
-<style scoped>
-.lab-card {
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  background-color: var(--color-background);
-  transition: box-shadow 0.3s ease;
-}
-
-.lab-card:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.lab-card-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--color-border);
-}
-
-.lab-card-icon {
-  width: 24px;
-  height: 24px;
-  margin-right: 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.2rem;
-}
-
-.lab-card-title {
-  margin: 0;
-  color: var(--color-heading);
-  font-size: 1.1rem;
-}
-
-.lab-card-content {
-  color: var(--color-text);
-}
-</style>
