@@ -1,0 +1,17 @@
+/* src/assets/gradient-icons.css */
+
+/* Custom CSS for gradient icons */
+.gradient-icon {
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent; /* Makes the text transparent so the background shows through */
+  -webkit-text-fill-color: transparent;
+}
+
+.blue-gradient {
+  background-image: linear-gradient(to right, #007bff, #00c6ff); /* Example blue gradient */
+}
+
+.red-gradient {
+  background-image: linear-gradient(to right, #ef4444, #f97316); /* Example red/orange gradient */
+}
