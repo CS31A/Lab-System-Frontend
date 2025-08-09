@@ -30,3 +30,43 @@
     </div>
   </div>
 </template>
+<<<<<<< HEAD
+
+<style scoped>
+/* .lab-dashboard {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.lab-dashboard h2 {
+  color: var(--color-heading);
+  margin-bottom: 1rem;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.dashboard-card {
+  padding: 1.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background-color: var(--color-background-soft);
+}
+
+.dashboard-card h3 {
+  color: var(--color-heading);
+  margin-bottom: 0.5rem;
+}
+
+.dashboard-card p {
+  color: var(--color-text);
+  margin: 0;
+  font-style: italic;
+} */
+</style>
+=======
+>>>>>>> 5bd82e21f5e14d7bdf969c6ae24776793f0c645b
