@@ -3,33 +3,34 @@
 </script>
 
 <template>
-  <div class="lab-dashboard">
-    <h2>Lab System Dashboard</h2>
-    <p>This is a placeholder for the main lab system dashboard.</p>
-    
-    <div class="dashboard-grid">
-      <div class="dashboard-card">
-        <h3>Equipment Status</h3>
-        <p>Equipment monitoring will go here</p>
+  <div class="max-w-6xl mx-auto">
+    <h2 class="text-gray-900 dark:text-white mb-4 text-2xl font-bold">Lab System Dashboard</h2>
+    <p class="text-gray-700 dark:text-gray-300 mb-8">This is a placeholder for the main lab system dashboard.</p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4 mt-8">
+      <div class="p-6 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800">
+        <h3 class="text-gray-900 dark:text-white mb-2 font-semibold">Equipment Status</h3>
+        <p class="text-gray-700 dark:text-gray-300 m-0 italic">Equipment monitoring will go here</p>
       </div>
-      
-      <div class="dashboard-card">
-        <h3>Active Experiments</h3>
-        <p>Current experiments will be listed here</p>
+
+      <div class="p-6 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800">
+        <h3 class="text-gray-900 dark:text-white mb-2 font-semibold">Active Experiments</h3>
+        <p class="text-gray-700 dark:text-gray-300 m-0 italic">Current experiments will be listed here</p>
       </div>
-      
-      <div class="dashboard-card">
-        <h3>Recent Results</h3>
-        <p>Latest lab results will be displayed here</p>
+
+      <div class="p-6 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800">
+        <h3 class="text-gray-900 dark:text-white mb-2 font-semibold">Recent Results</h3>
+        <p class="text-gray-700 dark:text-gray-300 m-0 italic">Latest lab results will be displayed here</p>
       </div>
-      
-      <div class="dashboard-card">
-        <h3>System Alerts</h3>
-        <p>Important notifications will appear here</p>
+
+      <div class="p-6 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800">
+        <h3 class="text-gray-900 dark:text-white mb-2 font-semibold">System Alerts</h3>
+        <p class="text-gray-700 dark:text-gray-300 m-0 italic">Important notifications will appear here</p>
       </div>
     </div>
   </div>
 </template>
+<<<<<<< HEAD
 
 <style scoped>
 /* .lab-dashboard {
@@ -67,3 +68,5 @@
   font-style: italic;
 } */
 </style>
+=======
+>>>>>>> 5bd82e21f5e14d7bdf969c6ae24776793f0c645b

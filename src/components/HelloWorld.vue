@@ -6,28 +6,9 @@ defineProps<{
 </script>
 
 <template>
-  <div class="placeholder-component">
-    <h2>{{ title || 'Placeholder Component' }}</h2>
-    <p>This is a placeholder component. Replace with actual lab system functionality.</p>
+  <div class="p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-center">
+    <h2 class="text-gray-900 dark:text-white mb-2 text-lg font-semibold">{{ title || 'Placeholder Component' }}</h2>
+    <p class="text-gray-700 dark:text-gray-300 m-0">This is a placeholder component. Replace with actual lab system functionality.</p>
     <!-- Component content will go here -->
   </div>
 </template>
-
-<style scoped>
-.placeholder-component {
-  padding: 1rem;
-  border: 2px dashed var(--color-border);
-  border-radius: 8px;
-  text-align: center;
-}
-
-.placeholder-component h2 {
-  color: var(--color-heading);
-  margin-bottom: 0.5rem;
-}
-
-.placeholder-component p {
-  color: var(--color-text);
-  margin: 0;
-}
-</style>
