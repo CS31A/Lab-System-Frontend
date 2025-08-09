@@ -3,6 +3,7 @@ import { RouterView } from 'vue-router'
 </script>
 
 <template>
+<<<<<<< HEAD
   <div id="app">
     <!-- <header>
       <h1>Lab System Frontend</h1>
@@ -49,3 +50,11 @@ footer {
   text-align: center;
 } */
 </style>
+=======
+  <div id="app" class="">
+    <main>
+      <RouterView />
+    </main>
+  </div>
+</template>
+>>>>>>> 5bd82e21f5e14d7bdf969c6ae24776793f0c645b
