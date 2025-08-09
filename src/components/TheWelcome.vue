@@ -32,7 +32,7 @@
 </template>
 
 <style scoped>
-.lab-dashboard {
+/* .lab-dashboard {
   max-width: 1200px;
   margin: 0 auto;
 }
@@ -65,5 +65,5 @@
   color: var(--color-text);
   margin: 0;
   font-style: italic;
-}
+} */
 </style>

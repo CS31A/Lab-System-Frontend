@@ -4,23 +4,23 @@ import { RouterView } from 'vue-router'
 
 <template>
   <div id="app">
-    <header>
+    <!-- <header>
       <h1>Lab System Frontend</h1>
-      <!-- Navigation will go here -->
-    </header>
+      Navigation will go here
+    </header> -->
 
     <main>
       <RouterView />
     </main>
-
+<!-- 
     <footer>
-      <!-- Footer content will go here -->
-    </footer>
+      Footer content will go here
+    </footer> -->
   </div>
 </template>
 
 <style scoped>
-#app {
+/* #app {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -47,5 +47,5 @@ footer {
   padding: 1rem;
   border-top: 1px solid var(--color-border);
   text-align: center;
-}
+} */
 </style>
