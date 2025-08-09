@@ -1,0 +1,6 @@
+.gradient-icon {
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent; /* Makes the text transparent so the background shows through */
+  -webkit-text-fill-color: transparent;
+}

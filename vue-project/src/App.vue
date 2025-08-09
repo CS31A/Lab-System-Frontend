@@ -1,11 +1,9 @@
 <template>
     <div>
-        <!-- <SideBar /> -->
-        <Slab4 />
+        <SlabView />
     </div>
 </template>
 
 <script setup>
-import SideBar from './Components/SideBar.vue'
-import Slab4 from './Components/Slab4.vue';
+import SlabView from './View/Slab4View.vue';   
 </script>

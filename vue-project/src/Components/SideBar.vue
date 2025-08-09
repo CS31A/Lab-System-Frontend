@@ -4,7 +4,7 @@
   >
     <!-- Sidebar -->
     <aside
-      class="w-full lg:max-w-xs bg-white shadow-xl p-6 flex flex-col overflow-y-auto border-r border-blue-300"
+      class="w-full lg:max-w-xs bg-white shadow-xl  flex flex-col overflow-y-auto border-r border-blue-300"
     >
       <!-- Calendar Section -->
       <div class="mb-6 pb-4 border-b border-blue-300 p-4">
@@ -77,12 +77,8 @@
           </div>
           <!-- Desktop Icon using PrimeIcons -->
           <div>
-            <i
-              class="pi pi-desktop text-9xl pb-2"
-              :class="pcAvailable ? 'text-blue-500' : 'text-red-500'"
-              id="gradient-sidebar-icon"
-            ></i>
-
+            <i class="pi pi-desktop text-5xl sm:text-7xl block gradient-icon pb-2"
+                :class="pcAvailable ? 'blue-gradient' : 'red-gradient'"></i>
           </div>
           <div class="bg-blue-100 p-2 rounded text-black">
             <div class="font-semibold border-b border-blue-400 w-fit mx-auto">
@@ -112,7 +108,7 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import SideBar from "./SideBar.vue";
+import "../Assets/SideBar.css"
 
 const days = [
   { name: "MON", date: 28, isCurrentMonth: false },
