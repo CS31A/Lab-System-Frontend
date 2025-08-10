@@ -9,18 +9,22 @@ defineOptions({
 
 // Column names for the lab management table
 const ColumnName = ref(['Labratory Name', 'Status', 'Teacher', 'Schedule'])
+const timeInterval = 300000 // 5 minutes in milliseconds
 
 // Sample data for lab management
-const LabData = ref([
-  { name: '',	status: '',	teacher: '',	schedule: '' },
-])
+interface Lab {
+  name: string
+  status: string
+  teacher: string
+  schedule: string
+}
 
-function fetchLabData() {
-  // Simulate fetching data from an API
+const LabData = ref<Lab[]>([])
+
+// Fetch data from API
+async function fetchLabData() {
   LabData.value = [
-    { name: 'Chemistry Lab', status: 'Available', teacher: 'Dr. Smith', schedule: 'Mon-Fri 9AM-5PM' },
-    { name: 'Physics Lab', status: 'Occupied', teacher: 'Dr. Johnson', schedule: 'Mon-Fri 10AM-6PM' },
-    { name: 'Biology Lab', status: 'Available', teacher: 'Dr. Lee', schedule: 'Mon-Fri 8AM-4PM' },
+
   ]
 }
 
@@ -28,7 +32,7 @@ let refreshInterval: ReturnType<typeof setInterval>
 
 // Refresh every 5 mins
 onMounted(() => {
-  refreshInterval = setInterval(fetchLabData, 300000)
+  refreshInterval = setTimeout(fetchLabData, timeInterval)
   fetchLabData()
 })
 
