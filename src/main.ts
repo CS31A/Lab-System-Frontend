@@ -1,4 +1,3 @@
-import * as lucide from 'lucide-vue-next'
 import { createPinia } from 'pinia'
 import { createApp } from 'vue'
 import App from './App.vue'
