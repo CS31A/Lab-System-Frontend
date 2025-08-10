@@ -26,7 +26,7 @@ function togglePasswordVisibility() {
 
 function handleLogin() {
   if (import.meta.env.MODE === 'development') {
-    console.log('Login clicked:', {
+    console.warn('Login clicked:', {
       username: username.value,
       password: password.value,
       rememberMe: rememberMe.value,

@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /**
  * API Service Examples
  *
@@ -5,6 +6,7 @@
  * Copy and modify these examples for your own use cases
  */
 
+import { ref } from 'vue'
 import { setAuthToken } from '@/boot/axios'
 import { apiService } from './api'
 
@@ -64,15 +66,8 @@ export async function exampleUpdateUser(userId: string) {
   }
 
   const response = await apiService.patch(`/users/${userId}`, updateData)
-
-  if (response.success) {
-    console.log('✅ User updated successfully:', response.data)
-    return response.data
-  }
-  else {
-    console.error('❌ Failed to update user:', response.message)
-    return null
-  }
+  console.log('✅ User updated successfully:', response)
+  return response
 }
 
 /**
@@ -82,15 +77,8 @@ export async function exampleDeleteUser(userId: string) {
   console.log(`🗑️ Deleting user ${userId}...`)
 
   const response = await apiService.delete(`/users/${userId}`)
-
-  if (response.success) {
-    console.log('✅ User deleted successfully')
-    return true
-  }
-  else {
-    console.error('❌ Failed to delete user:', response.message)
-    return false
-  }
+  console.log('✅ User deleted successfully:', response)
+  return response
 }
 
 // ============================================================================
@@ -111,8 +99,10 @@ export async function exampleLogin(email: string, password: string) {
 
     console.log('✅ Login successful')
 
-    // Set the auth token for future requests
-    setAuthToken(response.token)
+    // Set the auth token for future requests (assuming response has token)
+    if (response && typeof response === 'object' && 'token' in response) {
+      setAuthToken((response as any).token)
+    }
 
     return response
   }
@@ -132,7 +122,7 @@ export async function exampleLogout() {
     await apiService.post('/auth/logout')
     console.log('✅ Logout successful')
   }
-  catch (error) {
+  catch {
     console.log('⚠️ Logout request failed, but token cleared locally')
   }
   finally {
@@ -147,20 +137,15 @@ export async function exampleLogout() {
 export async function exampleGetProfile() {
   console.log('👤 Fetching user profile...')
 
-  const response = await apiService.get('/auth/me')
-
-  if (response.success) {
-    console.log('✅ Profile fetched:', response.data)
-    return response.data
+  try {
+    const response = await apiService.get('/auth/me')
+    console.log('✅ Profile fetched:', response)
+    return response
   }
-  else {
-    console.error('❌ Failed to fetch profile:', response.message)
-
+  catch (error) {
+    console.error('❌ Failed to fetch profile:', error)
     // If unauthorized, clear token
-    if (response.status === 401) {
-      apiService.setAuthToken(null)
-    }
-
+    setAuthToken(null)
     return null
   }
 }
@@ -175,24 +160,17 @@ export async function exampleGetProfile() {
 export async function exampleSearchUsers(searchTerm: string, filters: any = {}) {
   console.log('🔍 Searching users...')
 
-  const response = await apiService.get('/users', {
-    params: {
-      search: searchTerm,
-      role: filters.role,
-      active: filters.active,
-      page: filters.page || 1,
-      limit: filters.limit || 20,
-    },
-  })
+  const params = {
+    search: searchTerm,
+    role: filters.role,
+    active: filters.active,
+    page: filters.page || 1,
+    limit: filters.limit || 20,
+  }
 
-  if (response.success) {
-    console.log('✅ Search results:', response.data)
-    return response.data
-  }
-  else {
-    console.error('❌ Search failed:', response.message)
-    return null
-  }
+  const response = await apiService.get('/users', params)
+  console.log('✅ Search results:', response)
+  return response
 }
 
 /**
@@ -201,24 +179,16 @@ export async function exampleSearchUsers(searchTerm: string, filters: any = {}) 
 export async function exampleFetchPaginatedUsers(page: number = 1, limit: number = 10) {
   console.log(`📄 Fetching users page ${page}...`)
 
-  const response = await apiService.getPaginated('/users', {
+  const params = {
     page,
     limit,
     sortBy: 'name',
     sortOrder: 'asc',
-  })
+  }
 
-  if (response.success) {
-    console.log('✅ Paginated data:', {
-      users: response.data.data,
-      pagination: response.data.pagination,
-    })
-    return response.data
-  }
-  else {
-    console.error('❌ Failed to fetch paginated data:', response.message)
-    return null
-  }
+  const response = await apiService.get('/users', params)
+  console.log('✅ Paginated data:', response)
+  return response
 }
 
 // ============================================================================
@@ -238,16 +208,9 @@ export async function exampleUploadFile(file: File, description?: string) {
     formData.append('description', description)
   }
 
-  const response = await apiService.upload('/upload', formData)
-
-  if (response.success) {
-    console.log('✅ File uploaded successfully:', response.data)
-    return response.data
-  }
-  else {
-    console.error('❌ File upload failed:', response.message)
-    return null
-  }
+  const response = await apiService.post('/upload', formData)
+  console.log('✅ File uploaded successfully:', response)
+  return response
 }
 
 /**
@@ -267,16 +230,9 @@ export async function exampleUploadMultipleFiles(files: File[], category?: strin
     formData.append('category', category)
   }
 
-  const response = await apiService.upload('/upload/multiple', formData)
-
-  if (response.success) {
-    console.log('✅ Files uploaded successfully:', response.data)
-    return response.data
-  }
-  else {
-    console.error('❌ File upload failed:', response.message)
-    return null
-  }
+  const response = await apiService.post('/upload/multiple', formData)
+  console.log('✅ Files uploaded successfully:', response)
+  return response
 }
 
 // ============================================================================
@@ -291,38 +247,8 @@ export async function exampleWithErrorHandling() {
 
   try {
     const response = await apiService.get('/users')
-
-    if (response.success) {
-      console.log('✅ Success:', response.data)
-      return response.data
-    }
-    else {
-      // Handle different error types
-      switch (response.status) {
-        case 400:
-          console.error('❌ Bad Request:', response.message)
-          break
-        case 401:
-          console.error('🔐 Unauthorized - redirecting to login')
-          // Redirect to login page
-          break
-        case 403:
-          console.error('🚫 Forbidden - insufficient permissions')
-          break
-        case 404:
-          console.error('🔍 Not Found:', response.message)
-          break
-        case 429:
-          console.error('⏱️ Rate Limited - too many requests')
-          break
-        case 500:
-          console.error('🔥 Server Error:', response.message)
-          break
-        default:
-          console.error('❌ Unknown Error:', response.message)
-      }
-      return null
-    }
+    console.log('✅ Success:', response)
+    return response
   }
   catch (error) {
     console.error('🌐 Network Error:', error)
@@ -339,24 +265,19 @@ export async function exampleWithRetry(maxRetries: number = 3) {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     console.log(`Attempt ${attempt}/${maxRetries}`)
 
-    const response = await apiService.get('/users')
-
-    if (response.success) {
+    try {
+      const response = await apiService.get('/users')
       console.log('✅ Success on attempt', attempt)
-      return response.data
+      return response
     }
-
-    // Don't retry on client errors (4xx)
-    if (response.status >= 400 && response.status < 500) {
-      console.error('❌ Client error, not retrying:', response.message)
-      return null
-    }
-
-    // Wait before retrying (exponential backoff)
-    if (attempt < maxRetries) {
-      const delay = 2 ** attempt * 1000 // 2s, 4s, 8s...
-      console.log(`⏳ Waiting ${delay}ms before retry...`)
-      await new Promise(resolve => setTimeout(resolve, delay))
+    catch (error) {
+      console.error(`❌ Attempt ${attempt} failed:`, error)
+      // Wait before retrying (exponential backoff)
+      if (attempt < maxRetries) {
+        const delay = 2 ** attempt * 1000 // 2s, 4s, 8s...
+        console.log(`⏳ Waiting ${delay}ms before retry...`)
+        await new Promise(resolve => setTimeout(resolve, delay))
+      }
     }
   }
 
@@ -388,18 +309,33 @@ interface CreateUserRequest {
  * Example: Typed API functions
  */
 export async function exampleTypedGetUsers(): Promise<User[] | null> {
-  const response = await apiService.get<User[]>('/users')
-  return response.success ? response.data : null
+  try {
+    const response = await apiService.get<User[]>('/users')
+    return response as User[]
+  }
+  catch {
+    return null
+  }
 }
 
 export async function exampleTypedCreateUser(userData: CreateUserRequest): Promise<User | null> {
-  const response = await apiService.post<User>('/users', userData)
-  return response.success ? response.data : null
+  try {
+    const response = await apiService.post<User>('/users', userData)
+    return response as User
+  }
+  catch {
+    return null
+  }
 }
 
 export async function exampleTypedUpdateUser(id: string, userData: Partial<CreateUserRequest>): Promise<User | null> {
-  const response = await apiService.patch<User>(`/users/${id}`, userData)
-  return response.success ? response.data : null
+  try {
+    const response = await apiService.patch<User>(`/users/${id}`, userData)
+    return response as User
+  }
+  catch {
+    return null
+  }
 }
 
 // ============================================================================
@@ -411,35 +347,64 @@ export async function exampleTypedUpdateUser(id: string, userData: Partial<Creat
  */
 export class UserService {
   async getAll(): Promise<User[] | null> {
-    const response = await apiService.get<User[]>('/users')
-    return response.success ? response.data : null
+    try {
+      const response = await apiService.get<User[]>('/users')
+      return response as User[]
+    }
+    catch {
+      return null
+    }
   }
 
   async getById(id: string): Promise<User | null> {
-    const response = await apiService.get<User>(`/users/${id}`)
-    return response.success ? response.data : null
+    try {
+      const response = await apiService.get<User>(`/users/${id}`)
+      return response as User
+    }
+    catch {
+      return null
+    }
   }
 
   async create(userData: CreateUserRequest): Promise<User | null> {
-    const response = await apiService.post<User>('/users', userData)
-    return response.success ? response.data : null
+    try {
+      const response = await apiService.post<User>('/users', userData)
+      return response as User
+    }
+    catch {
+      return null
+    }
   }
 
   async update(id: string, userData: Partial<CreateUserRequest>): Promise<User | null> {
-    const response = await apiService.patch<User>(`/users/${id}`, userData)
-    return response.success ? response.data : null
+    try {
+      const response = await apiService.patch<User>(`/users/${id}`, userData)
+      return response as User
+    }
+    catch {
+      return null
+    }
   }
 
   async delete(id: string): Promise<boolean> {
-    const response = await apiService.delete(`/users/${id}`)
-    return response.success
+    try {
+      await apiService.delete(`/users/${id}`)
+      return true
+    }
+    catch {
+      return false
+    }
   }
 
   async search(query: string, filters?: any): Promise<User[] | null> {
-    const response = await apiService.get<User[]>('/users', {
-      params: { search: query, ...filters },
-    })
-    return response.success ? response.data : null
+    try {
+      const params = { search: query, ...filters }
+      const response = await apiService.get<User[]>('/users', params)
+      return response as User[]
+    }
+    catch {
+      return null
+    }
   }
 }
 
@@ -459,16 +424,16 @@ export function useApiData<T>(endpoint: string) {
     loading.value = true
     error.value = null
 
-    const response = await apiService.get<T>(endpoint)
-
-    if (response.success) {
-      data.value = response.data
+    try {
+      const response = await apiService.get<T>(endpoint)
+      data.value = response as T
     }
-    else {
-      error.value = response.message
+    catch (err) {
+      error.value = err instanceof Error ? err.message : 'An error occurred'
     }
-
-    loading.value = false
+    finally {
+      loading.value = false
+    }
   }
 
   const refresh = () => fetch()
