@@ -43,6 +43,16 @@ const router = createRouter({
       name: 'slab4',
       component: () => import('../views/Slab4.vue'),
     },
+    {
+      path: '/LabAvailability',
+      name: 'LabAvailability',
+      component: () => import('../components/LabAvailability.vue'),
+    },
+    {
+      path: '/TopNavBar',
+      name: 'TopNavBar',
+      component: () => import('../components/TopNavBar.vue'),
+    },
   ],
 })
 
