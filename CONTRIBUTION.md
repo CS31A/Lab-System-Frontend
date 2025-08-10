@@ -237,7 +237,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <!-- Keep template simple and readable -->
+  <div>
+    <!-- Keep template simple and readable -->
+    <h1>{{ title }}</h1>
+  </div>
 </template>
 
 <style scoped>
@@ -430,7 +433,7 @@ interface User {
 }
 
 // Bad
-const user: any = { ... }
+const user: any = { name: 'John', age: 30 }
 ```
 
 ### ESLint Rules

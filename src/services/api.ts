@@ -41,4 +41,14 @@ export const apiService = {
       throw error
     }
   },
+  patch: async <T>(url: string, data = {}) => {
+    try {
+      const response = await api.patch<T>(url, data)
+      return response.data
+    }
+    catch (error) {
+      console.error(`API PATCH error for ${url}:`, error)
+      throw error
+    }
+  },
 }

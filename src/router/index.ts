@@ -23,10 +23,25 @@ const router = createRouter({
       // which is lazy-loaded when the route is visited.
       component: () => import('../views/AboutView.vue'),
     },
-        {
-      path: '/',
+    {
+      path: '/laboratory/1',
+      name: 'slab4',
+      component: () => import('../views/Slab1.vue'),
+    },
+    {
+      path: '/laboratory/2',
       name: 'slab4',
       component: () => import('../views/Slab2.vue'),
+    },
+    {
+      path: '/laboratory/3',
+      name: 'slab4',
+      component: () => import('../views/Slab3.vue'),
+    },
+    {
+      path: '/laboratory/4',
+      name: 'slab4',
+      component: () => import('../views/Slab4.vue'),
     },
   ],
 })

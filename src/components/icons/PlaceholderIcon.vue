@@ -4,10 +4,7 @@ interface Props {
   size?: number
 }
 
-const props = withDefaults(defineProps<Props>(), {
-  icon: '🔧',
-  size: 20,
-})
+const { icon = '🔧', size = 20 } = defineProps<Props>()
 </script>
 
 <template>

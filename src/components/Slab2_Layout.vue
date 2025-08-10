@@ -2,15 +2,15 @@
 import { ref } from 'vue'
 
 defineOptions({
-  name: 'PCLayout'
+  name: 'PCLayout',
 })
 
 const pcStatus = ref(
   Array.from({ length: 48 }, (_, i) => ({
     id: i + 1,
     status: i < 30 ? 'assigned' : 'unassigned',
-    missingOrbrokenDetails: ''
-  }))
+    missingOrbrokenDetails: '',
+  })),
 )
 
 const selectedPC = ref<{
@@ -20,9 +20,9 @@ const selectedPC = ref<{
 } | null>(null)
 
 // Slected PC for Modal
-function selectPC(pc: { id: number; status: string; missingOrbrokenDetails?: string }) {
+function selectPC(pc: { id: number, status: string, missingOrbrokenDetails?: string }) {
   // Reset any previously selected PC
-  pcStatus.value.forEach(p => {
+  pcStatus.value.forEach((p) => {
     if (p.status === 'selected') {
       p.status = p.id <= 30 ? 'assigned' : 'unassigned'
     }
@@ -31,14 +31,16 @@ function selectPC(pc: { id: number; status: string; missingOrbrokenDetails?: str
   if (pc.status === 'selected') {
     pc.status = pc.id <= 30 ? 'assigned' : 'unassigned'
     selectedPC.value = null
-  } else {
+  }
+  else {
     pc.status = 'selected'
     selectedPC.value = { ...pc, missingOrbrokenDetails: pc.missingOrbrokenDetails || '' }
   }
 }
 
 function closeModal() {
-  if (!selectedPC.value) return
+  if (!selectedPC.value)
+    return
 
   const pc = pcStatus.value.find(p => p.id === selectedPC.value!.id)
   if (pc) {
@@ -53,7 +55,8 @@ function closeModal() {
 }
 
 function setStatus(status: string) {
-  if (!selectedPC.value) return
+  if (!selectedPC.value)
+    return
 
   selectedPC.value.status = status
 
@@ -63,8 +66,10 @@ function setStatus(status: string) {
 }
 
 function getStatusColor(status: string) {
-  if (status === 'assigned') return 'text-[#5b8ae5]'
-  if (status === 'selected') return 'text-[#013aae]'
+  if (status === 'assigned')
+    return 'text-[#5b8ae5]'
+  if (status === 'selected')
+    return 'text-[#013aae]'
   return 'text-[#abb8d8]'
 }
 </script>
@@ -81,25 +86,26 @@ function getStatusColor(status: string) {
 
       <!-- PC LAYOUT -->
       <div class="parent p-4 pt-6">
-        <i v-for="pc in pcStatus" :key="pc.id" @click="selectPC(pc)" :class="[
-          `pi pi-desktop text-4xl div${pc.id}`,
-          'cursor-pointer transition-all duration-200 hover:scale-110 flex items-center justify-center',
-          getStatusColor(pc.status)
-        ]" :title="`PC ${pc.id}`"></i>
+        <i
+          v-for="pc in pcStatus" :key="pc.id" class="cursor-pointer transition-all duration-200 hover:scale-110 flex items-center justify-center" :class="[
+            `pi pi-desktop text-4xl div${pc.id}`,
+            getStatusColor(pc.status),
+          ]" :title="`PC ${pc.id}`" @click="selectPC(pc)"
+        />
       </div>
 
       <!-- LEGEND -->
       <div class="flex gap-6 py-5">
         <div class="flex items-center gap-2">
-          <div class="w-4 h-4 rounded-full bg-[#013aae]"></div>
+          <div class="w-4 h-4 rounded-full bg-[#013aae]" />
           <span class="text-gray-700">Selected</span>
         </div>
         <div class="flex items-center gap-2">
-          <div class="w-4 h-4 rounded-full bg-[#5b8ae5]"></div>
+          <div class="w-4 h-4 rounded-full bg-[#5b8ae5]" />
           <span class="text-gray-700">Assigned</span>
         </div>
         <div class="flex items-center gap-2">
-          <div class="w-4 h-4 rounded-full bg-[#abb8d8]"></div>
+          <div class="w-4 h-4 rounded-full bg-[#abb8d8]" />
           <span class="text-gray-700">Unassigned</span>
         </div>
       </div>
@@ -108,36 +114,48 @@ function getStatusColor(status: string) {
     <!-- MODAL -->
     <div v-if="selectedPC" class="fixed inset-0 flex items-center justify-center backdrop-blur-[5px] z-50">
       <div class="bg-white rounded-lg p-6 w-80 max-w-full shadow-lg relative">
-        <button @click="closeModal" class="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
-          aria-label="Close modal">
-          <i class="pi pi-times text-xl"></i>
+        <button
+          class="absolute top-3 right-3 text-gray-500 hover:text-gray-700" aria-label="Close modal"
+          @click="closeModal"
+        >
+          <i class="pi pi-times text-xl" />
         </button>
 
-        <h3 class="text-xl font-bold mb-4">PC {{ selectedPC.id }} Status</h3>
+        <h3 class="text-xl font-bold mb-4">
+          PC {{ selectedPC.id }} Status
+        </h3>
 
         <!-- Show missing details if exist and status is not 'missing' -->
-        <div v-if="selectedPC.missingOrbrokenDetails && selectedPC.status !== 'missing'"
-          class="mb-4 p-3 bg-yellow-100 rounded text-yellow-800 font-semibold">
+        <div
+          v-if="selectedPC.missingOrbrokenDetails && selectedPC.status !== 'missing'"
+          class="mb-4 p-3 bg-yellow-100 rounded text-yellow-800 font-semibold"
+        >
           Missing items: {{ selectedPC.missingOrbrokenDetails }}
         </div>
 
         <!-- Status options -->
         <div class="space-y-3 cursor-pointer select-none">
-          <div class="flex items-center gap-2"
-            :class="selectedPC.status === 'complete' ? 'font-bold text-gray-500' : ''" @click="setStatus('complete')">
-            <i class="pi pi-check-circle text-green-600"></i>
+          <div
+            class="flex items-center gap-2"
+            :class="selectedPC.status === 'complete' ? 'font-bold text-gray-500' : ''" @click="setStatus('complete')"
+          >
+            <i class="pi pi-check-circle text-green-600" />
             <span class="text-green-500">Complete</span>
           </div>
 
-          <div class="flex items-center gap-2" :class="selectedPC.status === 'missing' ? 'font-bold' : ''"
-            @click="setStatus('missing')">
-            <i class="pi pi-exclamation-triangle text-yellow-500"></i>
+          <div
+            class="flex items-center gap-2" :class="selectedPC.status === 'missing' ? 'font-bold' : ''"
+            @click="setStatus('missing')"
+          >
+            <i class="pi pi-exclamation-triangle text-yellow-500" />
             <span class="text-gray-700">Missing</span>
           </div>
 
-          <div class="flex items-center gap-2" :class="selectedPC.status === 'broken' ? 'font-bold' : ''"
-            @click="setStatus('broken')">
-            <i class="pi pi-times-circle text-red-600"></i>
+          <div
+            class="flex items-center gap-2" :class="selectedPC.status === 'broken' ? 'font-bold' : ''"
+            @click="setStatus('broken')"
+          >
+            <i class="pi pi-times-circle text-red-600" />
             <span class="text-gray-700">Broken</span>
           </div>
         </div>
@@ -147,20 +165,23 @@ function getStatusColor(status: string) {
           <label for="missingOrbrokenDetails" class="block font-semibold mb-1 mt-5">
             Enter {{ selectedPC.status === 'missing' ? 'missing' : 'broken' }} items:
           </label>
-          <input id="missingOrbrokenDetails" type="text" v-model="selectedPC.missingOrbrokenDetails"
+          <input
+            id="missingOrbrokenDetails" v-model="selectedPC.missingOrbrokenDetails" type="text"
             :placeholder="selectedPC.status === 'missing' ? 'e.g. mouse, keyboard' : 'e.g. monitor, cables'"
-            class="w-full border border-gray-300 rounded pt-4 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-400" />
+            class="w-full border border-gray-300 rounded pt-4 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-400"
+          >
         </div>
 
-        <button @click="closeModal"
-          class="mt-6 px-5 py-2 bg-gradient-to-r from-[#013aae] to-[#5b8ae5] text-white rounded">
+        <button
+          class="mt-6 px-5 py-2 bg-gradient-to-r from-[#013aae] to-[#5b8ae5] text-white rounded"
+          @click="closeModal"
+        >
           Done
         </button>
       </div>
     </div>
   </div>
 </template>
-
 
 <style scoped>
 .parent {
