@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { Monitor } from 'lucide-vue-next'
 
 defineOptions({
   name: 'PCLayout',
@@ -19,9 +20,7 @@ const selectedPC = ref<{
   missingOrbrokenDetails?: string
 } | null>(null)
 
-// Slected PC for Modal
 function selectPC(pc: { id: number, status: string, missingOrbrokenDetails?: string }) {
-  // Reset any previously selected PC
   pcStatus.value.forEach((p) => {
     if (p.status === 'selected') {
       p.status = p.id <= 30 ? 'assigned' : 'unassigned'
@@ -44,10 +43,7 @@ function closeModal() {
 
   const pc = pcStatus.value.find(p => p.id === selectedPC.value!.id)
   if (pc) {
-    pc.status = selectedPC.value.status === 'selected'
-      ? (pc.id <= 30 ? 'assigned' : 'unassigned')
-      : selectedPC.value.status
-
+    pc.status = selectedPC.value.status
     pc.missingOrbrokenDetails = selectedPC.value.missingOrbrokenDetails || ''
   }
 
@@ -77,20 +73,25 @@ function getStatusColor(status: string) {
 <template>
   <div class="flex-1 p-6 bg-white">
     <div class="mb-6 flex flex-col items-center">
-      <h2 class="text-4xl font-bold text-[#06225b] mb-1 text-center" style="font-family: var(--konkhmer-font);">
+      <h2 class="text-4xl font-bold text-[#013aae] mb-1 text-center" style="font-family: var(--konkhmer-font);">
         SLAB 2
       </h2>
-      <span class="text-[#39A249] bg-[#C9F6CB] text-sm font-semibold mb-4 rounded-2xl py-1 px-3">
+      <span class="text-[#39A249] bg-[#C9F6CB] text-sm font-semibold rounded-2xl py-1 px-3">
         Attended
       </span>
 
       <!-- PC LAYOUT -->
       <div class="parent p-4 pt-6">
-        <i
-          v-for="pc in pcStatus" :key="pc.id" class="cursor-pointer transition-all duration-200 hover:scale-110 flex items-center justify-center" :class="[
-            `pi pi-desktop text-4xl div${pc.id}`,
-            getStatusColor(pc.status),
-          ]" :title="`PC ${pc.id}`" @click="selectPC(pc)"
+        <Monitor
+          v-for="pc in pcStatus"
+          :key="pc.id"
+          @click="selectPC(pc)"
+          :class="[
+            `div${pc.id}`,
+            'w-9 h-9 cursor-pointer transition-all duration-200 hover:scale-110',
+            getStatusColor(pc.status)
+          ]"
+          :title="`PC ${pc.id}`"
         />
       </div>
 
