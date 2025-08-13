@@ -1,30 +1,88 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import Footer from '@/components/organisms/Footer.vue'
-import Header from '@/components/organisms/Header.vue'
+import { computed, defineAsyncComponent, ref, watch } from 'vue'
+
+const Header = defineAsyncComponent(() => import('@/components/global/Header.vue'))
+const Footer = defineAsyncComponent(() => import('@/components/global/Footer.vue'))
 
 const username = ref('')
 const password = ref('')
 const rememberMe = ref(false)
 const showPassword = ref(false) // 👁️ Toggle state
+const hasTriedSubmit = ref(false)
 
-// This removes spaces and limits length to 20 for username
-function onUsernameInput(e: Event) {
-  const input = (e.target as HTMLInputElement).value
-  username.value = input.replace(/\s/g, '').slice(0, 20)
-}
+watch(username, (newValue) => {
+  const formatted = newValue.replace(/\s/g, '').slice(0, 20)
+  if (formatted !== newValue) {
+    username.value = formatted
+  }
+})
 
-// This removes spaces and limits length to 6 for password
-function onPasswordInput(e: Event) {
-  const input = (e.target as HTMLInputElement).value
-  password.value = input.replace(/\s/g, '').slice(0, 6)
-}
+watch(password, (newValue) => {
+  const formatted = newValue.replace(/\s/g, '').slice(0, 64)
+  if (formatted !== newValue) {
+    password.value = formatted
+  }
+})
 
 function togglePasswordVisibility() {
   showPassword.value = !showPassword.value
 }
 
+// Validation rules/messages
+const usernameErrorMessage = computed<string>(() => {
+  if (username.value.length === 0)
+    return 'Username is required'
+  return ''
+})
+
+const passwordErrorMessage = computed<string>(() => {
+  if (password.value.length === 0)
+    return 'Password is required'
+  if (password.value.length < 8)
+    return 'Password must be at least 8 characters'
+  if (!/\d/.test(password.value))
+    return 'Password must contain at least 1 number'
+  if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password.value))
+    return 'Password must contain at least 1 special character'
+  return ''
+})
+
+const isFormValid = computed<boolean>(() => {
+  return usernameErrorMessage.value === '' && passwordErrorMessage.value === ''
+})
+
+// Computed properties for template logic
+const shouldShowUsernameError = computed<boolean>(() => {
+  return (hasTriedSubmit.value && !!usernameErrorMessage.value) || (!!username.value && !!usernameErrorMessage.value)
+})
+
+const shouldShowPasswordError = computed<boolean>(() => {
+  return (hasTriedSubmit.value && !!passwordErrorMessage.value) || (!!password.value && !!passwordErrorMessage.value)
+})
+
+const usernameInputClasses = computed<string>(() => {
+  return shouldShowUsernameError.value
+    ? 'w-full px-3 py-2 rounded focus:outline-none focus:ring-2 border-2 border-red-500 focus:ring-red-500'
+    : 'w-full px-3 py-2 rounded focus:outline-none focus:ring-2 border border-gray-300 focus:ring-blue-500'
+})
+
+const passwordInputClasses = computed<string>(() => {
+  return shouldShowPasswordError.value
+    ? 'w-full px-3 py-2 rounded focus:outline-none focus:ring-2 pr-16 border-2 border-red-500 focus:ring-red-500'
+    : 'w-full px-3 py-2 rounded focus:outline-none focus:ring-2 pr-16 border border-gray-300 focus:ring-blue-500'
+})
+
 function handleLogin() {
+  hasTriedSubmit.value = true
+  if (!isFormValid.value) {
+    if (import.meta.env.MODE === 'development') {
+      console.warn('Form validation failed', {
+        usernameError: usernameErrorMessage.value,
+        passwordError: passwordErrorMessage.value,
+      })
+    }
+    return
+  }
   if (import.meta.env.MODE === 'development') {
     console.warn('Login clicked:', {
       username: username.value,
@@ -58,27 +116,45 @@ function handleLogin() {
               v-model="username"
               type="text"
               placeholder="Username"
-              class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              @input="onUsernameInput"
+              :class="usernameInputClasses"
+              :aria-invalid="shouldShowUsernameError"
+              aria-describedby="username-error"
             >
+            <p
+              v-if="shouldShowUsernameError"
+              id="username-error"
+              class="mt-1 text-sm text-red-600"
+            >
+              {{ usernameErrorMessage }}
+            </p>
           </div>
 
           <!-- Password with toggle -->
-          <div class="relative">
-            <input
-              v-model="password"
-              :type="showPassword ? 'text' : 'password'"
-              placeholder="Password"
-              class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 pr-16"
-              @input="onPasswordInput"
+          <div>
+            <div class="relative">
+              <input
+                v-model="password"
+                :type="showPassword ? 'text' : 'password'"
+                placeholder="Password"
+                :class="passwordInputClasses"
+                :aria-invalid="shouldShowPasswordError"
+                aria-describedby="password-error"
+              >
+              <button
+                type="button"
+                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-blue-600 hover:underline focus:outline-none"
+                @click="togglePasswordVisibility"
+              >
+                {{ showPassword ? 'Hide' : 'Show' }}
+              </button>
+            </div>
+            <p
+              v-if="shouldShowPasswordError"
+              id="password-error"
+              class="mt-1 text-sm text-red-600"
             >
-            <button
-              type="button"
-              class="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-blue-600 hover:underline focus:outline-none"
-              @click="togglePasswordVisibility"
-            >
-              {{ showPassword ? 'Hide' : 'Show' }}
-            </button>
+              {{ passwordErrorMessage }}
+            </p>
           </div>
 
           <!-- Options -->
