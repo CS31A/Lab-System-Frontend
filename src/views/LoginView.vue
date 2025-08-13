@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, defineAsyncComponent, ref, watch } from 'vue'
+import { computed, defineAsyncComponent, ref } from 'vue'
 
 const Header = defineAsyncComponent(() => import('@/components/global/Header.vue'))
 const Footer = defineAsyncComponent(() => import('@/components/global/Footer.vue'))
@@ -10,18 +10,18 @@ const rememberMe = ref(false)
 const showPassword = ref(false) // 👁️ Toggle state
 const hasTriedSubmit = ref(false)
 
-watch(username, (newValue) => {
-  const formatted = newValue.replace(/\s/g, '').slice(0, 20)
-  if (formatted !== newValue) {
-    username.value = formatted
-  }
+const formattedUsername = computed({
+  get: () => username.value,
+  set: (newValue) => {
+    username.value = newValue.replace(/\s/g, '').slice(0, 20)
+  },
 })
 
-watch(password, (newValue) => {
-  const formatted = newValue.replace(/\s/g, '').slice(0, 64)
-  if (formatted !== newValue) {
-    password.value = formatted
-  }
+const formattedPassword = computed({
+  get: () => password.value,
+  set: (newValue) => {
+    password.value = newValue.replace(/\s/g, '').slice(0, 64)
+  },
 })
 
 function togglePasswordVisibility() {
@@ -113,7 +113,7 @@ function handleLogin() {
           <!-- Username -->
           <div>
             <input
-              v-model="username"
+              v-model="formattedUsername"
               type="text"
               placeholder="Username"
               :class="usernameInputClasses"
@@ -133,7 +133,7 @@ function handleLogin() {
           <div>
             <div class="relative">
               <input
-                v-model="password"
+                v-model="formattedPassword"
                 :type="showPassword ? 'text' : 'password'"
                 placeholder="Password"
                 :class="passwordInputClasses"

@@ -8,8 +8,11 @@ defineOptions({
 // Column names for the lab management table
 const ColumnName = ref(['Laboratory Name', 'Status', 'Teacher', 'Schedule'])
 const TIME_INTERVAL = 300000 // 5 minutes in milliseconds
+const MAX_RETRIES = 3
 
 let timeoutId: number | null = null
+let isScheduled = false
+let retryCount = 0
 
 // Sample data for lab management
 interface Lab {
@@ -37,8 +40,25 @@ async function fetchLabData() {
 }
 
 async function scheduleNextFetch() {
-  await fetchLabData()
-  timeoutId = setTimeout(scheduleNextFetch, TIME_INTERVAL)
+  if (!isScheduled)
+    return
+
+  try {
+    await fetchLabData()
+    retryCount = 0 // Reset on success
+  }
+  catch (error) {
+    retryCount++
+    if (retryCount >= MAX_RETRIES) {
+      console.error('Max retries reached, stopping fetch cycle', error)
+      isScheduled = false
+      return
+    }
+  }
+
+  if (isScheduled) {
+    timeoutId = setTimeout(scheduleNextFetch, TIME_INTERVAL)
+  }
 }
 
 // Refresh every 5 mins
