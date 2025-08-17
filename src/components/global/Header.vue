@@ -10,7 +10,7 @@
     >
     <div class="absolute inset-0 bg-gradient-to-r from-blue-700 to-blue-200 opacity-70 z-10" />
     <div class="relative z-20 flex items-center">
-      <img src="/images/aclc_nb.png" alt="ACLC Logo" class="h-17 w-17 mr-3 rounded-full">
+      <img src="/images/aclc_nb.png" alt="ACLC Logo" aria-hidden="true" decoding="async" draggable="false" class="h-16 w-16 mr-3 rounded-full">
       <h1 class="text-lg md:text-xl font-bold text-white">
         ACLC College of Mandaue
       </h1>

@@ -1,5 +1,3 @@
-<!-- eslint-disable style/no-tabs -->
-<!-- I I have no comment on what tf is above here :< -->
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 
@@ -8,8 +6,13 @@ defineOptions({
 })
 
 // Column names for the lab management table
-const ColumnName = ref(['Labratory Name', 'Status', 'Teacher', 'Schedule'])
-const timeInterval = 300000 // 5 minutes in milliseconds
+const ColumnName = ref(['Laboratory Name', 'Status', 'Teacher', 'Schedule'])
+const TIME_INTERVAL = 300000 // 5 minutes in milliseconds
+const MAX_RETRIES = 3
+
+let timeoutId: number | null = null
+let isScheduled = false
+let retryCount = 0
 
 // Sample data for lab management
 interface Lab {
@@ -21,23 +24,51 @@ interface Lab {
 
 const LabData = ref<Lab[]>([])
 
-// Fetch data from API
 async function fetchLabData() {
-  LabData.value = [
-
-  ]
+  try {
+    // TODO: Replace with actual API call
+    LabData.value = [
+      { name: 'SLAB 1', status: 'Available', teacher: 'N/A', schedule: 'N/A' },
+      { name: 'SLAB 2', status: 'In Use', teacher: 'Noel Lehitimas', schedule: '9:00 AM - 11:00 AM' },
+      { name: 'SLAB 3', status: 'Available', teacher: 'N/A', schedule: 'N/A' },
+      { name: 'SLAB 4', status: 'In Use', teacher: 'Jovelyn Comaingking', schedule: '10:30 AM - 12:00PM' },
+    ]
+  }
+  catch (error) {
+    console.error('Failed to fetch data:', error)
+  }
 }
 
-let refreshInterval: ReturnType<typeof setInterval>
+async function scheduleNextFetch() {
+  if (!isScheduled)
+    return
+
+  try {
+    await fetchLabData()
+    retryCount = 0 // Reset on success
+  }
+  catch (error) {
+    retryCount++
+    if (retryCount >= MAX_RETRIES) {
+      console.error('Max retries reached, stopping fetch cycle', error)
+      isScheduled = false
+      return
+    }
+  }
+
+  if (isScheduled) {
+    timeoutId = setTimeout(scheduleNextFetch, TIME_INTERVAL)
+  }
+}
 
 // Refresh every 5 mins
 onMounted(() => {
-  refreshInterval = setTimeout(fetchLabData, timeInterval)
-  fetchLabData()
+  scheduleNextFetch()
 })
 
 onBeforeUnmount(() => {
-  clearInterval(refreshInterval)
+  if (timeoutId !== null)
+    clearTimeout(timeoutId)
 })
 </script>
 
