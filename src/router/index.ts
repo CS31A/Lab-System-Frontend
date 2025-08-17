@@ -25,17 +25,17 @@ const router = createRouter({
     },
     {
       path: '/laboratory/1',
-      name: 'slab4',
+      name: 'slab1',
       component: () => import('../views/Slab1.vue'),
     },
     {
       path: '/laboratory/2',
-      name: 'slab4',
+      name: 'slab2',
       component: () => import('../views/Slab2.vue'),
     },
     {
       path: '/laboratory/3',
-      name: 'slab4',
+      name: 'slab3',
       component: () => import('../views/Slab3.vue'),
     },
     {
