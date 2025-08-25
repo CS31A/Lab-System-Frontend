@@ -92,6 +92,8 @@ function handleLogin() {
   }
 
   // Add API call here in real implementation
+
+  // TODO: Implement Login Logic Pass Authentication Token and Redirect
 }
 </script>
 
