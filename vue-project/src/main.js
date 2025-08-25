@@ -1,11 +1,11 @@
-import { createApp } from "vue";
-import App from "./App.vue";
-import SideBar from "./Components/SideBar.vue";
-import "./Assets/main.css"; 
-import "primeicons/primeicons.css"; 
+import { createApp } from 'vue'
+import App from './App.vue'
+import SideBar from './Components/SideBar.vue'
+import './Assets/main.css'
+import 'primeicons/primeicons.css'
 
-const app = createApp(App);
+const app = createApp(App)
 
-app.component("SideBar", SideBar);
+app.component('SideBar', SideBar)
 
-app.mount("#app");
+app.mount('#app')

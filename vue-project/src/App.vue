@@ -1,9 +1,9 @@
-<template>
-    <div>
-        <SlabView />
-    </div>
-</template>
-
 <script setup>
-import SlabView from './View/Slab4View.vue';   
+import SlabView from './View/Slab4View.vue'
 </script>
+
+<template>
+  <div>
+    <SlabView />
+  </div>
+</template>
