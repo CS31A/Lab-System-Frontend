@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import DashboardView from '@/views/DashboardView.vue'
 import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
 
@@ -11,9 +12,29 @@ const router = createRouter({
       component: HomeView,
     },
     {
+      path: '/workstations',
+      name: 'workstations',
+      component: () => import('../components/PlaceholderComponent.vue'),
+    },
+    {
+      path: '/users',
+      name: 'users',
+      component: () => import('../components/PlaceholderComponent.vue'),
+    },
+    {
+      path: '/usage-logs',
+      name: 'usage_logs',
+      component: () => import('../components/PlaceholderComponent.vue'),
+    },
+    {
       path: '/login',
       name: 'Login',
       component: LoginView,
+    },
+    {
+      path: '/dashboard',
+      name: 'Dashboard',
+      component: DashboardView,
     },
     {
       path: '/about',

@@ -2,7 +2,7 @@
 </script>
 
 <template>
-  <header class="relative h-20 flex items-center px-6">
+  <header class="relative h-20 w-screen overflow-hidden flex items-center px-6">
     <img
       src="/images/aclc_nb.png"
       alt="Background"
