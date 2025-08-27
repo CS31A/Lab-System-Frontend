@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import Sidebar from '@/components/global/dashboard/Sidebar.vue'
-import Header from '@/components/global/Header.vue'
 import BarChart from '@/components/global/dashboard/BarChart.vue'
 import teacherAvatar from '@/components/global/dashboard/images/sayson.jpg'
+import Sidebar from '@/components/global/dashboard/Sidebar.vue'
+import Header from '@/components/global/Header.vue'
 
 const timeframe = ref('All-time')
 const people = ref('All')
@@ -18,8 +18,6 @@ const stats = ref([
   { label: 'Users Today', value: '3,298' },
   { label: 'Av. Session Length', value: '2m 34s' },
 ])
-
-const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
 
 const problematic = ref([
   { label: 'Underutilized PCs', percent: 74, color: 'bg-red-500' },
