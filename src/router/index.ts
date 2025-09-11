@@ -25,31 +25,37 @@ const routes = [
     path: '/laboratory/1',
     name: 'slab1',
     component: () => import('../views/Slab1.vue'),
-    meta: { requiresAuth: true },
+    // meta: { requiresAuth: true },
   },
   {
     path: '/laboratory/2',
     name: 'slab2',
     component: () => import('../views/Slab2.vue'),
-    meta: { requiresAuth: true },
+    // meta: { requiresAuth: true },
   },
   {
     path: '/laboratory/3',
     name: 'slab3',
     component: () => import('../views/Slab3.vue'),
-    meta: { requiresAuth: true },
+    // meta: { requiresAuth: true },
   },
   {
     path: '/laboratory/4',
     name: 'slab4',
     component: () => import('../views/Slab4.vue'),
-    meta: { requiresAuth: true },
+    // meta: { requiresAuth: true },
   },
   {
     path: '/lab_availability',
     name: 'lab_availability',
     component: () => import('../components/LabAvailability.vue'),
-    meta: { requiresAuth: true },
+    // meta: { requiresAuth: true },
+  },
+  {
+    path: '/teacher_dashboard',
+    name: 'teacher_dashboard',
+    component: () => import('../components/TeacherDashboard.vue'),
+    // meta: { requiresAuth: true },
   },
 ]
 
