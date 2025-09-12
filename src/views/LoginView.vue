@@ -1,5 +1,12 @@
 <script setup lang="ts">
+import type { AxiosError } from 'axios'
 import { computed, defineAsyncComponent, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useToast } from 'vue-toastification'
+import api, { setAuthToken } from '@/boot/axios'
+
+const router = useRouter()
+const toast = useToast()
 
 const Header = defineAsyncComponent(() => import('@/components/global/Header.vue'))
 const Footer = defineAsyncComponent(() => import('@/components/global/Footer.vue'))
@@ -72,7 +79,8 @@ const passwordInputClasses = computed<string>(() => {
     : 'w-full px-3 py-2 rounded focus:outline-none focus:ring-2 pr-16 border border-gray-300 focus:ring-blue-500'
 })
 
-function handleLogin() {
+// Add API call here in real implementation
+async function handleLogin() {
   hasTriedSubmit.value = true
   if (!isFormValid.value) {
     if (import.meta.env.MODE === 'development') {
@@ -90,8 +98,35 @@ function handleLogin() {
       rememberMe: rememberMe.value,
     })
   }
+  try {
+    const response = await api.post('/auth/login', {
+      username: username.value,
+      password: password.value,
+    })
 
-  // Add API call here in real implementation
+    const token = response.data.token
+
+    setAuthToken(token)
+
+    if (rememberMe.value) {
+      localStorage.setItem('authToken', token)
+    }
+
+    if (import.meta.env.MODE === 'development') {
+      console.warn('Login successful!', {
+        username: username.value,
+        rememberMe: rememberMe.value,
+      })
+    }
+
+    toast.success('Login successful!')
+    router.push('/dashboard')
+  }
+  catch (err) {
+    const error = err as AxiosError<{ message?: string }>
+    const msg = error.response?.data?.message ?? 'Login failed. Please try again.'
+    toast.error(msg)
+  }
 }
 </script>
 
