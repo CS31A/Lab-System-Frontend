@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import BarChart from '@/components/global/dashboard/BarChart.vue'
 import teacherAvatar from '@/components/global/dashboard/images/sayson.jpg'
 import Sidebar from '@/components/global/dashboard/Sidebar.vue'
@@ -74,8 +74,17 @@ const chartData = ref({
   datasets: [
     {
       label: 'Active Sessions',
-      data: [20, 28, 25, 32, 40, 38, 45, 42, 48, 50, 46, 52],
+      data: [65, 78, 85, 92, 88, 95, 102, 98, 105, 110, 108, 115],
       backgroundColor: '#3b82f6',
+      borderRadius: 6,
+      maxBarThickness: 45,
+      barPercentage: 0.8,
+      categoryPercentage: 0.9,
+    },
+    {
+      label: 'Lab Usage',
+      data: [45, 52, 48, 60, 55, 62, 68, 65, 70, 75, 72, 80],
+      backgroundColor: '#10b981',
       borderRadius: 6,
       maxBarThickness: 45,
       barPercentage: 0.8,
@@ -94,113 +103,185 @@ const chartOptions = ref({
     },
     y: {
       grid: { color: 'rgba(0,0,0,0.05)' },
-      ticks: { color: '#6b7280', stepSize: 10 },
+      ticks: { color: '#6b7280', stepSize: 20 },
       beginAtZero: true,
     },
   },
   plugins: {
-    legend: { display: false },
+    legend: {
+      display: true,
+      position: 'top' as const,
+      labels: {
+        usePointStyle: true,
+        padding: 20,
+        font: {
+          size: 12,
+        },
+      },
+    },
     tooltip: { enabled: true },
   },
+})
+
+// Animation on mount
+onMounted(() => {
+  // Add entrance animations
+  const elements = document.querySelectorAll('[style*="animationDelay"]')
+  elements.forEach((el) => {
+    el.classList.add('animate-fade-in-up')
+  })
 })
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col">
+  <div class="h-screen flex flex-col bg-gradient-to-br from-slate-50 to-blue-50">
     <Header />
-    <div class="flex flex-1 overflow-hidden">
+    <div class="flex flex-1 min-h-0">
       <Sidebar class="flex-shrink-0" />
-      <main class="flex-1 overflow-auto p-4 space-y-4 bg-gray-50">
+      <main class="flex-1 overflow-auto p-6 space-y-6">
+        <!-- Header Section -->
         <div class="flex items-center justify-between">
-          <h2 class="text-xl font-semibold">
-            Dashboard
-          </h2>
+          <div>
+            <h1 class="text-3xl font-bold text-gray-900">
+              Dashboard
+            </h1>
+            <p class="text-gray-600 mt-1">
+              Welcome back! Here's what's happening in your lab system.
+            </p>
+          </div>
+          <div class="flex items-center space-x-3">
+            <div class="text-sm text-gray-500">
+              Last updated: {{ new Date().toLocaleDateString() }}
+            </div>
+          </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
           <div
-            v-for="s in stats"
+            v-for="(s, index) in stats"
             :key="s.label"
-            class="bg-white rounded-lg shadow p-4 flex items-center justify-between"
+            class="group bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-gray-100 hover:border-blue-200 hover:-translate-y-1"
+            :style="{ animationDelay: `${index * 100}ms` }"
           >
-            <div class="flex flex-col">
-              <span class="text-sm font-medium text-gray-600">{{ s.label }}</span>
-              <span class="text-2xl font-bold mt-1">{{ s.value }}</span>
-            </div>
-            <div :class="s.color" v-html="s.icon" />
-          </div>
-        </div>
-
-        <div class="flex justify-start mb-4">
-          <div class="bg-white rounded-lg shadow-sm ring-1 ring-black/5 p-3 w-48">
-            <div class="flex items-center justify-between mb-1">
-              <label class="text-sm font-medium text-gray-700">Timeframe</label>
-            </div>
-            <div class="relative">
-              <select v-model="timeframe" class="block w-full pl-3 pr-10 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer">
-                <option v-for="o in timeframeOptions" :key="o" :value="o">
-                  {{ o }}
-                </option>
-              </select>
-              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400" />
+            <div class="flex items-center justify-between">
+              <div class="flex flex-col space-y-2">
+                <span class="text-sm font-medium text-gray-600 uppercase tracking-wide">{{ s.label }}</span>
+                <span class="text-3xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-300">{{ s.value }}</span>
+                <div class="flex items-center space-x-1">
+                  <span class="text-xs text-green-600 font-medium">+12%</span>
+                  <span class="text-xs text-gray-500">from last month</span>
+                </div>
+              </div>
+              <div class="p-3 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-100 group-hover:from-blue-100 group-hover:to-indigo-200 transition-all duration-300" :class="s.color" v-html="s.icon" />
             </div>
           </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div class="lg:col-span-2 bg-white rounded-xl shadow p-4 h-[600px] flex flex-col">
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="font-medium">
-                Activity
-              </h3>
-              <span class="text-xs text-gray-500">Month</span>
+        <!-- Timeframe Selector -->
+        <div class="flex justify-between items-center">
+          <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-4">
+            <div class="flex items-center space-x-3">
+              <label class="text-sm font-semibold text-gray-700">Timeframe</label>
+              <div class="relative">
+                <select v-model="timeframe" class="appearance-none bg-transparent pl-4 pr-8 py-2 text-sm font-medium text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer transition-all duration-200 hover:border-blue-300">
+                  <option v-for="o in timeframeOptions" :key="o" :value="o">
+                    {{ o }}
+                  </option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
             </div>
-            <div class="flex-1 min-h-0">
+          </div>
+          <div class="flex items-center space-x-2 text-sm text-gray-500">
+            <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+            <span>Live data</span>
+          </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
+          <!-- Chart Section -->
+          <div class="xl:col-span-2 bg-white rounded-2xl shadow-lg border border-gray-100 p-6 h-[650px] flex flex-col">
+            <div class="flex items-center justify-between mb-6">
+              <div>
+                <h3 class="text-xl font-bold text-gray-900">
+                  Activity Overview
+                </h3>
+                <p class="text-sm text-gray-600 mt-1">
+                  Lab sessions and usage trends over time
+                </p>
+              </div>
+              <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-2">
+                  <div class="w-3 h-3 bg-blue-500 rounded-full" />
+                  <span class="text-sm text-gray-600">Active Sessions</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                  <div class="w-3 h-3 bg-green-500 rounded-full" />
+                  <span class="text-sm text-gray-600">Lab Usage</span>
+                </div>
+              </div>
+            </div>
+            <div class="flex-1 min-h-0 bg-gradient-to-br from-gray-50 to-blue-50 rounded-xl p-4">
               <BarChart :data="chartData" :options="chartOptions" class="w-full h-full" />
             </div>
           </div>
 
-          <div class="space-y-4">
-            <div class="bg-white rounded-xl shadow p-4">
-              <h3 class="font-medium mb-3">
-                Laboratory Schedules
-              </h3>
+          <!-- Sidebar Content -->
+          <div class="space-y-6">
+            <!-- Laboratory Schedules -->
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-gray-900">
+                  Laboratory Schedules
+                </h3>
+                <div class="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">
+                  Today
+                </div>
+              </div>
               <div class="overflow-x-auto">
                 <table class="min-w-full">
                   <thead>
-                    <tr class="text-sm text-gray-600">
-                      <th class="text-left py-2">
+                    <tr class="text-xs text-gray-500 uppercase tracking-wider border-b border-gray-100">
+                      <th class="text-left py-3 font-semibold">
                         Teacher
                       </th>
-                      <th class="text-left py-2">
+                      <th class="text-left py-3 font-semibold">
                         Subject
                       </th>
-                      <th class="text-left py-2">
+                      <th class="text-left py-3 font-semibold">
                         Time
                       </th>
-                      <th class="text-left py-2">
+                      <th class="text-left py-3 font-semibold">
                         Lab
                       </th>
-                      <th class="text-left py-2">
+                      <th class="text-left py-3 font-semibold">
                         Class
                       </th>
                     </tr>
                   </thead>
-                  <tbody>
-                    <tr v-for="t in teacherSchedules" :key="t.teacher" class="text-sm border-t hover:bg-gray-50">
-                      <td class="py-2 font-medium">
+                  <tbody class="divide-y divide-gray-100">
+                    <tr v-for="(t, index) in teacherSchedules" :key="t.teacher" class="text-sm hover:bg-gray-50 transition-colors duration-200" :style="{ animationDelay: `${index * 50}ms` }">
+                      <td class="py-4 font-semibold text-gray-900">
                         {{ t.teacher }}
                       </td>
-                      <td class="py-2">
+                      <td class="py-4 text-gray-700">
                         {{ t.subject }}
                       </td>
-                      <td class="py-2">
-                        {{ t.time }}
+                      <td class="py-4">
+                        <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
+                          {{ t.time }}
+                        </span>
                       </td>
-                      <td class="py-2">
+                      <td class="py-4 font-medium text-gray-900">
                         {{ t.lab }}
                       </td>
-                      <td class="py-2">
+                      <td class="py-4 text-gray-600">
                         {{ t.class }}
                       </td>
                     </tr>
@@ -209,25 +290,39 @@ const chartOptions = ref({
               </div>
             </div>
 
-            <div class="bg-white rounded-xl shadow p-4">
-              <h3 class="font-medium mb-3">
-                Room Assignments
-              </h3>
+            <!-- Room Assignments -->
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-gray-900">
+                  Room Assignments
+                </h3>
+                <div class="flex items-center space-x-2">
+                  <div class="w-2 h-2 bg-green-500 rounded-full" />
+                  <span class="text-xs text-gray-500">Live status</span>
+                </div>
+              </div>
               <div class="space-y-3">
-                <div v-for="r in roomAssignments" :key="r.room" class="flex items-center justify-between p-2 rounded-lg" :class="r.status === 'occupied' ? 'bg-red-50' : 'bg-green-50'">
-                  <div>
-                    <div class="font-medium">
-                      {{ r.room }}
+                <div v-for="(r, index) in roomAssignments" :key="r.room" class="group flex items-center justify-between p-4 rounded-xl border transition-all duration-200 hover:shadow-md" :class="r.status === 'occupied' ? 'bg-red-50 border-red-200 hover:bg-red-100' : 'bg-green-50 border-green-200 hover:bg-green-100'" :style="{ animationDelay: `${index * 100}ms` }">
+                  <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-lg flex items-center justify-center" :class="r.status === 'occupied' ? 'bg-red-100' : 'bg-green-100'">
+                      <svg class="w-5 h-5" :class="r.status === 'occupied' ? 'text-red-600' : 'text-green-600'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                      </svg>
                     </div>
-                    <div class="text-sm text-gray-600">
-                      {{ r.subject }} • {{ r.time }}
+                    <div>
+                      <div class="font-semibold text-gray-900">
+                        {{ r.room }}
+                      </div>
+                      <div class="text-sm text-gray-600">
+                        {{ r.subject }} • {{ r.time }}
+                      </div>
                     </div>
                   </div>
                   <div class="text-right">
-                    <div class="text-sm" :class="r.status === 'occupied' ? 'text-red-600' : 'text-green-600'">
+                    <div class="text-sm font-semibold" :class="r.status === 'occupied' ? 'text-red-600' : 'text-green-600'">
                       {{ r.status }}
                     </div>
-                    <div class="text-sm text-gray-600">
+                    <div class="text-xs text-gray-500">
                       {{ r.seats }} seats
                     </div>
                   </div>
@@ -237,55 +332,210 @@ const chartOptions = ref({
           </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div class="bg-white rounded-xl shadow p-4">
-            <h3 class="font-medium mb-3">
-              Teacher Leaderboard
-            </h3>
-            <ul class="divide-y">
-              <li v-for="t in teacherLeaders" :key="t.name" class="py-3 flex items-center justify-between cursor-pointer hover:bg-gray-50">
-                <div class="flex items-center gap-3">
-                  <img :src="t.avatar" alt="avatar" class="w-8 h-8 rounded-full object-cover">
+        <!-- Leaderboards Section -->
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
+          <!-- Teacher Leaderboard -->
+          <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+            <div class="flex items-center justify-between mb-6">
+              <h3 class="text-xl font-bold text-gray-900">
+                Teacher Leaderboard
+              </h3>
+              <div class="px-3 py-1 bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 text-xs font-semibold rounded-full">
+                Top Performers
+              </div>
+            </div>
+            <div class="space-y-4">
+              <div v-for="(t, index) in teacherLeaders" :key="t.name" class="group flex items-center justify-between p-4 rounded-xl border border-gray-100 hover:border-blue-200 hover:shadow-md transition-all duration-200 cursor-pointer" :style="{ animationDelay: `${index * 100}ms` }">
+                <div class="flex items-center space-x-4">
+                  <div class="relative">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg">
+                      {{ index + 1 }}
+                    </div>
+                    <img :src="t.avatar" alt="avatar" class="w-10 h-10 rounded-full object-cover absolute -bottom-1 -right-1 border-2 border-white">
+                  </div>
                   <div>
-                    <p class="font-medium">
+                    <p class="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-200">
                       {{ t.name }}
                     </p>
-                    <p class="text-xs text-gray-500">
-                      {{ t.users }} users
+                    <p class="text-sm text-gray-600">
+                      {{ t.users }} active users
                     </p>
                   </div>
                 </div>
-                <div class="flex items-center gap-2">
-                  <span class="text-sm" :class="t.up ? 'text-green-600' : 'text-red-600'">{{ t.delta }}</span>
-                  <span :class="t.up ? 'i-heroicons-arrow-up-20-solid text-green-600' : 'i-heroicons-arrow-down-20-solid text-red-600'" />
+                <div class="flex items-center space-x-2">
+                  <div class="flex items-center space-x-1 px-2 py-1 rounded-full" :class="t.up ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'">
+                    <span class="text-sm font-semibold">{{ t.delta }}</span>
+                    <svg class="w-4 h-4" :class="t.up ? 'text-green-600' : 'text-red-600'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path v-if="t.up" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 17l9.2-9.2M17 17V7H7" />
+                      <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 7l-9.2 9.2M7 7v10h10" />
+                    </svg>
+                  </div>
                 </div>
-              </li>
-            </ul>
+              </div>
+            </div>
           </div>
 
-          <div class="bg-white rounded-xl shadow p-4">
-            <h3 class="font-medium mb-3">
-              Lab Leaderboard
-            </h3>
-            <ul class="divide-y">
-              <li v-for="l in labLeaders" :key="l.name" class="py-3 flex items-center justify-between cursor-pointer hover:bg-gray-50">
-                <div>
-                  <p class="font-medium">
-                    {{ l.name }}
-                  </p>
-                  <p class="text-xs text-gray-500">
-                    {{ l.users }} users
-                  </p>
+          <!-- Lab Leaderboard -->
+          <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+            <div class="flex items-center justify-between mb-6">
+              <h3 class="text-xl font-bold text-gray-900">
+                Lab Leaderboard
+              </h3>
+              <div class="px-3 py-1 bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 text-xs font-semibold rounded-full">
+                Most Active
+              </div>
+            </div>
+            <div class="space-y-4">
+              <div v-for="(l, index) in labLeaders" :key="l.name" class="group flex items-center justify-between p-4 rounded-xl border border-gray-100 hover:border-green-200 hover:shadow-md transition-all duration-200 cursor-pointer" :style="{ animationDelay: `${index * 100}ms` }">
+                <div class="flex items-center space-x-4">
+                  <div class="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white font-bold text-lg">
+                    {{ index + 1 }}
+                  </div>
+                  <div>
+                    <p class="font-semibold text-gray-900 group-hover:text-green-600 transition-colors duration-200">
+                      {{ l.name }}
+                    </p>
+                    <p class="text-sm text-gray-600">
+                      {{ l.users }} active users
+                    </p>
+                  </div>
                 </div>
-                <div class="flex items-center gap-2">
-                  <span class="text-sm" :class="l.up ? 'text-green-600' : 'text-red-600'">{{ l.delta }}</span>
-                  <span :class="l.up ? 'i-heroicons-arrow-up-20-solid text-green-600' : 'i-heroicons-arrow-down-20-solid text-red-600'" />
+                <div class="flex items-center space-x-2">
+                  <div class="flex items-center space-x-1 px-2 py-1 rounded-full" :class="l.up ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'">
+                    <span class="text-sm font-semibold">{{ l.delta }}</span>
+                    <svg class="w-4 h-4" :class="l.up ? 'text-green-600' : 'text-red-600'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path v-if="l.up" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 17l9.2-9.2M17 17V7H7" />
+                      <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 7l-9.2 9.2M7 7v10h10" />
+                    </svg>
+                  </div>
                 </div>
-              </li>
-            </ul>
+              </div>
+            </div>
           </div>
         </div>
       </main>
     </div>
   </div>
 </template>
+
+<style scoped>
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out forwards;
+  opacity: 0;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Smooth transitions for all interactive elements */
+* {
+  transition-property:
+    color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter,
+    backdrop-filter;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Enhanced hover effects */
+.group:hover .group-hover\:scale-105 {
+  transform: scale(1.05);
+}
+
+.group:hover .group-hover\:rotate-3 {
+  transform: rotate(3deg);
+}
+
+/* Gradient text effect */
+.gradient-text {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glass morphism effect */
+.glass {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* Responsive improvements */
+@media (max-width: 640px) {
+  .grid {
+    gap: 1rem;
+  }
+
+  .p-6 {
+    padding: 1rem;
+  }
+
+  .text-3xl {
+    font-size: 1.875rem;
+  }
+
+  .text-xl {
+    font-size: 1.25rem;
+  }
+
+  .h-\[650px\] {
+    height: 500px;
+  }
+
+  .space-y-6 > * + * {
+    margin-top: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .flex-col {
+    flex-direction: column;
+  }
+
+  .xl\:col-span-2 {
+    grid-column: span 1;
+  }
+
+  .xl\:grid-cols-3 {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+
+  .xl\:grid-cols-2 {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1024px) {
+  .lg\:grid-cols-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+</style>

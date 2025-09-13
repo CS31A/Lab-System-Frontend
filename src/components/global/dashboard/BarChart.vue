@@ -8,19 +8,20 @@ import {
   LinearScale,
   Title,
   Tooltip,
-} from 'chart.js/auto'
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+} from 'chart.js'
+import { computed } from 'vue'
+import { Bar } from 'vue-chartjs'
 
 const props = defineProps<{
   data: ChartDataType
   options: ChartOptions<'bar'>
 }>()
 
-// Register ChartJS components
+// Register Chart.js components
 ChartJS.register(
-  BarElement,
   CategoryScale,
   LinearScale,
+  BarElement,
   Title,
   Tooltip,
   Legend,
@@ -40,136 +41,95 @@ interface ChartDataType extends ChartData {
   datasets: DataSet[]
 }
 
-const canvas = ref<HTMLCanvasElement | null>(null)
-let chartInstance: ChartJS | null = null
-
-// Function to create/update chart
-function createChart(): void {
-  if (!canvas.value)
-    return
-
-  if (chartInstance) {
-    chartInstance.destroy()
-  }
-
-  chartInstance = new ChartJS(canvas.value, {
-    type: 'bar',
-    data: props.data,
-    options: {
-      ...props.options,
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: {
-        intersect: false,
-        mode: 'index',
+// Default chart options with your custom styling
+const defaultOptions: ChartOptions<'bar'> = {
+  responsive: true,
+  maintainAspectRatio: false,
+  interaction: {
+    intersect: false,
+    mode: 'index',
+  },
+  animation: {
+    duration: 750,
+    easing: 'easeInOutQuart',
+  },
+  plugins: {
+    legend: {
+      display: true,
+      position: 'top' as const,
+    },
+    tooltip: {
+      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      titleColor: 'white',
+      titleFont: {
+        size: 13,
+        weight: 'bold',
       },
-      animation: {
-        duration: 750,
-        easing: 'easeInOutQuart',
+      bodyFont: {
+        size: 12,
       },
-      plugins: {
-        legend: {
-          display: false,
-        },
-        tooltip: {
-          backgroundColor: 'rgba(0, 0, 0, 0.8)',
-          titleColor: 'white',
-          titleFont: {
-            size: 13,
-            weight: 'bold',
-          },
-          bodyFont: {
-            size: 12,
-          },
-          padding: 12,
-          cornerRadius: 8,
-        },
+      padding: 12,
+      cornerRadius: 8,
+    },
+  },
+  scales: {
+    x: {
+      grid: {
+        display: false,
       },
-      scales: {
-        x: {
-          grid: {
-            display: false,
-          },
-          ticks: {
-            font: {
-              size: 11,
-            },
-            color: '#6B7280',
-          },
+      ticks: {
+        font: {
+          size: 11,
         },
-        y: {
-          grid: {
-            color: 'rgba(0, 0, 0, 0.05)',
-          },
-          ticks: {
-            font: {
-              size: 11,
-            },
-            color: '#6B7280',
-            padding: 8,
-          },
-          border: {
-            dash: [4, 4],
-          },
-        },
+        color: '#6B7280',
       },
     },
-  })
+    y: {
+      grid: {
+        color: 'rgba(0, 0, 0, 0.05)',
+      },
+      ticks: {
+        font: {
+          size: 11,
+        },
+        color: '#6B7280',
+        padding: 8,
+      },
+      border: {
+        dash: [4, 4],
+      },
+    },
+  },
 }
 
-// Watch for data changes
-watch(() => props.data, (newData) => {
-  if (chartInstance) {
-    chartInstance.data = newData
-    chartInstance.update('active')
+// Merge user options with default options
+const chartOptions = computed(() => ({
+  ...defaultOptions,
+  ...props.options,
+}))
+
+// Add error handling for data validation
+const validatedData = computed(() => {
+  if (!props.data || !props.data.labels || !props.data.datasets) {
+    console.error('BarChart: Invalid data structure provided', props.data)
+    return {
+      labels: [],
+      datasets: [],
+    }
   }
-}, { deep: true })
-
-// Watch for options changes
-watch(() => props.options, (newOptions) => {
-  if (chartInstance) {
-    chartInstance.options = {
-      ...newOptions,
-      responsive: true,
-      interaction: {
-        intersect: false,
-        mode: 'index',
-      },
-    }
-    chartInstance.update('active')
-  }
-}, { deep: true })
-
-// Initialize chart on mount
-onMounted(() => {
-  createChart()
-
-  // Handle resize
-  const resizeObserver = new ResizeObserver(() => {
-    if (chartInstance) {
-      chartInstance.resize()
-    }
-  })
-
-  if (canvas.value) {
-    resizeObserver.observe(canvas.value)
-  }
-
-  // Cleanup on unmount
-  onBeforeUnmount(() => {
-    if (canvas.value) {
-      resizeObserver.unobserve(canvas.value)
-    }
-    resizeObserver.disconnect()
-
-    if (chartInstance) {
-      chartInstance.destroy()
-      chartInstance = null
-    }
-  })
+  return props.data
 })
 </script>
 
 <template>
-  <canvas ref="canvas" />
+  <div class="w-full h-full">
+    <Bar
+      v-if="validatedData.labels.length > 0"
+      :data="validatedData"
+      :options="chartOptions"
+    />
+    <div v-else class="flex items-center justify-center h-full text-gray-500">
+      No data available
+    </div>
+  </div>
 </template>

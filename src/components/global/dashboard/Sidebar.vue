@@ -34,11 +34,11 @@ function handleLogout() {
 
 <template>
   <aside
-    class="h-full border-r border-gray-200 bg-white transition-all duration-300" :class="[
+    class="h-full border-r border-gray-200 bg-white transition-all duration-300 flex flex-col" :class="[
       isSidebarOpen ? 'w-60' : 'w-16',
     ]"
   >
-    <div class="p-3">
+    <div class="p-3 flex flex-col h-full">
       <div class="flex justify-end mb-4">
         <button
           class="p-1.5 rounded-lg hover:bg-gray-100 cursor-pointer"
@@ -60,7 +60,7 @@ function handleLogout() {
           </svg>
         </button>
       </div>
-      <nav class="space-y-0.5">
+      <nav class="space-y-0.5 flex-1">
         <button
           class="group w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors text-gray-700 hover:bg-blue-100 cursor-pointer"
           :class="isActive('Dashboard') ? 'bg-blue-50 text-blue-700 ring-1 ring-blue-200' : ''"
@@ -170,27 +170,29 @@ function handleLogout() {
           </button>
         </div>
 
-        <div class="pt-4">
-          <h3 v-show="isSidebarOpen" class="px-3 py-1 text-xs font-medium text-gray-500">
-            Support
-          </h3>
-          <button class="group w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-blue-100 cursor-pointer">
-            <svg class="w-5 h-5 text-gray-600 transition-colors group-hover:text-blue-600" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M19.14 12.94a7.49 7.49 0 0 0 .05-.94 7.49 7.49 0 0 0-.05-.94l2-1.49a.5.5 0 0 0 .12-.64l-1.9-3.29a.5.5 0 0 0-.6-.22l-2.35.95a7.53 7.53 0 0 0-1.63-.94l-.36-2.5a.5.5 0 0 0-.5-.42h-3.8a.5.5 0 0 0-.5.42l-.36 2.5a7.53 7.53 0 0 0-1.63.94l-2.35-.95a.5.5 0 0 0-.6.22L2.7 8.93a.5.5 0 0 0 .12.64l2 1.49a7.49 7.49 0 0 0-.05.94 7.49 7.49 0 0 0 .05.94l-2 1.49a.5.5 0 0 0-.12.64l1.9 3.29a.5.5 0 0 0 .6.22l2.35-.95c.5.38 1.06.7 1.63.94l.36 2.5a.5.5 0 0 0 .5.42h3.8a.5.5 0 0 0 .5-.42l.36-2.5c.57-.24 1.13-.56 1.63-.94l2.35.95a.5.5 0 0 0 .6-.22l1.9-3.29a.5.5 0 0 0-.12-.64l-2-1.49zM12 15.5A3.5 3.5 0 1 1 15.5 12 3.5 3.5 0 0 1 12 15.5z" />
-            </svg>
-            <span v-show="isSidebarOpen" class="transition-colors group-hover:text-blue-700">Settings</span>
-          </button>
-          <button
-            class="group w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors text-gray-700 hover:bg-blue-100 cursor-pointer"
-            @click="handleLogout"
-          >
-            <svg class="w-5 h-5 text-gray-600 transition-colors group-hover:text-blue-600" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M16 17v-3H9v-4h7V7l5 5-5 5M14 2a2 2 0 012 2v2h-2V4H5v16h9v-2h2v2a2 2 0 01-2 2H5a2 2 0 01-2-2V4a2 2 0 012-2h9z" />
-            </svg>
-            <span v-show="isSidebarOpen" class="transition-colors group-hover:text-blue-700">Logout</span>
-          </button>
-        </div>
       </nav>
+
+      <!-- Support Section - Fixed at bottom -->
+      <div class="pt-4 mt-auto">
+        <h3 v-show="isSidebarOpen" class="px-3 py-1 text-xs font-medium text-gray-500">
+          Support
+        </h3>
+        <button class="group w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-blue-100 cursor-pointer">
+          <svg class="w-5 h-5 text-gray-600 transition-colors group-hover:text-blue-600" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M19.14 12.94a7.49 7.49 0 0 0 .05-.94 7.49 7.49 0 0 0-.05-.94l2-1.49a.5.5 0 0 0 .12-.64l-1.9-3.29a.5.5 0 0 0-.6-.22l-2.35.95a7.53 7.53 0 0 0-1.63-.94l-.36-2.5a.5.5 0 0 0-.5-.42h-3.8a.5.5 0 0 0-.5.42l-.36 2.5a7.53 7.53 0 0 0-1.63.94l-2.35-.95a.5.5 0 0 0-.6.22L2.7 8.93a.5.5 0 0 0 .12.64l2 1.49a7.49 7.49 0 0 0-.05.94 7.49 7.49 0 0 0 .05.94l-2 1.49a.5.5 0 0 0-.12.64l1.9 3.29a.5.5 0 0 0 .6.22l2.35-.95c.5.38 1.06.7 1.63.94l.36 2.5a.5.5 0 0 0 .5.42h3.8a.5.5 0 0 0 .5-.42l.36-2.5c.57-.24 1.13-.56 1.63-.94l2.35.95a.5.5 0 0 0 .6-.22l1.9-3.29a.5.5 0 0 0-.12-.64l-2-1.49zM12 15.5A3.5 3.5 0 1 1 15.5 12 3.5 3.5 0 0 1 12 15.5z" />
+          </svg>
+          <span v-show="isSidebarOpen" class="transition-colors group-hover:text-blue-700">Settings</span>
+        </button>
+        <button
+          class="group w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors text-gray-700 hover:bg-blue-100 cursor-pointer"
+          @click="handleLogout"
+        >
+          <svg class="w-5 h-5 text-gray-600 transition-colors group-hover:text-blue-600" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M16 17v-3H9v-4h7V7l5 5-5 5M14 2a2 2 0 012 2v2h-2V4H5v16h9v-2h2v2a2 2 0 01-2 2H5a2 2 0 01-2-2V4a2 2 0 012-2h9z" />
+          </svg>
+          <span v-show="isSidebarOpen" class="transition-colors group-hover:text-blue-700">Logout</span>
+        </button>
+      </div>
     </div>
   </aside>
 </template>
