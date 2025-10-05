@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ChartData, ChartOptions } from 'chart.js'
+import type { ChartData, ChartDataset, ChartOptions } from 'chart.js'
 import {
   BarElement,
   CategoryScale,
@@ -13,7 +13,7 @@ import { computed } from 'vue'
 import { Bar } from 'vue-chartjs'
 
 const props = defineProps<{
-  data: ChartDataType
+  data: ChartData<'bar'>
   options: ChartOptions<'bar'>
 }>()
 
@@ -27,18 +27,10 @@ ChartJS.register(
   Legend,
 )
 
-// Define proper types for the props
-interface DataSet {
-  label: string
-  data: number[]
-  backgroundColor: string
-  borderRadius?: number
-  maxBarThickness?: number
-}
-
-interface ChartDataType extends ChartData {
+// Define proper types for the props using Chart.js generics
+interface BarChartData extends ChartData<'bar'> {
   labels: string[]
-  datasets: DataSet[]
+  datasets: ChartDataset<'bar'>[]
 }
 
 // Default chart options with your custom styling
@@ -109,7 +101,7 @@ const chartOptions = computed(() => ({
 }))
 
 // Add error handling for data validation
-const validatedData = computed(() => {
+const validatedData = computed<BarChartData>(() => {
   if (!props.data || !props.data.labels || !props.data.datasets) {
     console.error('BarChart: Invalid data structure provided', props.data)
     return {
@@ -117,7 +109,10 @@ const validatedData = computed(() => {
       datasets: [],
     }
   }
-  return props.data
+  return {
+    labels: (props.data.labels ?? []).map(l => String(l as unknown)),
+    datasets: props.data.datasets as ChartDataset<'bar'>[],
+  }
 })
 </script>
 
