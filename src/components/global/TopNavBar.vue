@@ -21,6 +21,9 @@ defineOptions({
       <RouterLink to="/lab_availability" class="hover:underline">
         Lab Availability
       </RouterLink>
+      <RouterLink to="/labs" class="hover:underline">
+        Laboratories
+      </RouterLink>
       <!-- Path Doesnt Exist -->
       <RouterLink to="/students" class="hover:underline">
         Students

@@ -48,6 +48,11 @@ const router = createRouter({
       name: 'lab_availability',
       component: () => import('../components/LabAvailability.vue'),
     },
+    {
+      path: '/labs',
+      name: 'labs',
+      component: () => import('../components/LabList.vue'),
+    },
   ],
 })
 
