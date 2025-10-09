@@ -1,67 +1,28 @@
 <script setup lang="ts">
 // IMPORTS
-import { computed } from 'vue'
 import type { StatsCardProps } from '@/interfaces/interfaces'
 
 // PROPS & EMITS
 const props = defineProps<StatsCardProps>()
-
-// COMPUTED PROPERTIES
-// GET BORDER COLOR CLASS BASED ON CARD COLOR
-const borderColorClass = computed(() => {
-  const colors = {
-    primary: 'border-[#4299e1]',
-    green: 'border-green-500',
-    yellow: 'border-yellow-500',
-    purple: 'border-purple-500',
-    red: 'border-red-500'
-  }
-  return colors[props.color]
-})
-
-// GET BACKGROUND COLOR CLASS FOR ICON
-const iconBgClass = computed(() => {
-  const colors = {
-    primary: 'bg-[#4299e1]/10',
-    green: 'bg-green-100',
-    yellow: 'bg-yellow-100',
-    purple: 'bg-purple-100',
-    red: 'bg-red-100'
-  }
-  return colors[props.color]
-})
-
-// GET TEXT COLOR CLASS FOR ICON
-const iconColorClass = computed(() => {
-  const colors = {
-    primary: 'text-[#4299e1]',
-    green: 'text-green-500',
-    yellow: 'text-yellow-500',
-    purple: 'text-purple-500',
-    red: 'text-red-500'
-  }
-  return colors[props.color]
-})
 </script>
 
 
 <template>
   <!-- STATS CARD  -->
-  <div :class="[
-    'bg-white rounded-lg shadow p-6 ',
-    borderColorClass
-  ]">
+  <div
+    class="group bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-gray-100 hover:border-blue-200 hover:-translate-y-1"
+  >
     <div class="flex items-center justify-between">
-      <div>
-        <p class="text-sm font-medium text-gray-500">{{ title }}</p>
-        <p class="text-3xl font-semibold text-gray-800">{{ value }}</p>
+      <div class="flex flex-col space-y-2">
+        <span class="text-sm font-medium text-gray-600 uppercase tracking-wide">{{ title }}</span>
+        <span class="text-3xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-300">{{ value }}</span>
+        <div class="flex items-center space-x-1">
+          <span class="text-xs text-green-600 font-medium">+12%</span>
+          <span class="text-xs text-gray-500">from last month</span>
+        </div>
       </div>
-      <div :class="[
-        'p-3 rounded-full',
-        iconBgClass,
-        iconColorClass
-      ]">
-        <component :is="icon" :size="24" />
+      <div class="p-3 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-100 group-hover:from-blue-100 group-hover:to-indigo-200 transition-all duration-300">
+        <component :is="icon" class="w-6 h-6 text-blue-600" />
       </div>
     </div>
   </div>

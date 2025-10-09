@@ -130,7 +130,6 @@ export interface StatsCardProps {
   title: string
   value: string | number
   icon: Component
-  color: 'primary' | 'green' | 'yellow' | 'purple' | 'red'
 }
 
 // SIDEBAR INTERFACES
