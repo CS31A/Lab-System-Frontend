@@ -1,15 +1,16 @@
 <script setup lang="ts">
 // IMPORTS
-import { ref, computed, defineAsyncComponent } from 'vue'
+import { ref, computed, inject, defineAsyncComponent } from 'vue'
 import { Plus } from 'lucide-vue-next'
 import { useClassroomStore } from '@/stores/classrooms'
-import { useLayoutStore } from '@/stores/layout'
 const ClassroomCard = defineAsyncComponent(() => import('@/components/classrooms/ClassroomCard.vue'))
 const SeatMapView = defineAsyncComponent(() => import('@/components/classrooms/SeatMapView.vue'))
 
 // STORE INITIALIZATION
 const classroomStore = useClassroomStore()
-const layoutStore = useLayoutStore()
+
+// INJECT MODAL METHOD
+const showModal = inject<(modalName: string) => void>('showModal')!
 
 // REFS & REACTIVE STATE
 const showSeatMap = ref(false)
@@ -40,10 +41,10 @@ const hideSeatMap = () => {
 const handleSeatClick = (seatId: string, isOccupied: boolean) => {
   if (!isOccupied) {
     // SHOW ASSIGN STUDENT MODAL FOR EMPTY SEATS
-    layoutStore.showModal('assign-student')
+    showModal('assign-student')
   } else {
     // SHOW STUDENT INFO MODAL FOR OCCUPIED SEATS
-    layoutStore.showModal('student-info')
+    showModal('student-info')
   }
 }
 </script>
