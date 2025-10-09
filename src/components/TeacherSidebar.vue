@@ -230,7 +230,7 @@ function confirmEditPC() {
           <h2 class="font-bold text-lg text-[#3C3939]">PC Information</h2>
         </div>
         <button @click="isEditingPC ? confirmEditPC() : toggleEditPC()"
-          class="px-5 py-2 text-xs font-medium text-white bg-[linear-gradient(to_bottom,#5b8ae5,#013aae)] hover:border-blue-700 rounded-full transition-colors cursor-pointer shadow-md">{{
+          class="px-5 py-2 text-xs font-medium text-white bg-[linear-gradient(to_bottom,#5b8ae5,#013aae)] hover:border-[#2b6cb0] rounded-full transition-colors cursor-pointer shadow-md">{{
             isEditingPC ? 'Confirm' : 'Edit' }}</button>
       </div>
       <div class="mt-auto pb-4 border-b border-[#aeb9d4] p-4 px-12 pb-5 pt-2">

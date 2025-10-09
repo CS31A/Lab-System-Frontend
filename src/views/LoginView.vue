@@ -63,13 +63,13 @@ const shouldShowPasswordError = computed<boolean>(() => {
 const usernameInputClasses = computed<string>(() => {
   return shouldShowUsernameError.value
     ? 'w-full px-3 py-2 rounded focus:outline-none focus:ring-2 border-2 border-red-500 focus:ring-red-500'
-    : 'w-full px-3 py-2 rounded focus:outline-none focus:ring-2 border border-gray-300 focus:ring-blue-500'
+    : 'w-full px-3 py-2 rounded focus:outline-none focus:ring-2 border border-gray-300 focus:ring-[#4299e1]'
 })
 
 const passwordInputClasses = computed<string>(() => {
   return shouldShowPasswordError.value
     ? 'w-full px-3 py-2 rounded focus:outline-none focus:ring-2 pr-16 border-2 border-red-500 focus:ring-red-500'
-    : 'w-full px-3 py-2 rounded focus:outline-none focus:ring-2 pr-16 border border-gray-300 focus:ring-blue-500'
+    : 'w-full px-3 py-2 rounded focus:outline-none focus:ring-2 pr-16 border border-gray-300 focus:ring-[#4299e1]'
 })
 
 function handleLogin() {
@@ -170,7 +170,7 @@ function handleLogin() {
 
           <!-- Login Button -->
           <button
-            class="w-full bg-blue-700 text-white font-bold py-2 rounded hover:bg-blue-800 transition"
+            class="w-full bg-[#2b6cb0] text-white font-bold py-2 rounded hover:bg-blue-800 transition"
             @click="handleLogin"
           >
             Login
