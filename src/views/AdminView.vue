@@ -3,18 +3,17 @@
 import { ref, computed, defineAsyncComponent } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 // LAYOUT COMPONENTS
-const GlobalHeader = defineAsyncComponent(() => import('@/components/global/Header.vue'))
 const LayoutHeader = defineAsyncComponent(() => import('@/components/layout/Header.vue'))
 const AdminSidebar= defineAsyncComponent(() => import('@/components/layout/Sidebar.vue'))
 const AdminModals = defineAsyncComponent(() => import('@/components/modals/Modals.vue'))
 // ADMIN COMPONENTS
-const DashboardComponent = defineAsyncComponent(() => import('@/components/admin/DashboardComponent.vue'))
-const ClassroomsComponent = defineAsyncComponent(() => import('@/components/admin/ClassroomsComponent.vue'))
-const StudentsComponent = defineAsyncComponent(() => import('@/components/admin/StudentsComponent.vue'))
-const TeachersComponent = defineAsyncComponent(() => import('@/components/admin/TeachersComponent.vue'))
-const SchedulesComponent = defineAsyncComponent(() => import('@/components/admin/SchedulesComponent.vue'))
-const ActivityComponent = defineAsyncComponent(() => import('@/components/admin/ActivityComponent.vue'))
-const SettingsComponent = defineAsyncComponent(() => import('@/components/admin/SettingsComponent.vue'))
+const DashboardComponent = defineAsyncComponent(() => import('@/components/admin/Dashboard.vue'))
+const ClassroomsComponent = defineAsyncComponent(() => import('@/components/admin/Classrooms.vue'))
+const StudentsComponent = defineAsyncComponent(() => import('@/components/admin/Students.vue'))
+const TeachersComponent = defineAsyncComponent(() => import('@/components/admin/Teachers.vue'))
+const SchedulesComponent = defineAsyncComponent(() => import('@/components/admin/Schedules.vue'))
+const ActivityComponent = defineAsyncComponent(() => import('@/components/admin/ActivityLog.vue'))
+const SettingsComponent = defineAsyncComponent(() => import('@/components/admin/Settings.vue'))
 
 // ROUTER INITIALIZATION
 const route = useRoute()
@@ -72,9 +71,6 @@ router.afterEach(() => {
 
 <template>
   <div class="flex flex-col h-screen bg-gray-50">
-    <!-- GLOBAL HEADER -->
-    <GlobalHeader />
-
     <!-- BODY -->
     <div class="flex flex-1 overflow-hidden">
       <!-- SIDEBAR -->
