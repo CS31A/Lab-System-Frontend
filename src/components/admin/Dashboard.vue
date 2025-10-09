@@ -109,8 +109,6 @@ const handleQuickAction = (action: string) => {
         :title="stat.title"
         :value="stat.value"
         :icon="stat.icon"
-        :color="stat.color"
-        :index="index"
       />
     </div>
 
