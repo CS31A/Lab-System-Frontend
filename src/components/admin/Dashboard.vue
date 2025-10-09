@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router'
 import { Home, Users, User, Calendar, Plus, UserPlus, FilePlus, Upload } from 'lucide-vue-next'
 import { useNotificationStore } from '@/stores/notifications'
 import { useDashboardStore } from '@/stores/dashboard'
+const StatsCard = defineAsyncComponent(() => import('@/components/dashboard/StatsCard.vue'))
 const ScheduleCard = defineAsyncComponent(() => import('@/components/dashboard/ScheduleCard.vue'))
 const NotificationItem = defineAsyncComponent(() => import('@/components/dashboard/NotificationItem.vue'))
 const QuickActionButton = defineAsyncComponent(() => import('@/components/dashboard/QuickActionButton.vue'))
@@ -102,26 +103,15 @@ const handleQuickAction = (action: string) => {
     
     <!-- STATS CARDS -->
     <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 mb-8">
-      <div
+      <StatsCard
         v-for="(stat, index) in stats"
         :key="stat.title"
-        class="group bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-gray-100 hover:border-blue-200 hover:-translate-y-1"
-        :style="{ animationDelay: `${index * 100}ms` }"
-      >
-        <div class="flex items-center justify-between">
-          <div class="flex flex-col space-y-2">
-            <span class="text-sm font-medium text-gray-600 uppercase tracking-wide">{{ stat.title }}</span>
-            <span class="text-3xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-300">{{ stat.value }}</span>
-            <div class="flex items-center space-x-1">
-              <span class="text-xs text-green-600 font-medium">+12%</span>
-              <span class="text-xs text-gray-500">from last month</span>
-            </div>
-          </div>
-          <div class="p-3 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-100 group-hover:from-blue-100 group-hover:to-indigo-200 transition-all duration-300">
-            <component :is="stat.icon" class="w-6 h-6 text-blue-600" />
-          </div>
-        </div>
-      </div>
+        :title="stat.title"
+        :value="stat.value"
+        :icon="stat.icon"
+        :color="stat.color"
+        :index="index"
+      />
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
