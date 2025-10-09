@@ -136,3 +136,15 @@ export interface StatsCardProps {
 export interface SidebarProps {
   currentSection?: string
 }
+
+// FILTER BAR INTERFACES
+export interface Option {
+  label: string
+  value: string
+}
+
+export interface FilterConfig {
+  key: string
+  label?: string
+  options: Option[]
+}

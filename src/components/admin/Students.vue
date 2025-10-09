@@ -1,7 +1,8 @@
 <script setup lang="ts">
 // IMPORTS
-import { ref, computed } from 'vue'
-import { Plus, Upload, Search, ChevronLeft, ChevronRight } from 'lucide-vue-next'
+import { ref, reactive, computed } from 'vue'
+import { Plus, Upload, ChevronLeft, ChevronRight } from 'lucide-vue-next'
+import SearchFilterBar from '@/components/global/SearchFilterBar.vue'
 import { useStudentStore } from '@/stores/students'
 
 // CONSTANTS
@@ -12,7 +13,7 @@ const studentStore = useStudentStore()
 
 // REFS & REACTIVE STATE
 const searchQuery = ref('')
-const selectedRoom = ref('')
+const filters = reactive<{ room: string }>({ room: '' })
 const currentPage = ref(1)
 
 // COMPUTED PROPERTIES
@@ -37,8 +38,8 @@ const filteredStudents = computed(() => {
   }
 
   // FILTER BY SELECTED ROOM
-  if (selectedRoom.value) {
-    filtered = filtered.filter(student => student.room === selectedRoom.value)
+  if (filters.room) {
+    filtered = filtered.filter(student => student.room === filters.room)
   }
 
   // PAGINATE RESULTS
@@ -116,28 +117,23 @@ const goToPage = (page: number) => {
     <div class="bg-white rounded-lg shadow overflow-hidden mb-6">
       <!-- SEARCH AND FILTER BAR -->
       <div class="p-4 border-b border-gray-200 flex items-center justify-between">
-        <div class="relative w-full max-w-md">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search class="text-gray-400" :size="16" />
-          </div>
-          <input
-            v-model="searchQuery"
-            type="text"
-            class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-[#4299e1] focus:border-[#4299e1] sm:text-sm"
-            placeholder="Search students..."
-          >
-        </div>
-        <div class="flex space-x-2 ml-4">
-          <select
-            v-model="selectedRoom"
-            class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#4299e1] focus:border-[#4299e1]"
-          >
-            <option value="">All Classes</option>
-            <option value="Room 101">Room 101</option>
-            <option value="Room 102">Room 102</option>
-            <option value="Room 103">Room 103</option>
-          </select>
-        </div>
+        <SearchFilterBar
+          v-model="searchQuery"
+          :filters="filters"
+          @update:filters="(v) => Object.assign(filters, v)"
+          :filter-configs="[
+            {
+              key: 'room',
+              label: 'Class',
+              options: [
+                { label: 'Slab 1', value: 'Slab 1' },
+                { label: 'Slab 2', value: 'Slab 2' },
+                { label: 'Slab 3', value: 'Slab 3' }
+              ]
+            }
+          ]"
+          placeholder="Search students..."
+        />
       </div>
 
       <!-- STUDENTS TABLE -->

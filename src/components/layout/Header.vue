@@ -2,7 +2,8 @@
 // IMPORTS
 import { ref, computed, inject } from 'vue'
 import { useRouter } from 'vue-router'
-import { Menu, Search, Bell, User, ChevronDown, AlertCircle, AlertTriangle, CheckCircle } from 'lucide-vue-next'
+import { Menu, Bell, User, ChevronDown, AlertCircle, AlertTriangle, CheckCircle } from 'lucide-vue-next'
+import SearchFilterBar from '@/components/global/SearchFilterBar.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useNotificationStore } from '@/stores/notifications'
 
@@ -91,17 +92,8 @@ document.addEventListener('click', (event) => {
         </button>
 
         <!-- SEARCH BAR -->
-        <div class="relative ml-4 max-w-md w-full">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search class="text-gray-400" :size="16" />
-          </div>
-          <input
-            v-model="searchQuery"
-            type="text"
-            class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-[#4299e1] focus:border-[#4299e1] sm:text-sm transition-colors"
-            placeholder="Search..."
-            @keyup.enter="handleSearch"
-          >
+        <div class="ml-4 w-full max-w-md">
+          <SearchFilterBar v-model="searchQuery" :placeholder="'Search...'" @search="handleSearch" />
         </div>
       </div>
 
