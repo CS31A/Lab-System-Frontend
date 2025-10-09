@@ -1,16 +1,17 @@
 <script setup lang="ts">
 // IMPORTS
-import { ref, computed } from 'vue'
+import { ref, computed, inject } from 'vue'
 import { Download, Trash2, Calendar, ChevronLeft, ChevronRight } from 'lucide-vue-next'
 import { useActivityStore } from '@/stores/activity'
-import { useLayoutStore } from '@/stores/layout'
 
 // CONSTANTS
 const itemsPerPage = 10
 
 // STORE INITIALIZATION
 const activityStore = useActivityStore()
-const layoutStore = useLayoutStore()
+
+// INJECT MODAL METHOD
+const showModal = inject<(modalName: string) => void>('showModal')!
 
 // REFS & REACTIVE STATE
 const selectedAction = ref('')
@@ -95,7 +96,7 @@ const formatActionType = (action: string) => {
 
 // SHOW MODAL TO CLEAR ACTIVITY LOGS
 const showClearLogsModal = () => {
-  layoutStore.showModal('clear-logs')
+  showModal('clear-logs')
 }
 
 // NAVIGATE TO PREVIOUS PAGE

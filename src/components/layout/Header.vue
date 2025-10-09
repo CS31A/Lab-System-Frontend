@@ -1,22 +1,24 @@
 <script setup lang="ts">
 // IMPORTS
-import { ref, computed } from 'vue'
+import { ref, computed, inject } from 'vue'
 import { useRouter } from 'vue-router'
 import { Menu, Search, Bell, User, ChevronDown, AlertCircle, AlertTriangle, CheckCircle } from 'lucide-vue-next'
-import { useLayoutStore } from '@/stores/layout'
 import { useAuthStore } from '@/stores/auth'
 import { useNotificationStore } from '@/stores/notifications'
 
 // ROUTER & STORE INITIALIZATION
 const router = useRouter()
-const layoutStore = useLayoutStore()
 const authStore = useAuthStore()
 const notificationStore = useNotificationStore()
+
+// INJECT MODAL METHOD
+const showModal = inject<(modalName: string) => void>('showModal')!
 
 // REFS & REACTIVE STATE
 const searchQuery = ref('')
 const isProfileDropdownOpen = ref(false)
 const isNotificationsOpen = ref(false)
+const isMobileMenuOpen = ref(false)
 
 // COMPUTED PROPERTIES
 const currentUser = computed(() => authStore.currentUser)
@@ -26,7 +28,7 @@ const notificationCount = computed(() => notificationStore.unreadCount)
 // METHODS
 // TOGGLE MOBILE MENU VISIBILITY
 const toggleMobileMenu = () => {
-  layoutStore.toggleMobileMenu()
+  isMobileMenuOpen.value = !isMobileMenuOpen.value
 }
 
 // TOGGLE PROFILE DROPDOWN AND CLOSE NOTIFICATIONS
@@ -62,7 +64,7 @@ const goToSettings = () => {
 
 // SHOW LOGOUT CONFIRMATION MODAL
 const showLogoutModal = () => {
-  layoutStore.showModal('logout')
+  showModal('logout')
   isProfileDropdownOpen.value = false
 }
 
