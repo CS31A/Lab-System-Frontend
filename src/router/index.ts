@@ -41,6 +41,11 @@ const router = createRouter({
     {
       path: '/laboratory/4',
       name: 'slab4',
+      component: () => import('../views/Slab4.vue'),
+    },
+    {
+      path: '/admin',
+      name: 'admin',
       component: () => import('../views/AdminView.vue'),
     },
     {
