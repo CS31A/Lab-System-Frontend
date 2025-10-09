@@ -1,7 +1,8 @@
 <script setup lang="ts">
 // IMPORTS
 import { ref, computed } from 'vue'
-import { Plus, Search, User } from 'lucide-vue-next'
+import { Plus, User } from 'lucide-vue-next'
+import SearchFilterBar from '@/components/global/SearchFilterBar.vue'
 import { useTeacherStore } from '@/stores/teachers'
 
 // CONSTANTS
@@ -104,17 +105,7 @@ const addSchedule = () => {
     <div class="bg-white rounded-lg shadow overflow-hidden mb-6">
       <!-- SEARCH BAR -->
       <div class="p-4 border-b border-gray-200 flex items-center justify-between">
-        <div class="relative w-full max-w-md">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search class="text-gray-400" :size="16" />
-          </div>
-          <input
-            v-model="searchQuery"
-            type="text"
-            class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-[#4299e1] focus:border-[#4299e1] sm:text-sm"
-            placeholder="Search teachers..."
-          >
-        </div>
+        <SearchFilterBar v-model="searchQuery" placeholder="Search teachers..." />
       </div>
 
       <!-- TEACHERS TABLE -->
