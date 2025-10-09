@@ -1,24 +1,29 @@
 <script setup lang="ts">
 // IMPORTS
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import type { SidebarProps } from '@/interfaces/interfaces'
-
-// PROPS & EMITS
-const props = withDefaults(defineProps<SidebarProps>(), {
-  currentSection: 'dashboard'
-})
-
-const emit = defineEmits<{
-  navigate: [section: string]
-}>()
+import { ref, computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 
 // ROUTER INITIALIZATION
 const router = useRouter()
+const route = useRoute()
 
 // REFS & REACTIVE STATE
 const isLabsOpen = ref(false)
 const isSidebarOpen = ref(true)
+
+// COMPUTED
+// GET CURRENT SECTION FROM ROUTE
+const currentSection = computed(() => {
+  const path = route.path
+  if (path.startsWith('/admin/')) {
+    return path.split('/')[2] || 'dashboard'
+  }
+  if (path.startsWith('/laboratory/')) {
+    const labNum = path.split('/')[2]
+    return `slab${labNum}`
+  }
+  return ''
+})
 
 // METHODS
 // TOGGLE SIDEBAR OPEN/CLOSED STATE
@@ -32,19 +37,24 @@ function toggleSidebar() {
 
 // CHECK IF SECTION IS CURRENTLY ACTIVE
 function isActive(name: string) {
-  return props.currentSection === name
+  return currentSection.value === name
 }
 
 // NAVIGATE TO SECTION OR ROUTE
 function navigate(name: string) {
-  // ROUTE NAMES THAT SHOULD USE ROUTER.PUSH
-  const routeNames = new Set(['slab1', 'slab2', 'slab3', 'slab4', 'Login'])
-  if (routeNames.has(name)) {
+  // LABORATORY ROUTES
+  if (name.startsWith('slab')) {
     router.push({ name })
     return
   }
-  // EMIT NAVIGATION EVENT FOR PARENT-CONTROLLED SECTIONS
-  emit('navigate', name)
+  // ADMIN ROUTES
+  const adminSections = ['dashboard', 'classrooms', 'students', 'teachers', 'schedules', 'activity', 'settings']
+  if (adminSections.includes(name)) {
+    router.push({ name: `admin-${name}` })
+    return
+  }
+  // OTHER ROUTES (e.g., Login)
+  router.push({ name })
 }
 
 // GET ICON COLOR BASED ON ACTIVE STATE

@@ -47,6 +47,44 @@ const router = createRouter({
       path: '/admin',
       name: 'admin',
       component: () => import('../views/AdminView.vue'),
+      redirect: '/admin/dashboard',
+      children: [
+        {
+          path: 'dashboard',
+          name: 'admin-dashboard',
+          component: () => import('../components/admin/Dashboard.vue'),
+        },
+        {
+          path: 'classrooms',
+          name: 'admin-classrooms',
+          component: () => import('../components/admin/Classrooms.vue'),
+        },
+        {
+          path: 'students',
+          name: 'admin-students',
+          component: () => import('../components/admin/Students.vue'),
+        },
+        {
+          path: 'teachers',
+          name: 'admin-teachers',
+          component: () => import('../components/admin/Teachers.vue'),
+        },
+        {
+          path: 'schedules',
+          name: 'admin-schedules',
+          component: () => import('../components/admin/Schedules.vue'),
+        },
+        {
+          path: 'activity',
+          name: 'admin-activity',
+          component: () => import('../components/admin/ActivityLog.vue'),
+        },
+        {
+          path: 'settings',
+          name: 'admin-settings',
+          component: () => import('../components/admin/Settings.vue'),
+        },
+      ],
     },
     {
       path: '/lab_availability',
