@@ -28,7 +28,7 @@ const handleAssignStudent = () => {
 
 <template>
   <div
-    class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50"
+    class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50"
     @click.self="handleClose"
   >
     <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
