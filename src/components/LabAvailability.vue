@@ -24,6 +24,15 @@ interface Lab {
 
 const LabData = ref<Lab[]>([])
 
+// Current date display
+const currentDate = ref('')
+function updateCurrentDate() {
+  const now = new Date()
+  currentDate.value = now.toLocaleDateString(undefined, {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+  })
+}
+
 async function fetchLabData() {
   try {
     // TODO: Replace with actual API call
@@ -65,6 +74,7 @@ async function scheduleNextFetch() {
 onMounted(() => {
   isScheduled = true
   scheduleNextFetch()
+  updateCurrentDate()
 })
 
 onBeforeUnmount(() => {
@@ -77,9 +87,11 @@ onBeforeUnmount(() => {
 <template>
   <div class="flex-1 p-6 bg-white min-h-screen flex flex-col items-center">
     <div class="mb-6 flex flex-col items-center">
+
       <h2 class="text-4xl font-bold text-[#013aae] mb-1 text-center" style="font-family: var(--konkhmer-font);">
         Lab Availability
       </h2>
+      <span class="block text-gray-500 text-base mb-2">{{ currentDate }}</span>
       <span class="text-[#39A249] bg-[#C9F6CB] text-sm font-semibold rounded-2xl py-1 px-3 mb-4">
         Status Board
       </span>
