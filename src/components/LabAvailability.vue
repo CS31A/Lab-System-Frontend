@@ -32,7 +32,7 @@ function updateCurrentDate() {
 
 async function fetchLabData() {
   try {
-    const response = await apiService.get<ApiResponse>('/teachers/laboratories')
+    const response = await apiService.get<ApiResponse>('/laboratories')
     LabData.value = response.data.map((lab: ApiLab) => {
       let status: string
       let teacher: string
@@ -145,6 +145,9 @@ onBeforeUnmount(() => {
               <td class="p-4 text-gray-900 dark:text-black">
                 {{ lab.schedule }}
               </td>
+            </tr>
+            <tr v-if="LabData.length === 0">
+              <td colspan="4" class="text-center p-4 text-gray-500">No laboratories found</td>
             </tr>
           </tbody>
         </table>
