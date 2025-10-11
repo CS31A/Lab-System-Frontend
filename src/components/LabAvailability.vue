@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { apiService } from '@/services/api'
+import type { Lab, ApiLab, ApiResponse } from '@/interfaces/interfaces'
 
 defineOptions({
   name: 'LabAvailability',
@@ -15,35 +16,8 @@ let timeoutId: number | null = null
 let isScheduled = false
 let retryCount = 0
 
-// Sample data for lab management
-interface Lab {
-  name: string
-  status: string
-  teacher: string
-  schedule: string
-}
 
-interface ApiLab {
-  id: string
-  name: string
-  status: boolean
-  vacancy_status: 'available' | 'occupied' | 'maintenance'
-  current_schedule: {
-    id: string
-    section: string
-    start_time: string
-    end_time: string
-    subject_name: string
-    teacher_name: string
-  } | null
-  created_at: string
-  updated_at: string
-}
 
-interface ApiResponse {
-  message: string
-  data: ApiLab[]
-}
 
 const LabData = ref<Lab[]>([])
 
@@ -90,13 +64,6 @@ async function fetchLabData() {
   }
   catch (error) {
     console.error('Failed to fetch data:', error)
-    // Fallback to sample data on error
-    LabData.value = [
-      { name: 'SLAB 1', status: 'Available', teacher: 'Mock Teacher', schedule: 'N/A' },
-      { name: 'SLAB 2', status: 'In Use', teacher: 'Noel Lehitimas', schedule: '9:00 AM - 11:00 AM' },
-      { name: 'SLAB 3', status: 'Available', teacher: 'N/A', schedule: 'N/A' },
-      { name: 'SLAB 4', status: 'In Use', teacher: 'Jovelyn Comaingking', schedule: '10:30 AM - 12:00PM' },
-    ]
   }
 }
 
