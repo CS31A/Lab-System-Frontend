@@ -1,7 +1,8 @@
+import type { Teacher } from '@/interfaces/interfaces'
 // IMPORTS
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
-import type { Teacher } from '@/interfaces/interfaces'
+import { computed, ref } from 'vue'
+import api from '@/boot/axios'
 
 // TEACHER STORE DEFINITION
 export const useTeacherStore = defineStore('teachers', () => {
@@ -14,7 +15,7 @@ export const useTeacherStore = defineStore('teachers', () => {
       email: 'donald.francisco@gmail.com',
       subject: 'Automata',
       assignedRooms: ['Slab 1', 'Slab 2'],
-      upcomingSchedules: 3
+      upcomingSchedules: 3,
     },
     {
       id: '2',
@@ -22,7 +23,7 @@ export const useTeacherStore = defineStore('teachers', () => {
       email: 'gojo.satoru@gmail.com',
       subject: 'Information Assurance',
       assignedRooms: ['SCLAB'],
-      upcomingSchedules: 2
+      upcomingSchedules: 2,
     },
     {
       id: '3',
@@ -30,7 +31,7 @@ export const useTeacherStore = defineStore('teachers', () => {
       email: 'noel.lehitimas@gmail.com',
       subject: 'Pagsasalin',
       assignedRooms: ['Slab 3', 'Slab 4'],
-      upcomingSchedules: 1
+      upcomingSchedules: 1,
     },
     {
       id: '4',
@@ -38,7 +39,7 @@ export const useTeacherStore = defineStore('teachers', () => {
       email: 'winslie.dada@gmail.com',
       subject: 'Computer Fundamentals',
       assignedRooms: ['Linux'],
-      upcomingSchedules: 2
+      upcomingSchedules: 2,
     },
     {
       id: '5',
@@ -46,8 +47,8 @@ export const useTeacherStore = defineStore('teachers', () => {
       email: 'alice.mao@gmail.com',
       subject: 'Data Structure',
       assignedRooms: ['Slab 5', 'SCLAB'],
-      upcomingSchedules: 4
-    }
+      upcomingSchedules: 4,
+    },
   ])
 
   // METHODS
@@ -60,7 +61,7 @@ export const useTeacherStore = defineStore('teachers', () => {
   const addTeacher = (teacher: Omit<Teacher, 'id'>) => {
     const newTeacher: Teacher = {
       ...teacher,
-      id: Date.now().toString()
+      id: Date.now().toString(),
     }
     teachers.value.push(newTeacher)
   }
@@ -114,28 +115,39 @@ export const useTeacherStore = defineStore('teachers', () => {
   const searchTeachers = (query: string) => {
     const searchTerm = query.toLowerCase()
     return teachers.value.filter(teacher =>
-      teacher.name.toLowerCase().includes(searchTerm) ||
-      teacher.email.toLowerCase().includes(searchTerm) ||
-      teacher.subject.toLowerCase().includes(searchTerm)
+      teacher.name.toLowerCase().includes(searchTerm)
+      || teacher.email.toLowerCase().includes(searchTerm)
+      || teacher.subject.toLowerCase().includes(searchTerm),
     )
+  }
+
+  // FETCH TEACHERS FROM API
+  const fetchTeachers = async () => {
+    try {
+      const res = await api.get('/teachers')
+      teachers.value = res.data
+    }
+    catch (error) {
+      console.error('Error fetching teachers:', error)
+    }
   }
 
   // COMPUTED PROPERTIES
   // TOTAL COUNT OF ALL TEACHERS
   const totalTeachers = computed(() => teachers.value.length)
-  
+
   // COUNT TEACHERS GROUPED BY SUBJECT
   const teachersBySubject = computed(() => {
     const subjectCounts: Record<string, number> = {}
-    teachers.value.forEach(teacher => {
+    teachers.value.forEach((teacher) => {
       subjectCounts[teacher.subject] = (subjectCounts[teacher.subject] || 0) + 1
     })
     return subjectCounts
   })
 
   // TOTAL COUNT OF ALL UPCOMING SCHEDULES
-  const totalUpcomingSchedules = computed(() => 
-    teachers.value.reduce((total, teacher) => total + teacher.upcomingSchedules, 0)
+  const totalUpcomingSchedules = computed(() =>
+    teachers.value.reduce((total, teacher) => total + teacher.upcomingSchedules, 0),
   )
 
   return {
@@ -151,6 +163,7 @@ export const useTeacherStore = defineStore('teachers', () => {
     getTeachersBySubject,
     assignRoomToTeacher,
     unassignRoomFromTeacher,
-    searchTeachers
+    searchTeachers,
+    fetchTeachers,
   }
 })
