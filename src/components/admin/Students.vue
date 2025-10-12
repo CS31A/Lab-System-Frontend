@@ -1,7 +1,9 @@
+<!-- eslint-disable no-alert -->
+<!-- eslint-disable no-console -->
 <script setup lang="ts">
 // IMPORTS
-import { ref, reactive, computed } from 'vue'
-import { Plus, Upload, ChevronLeft, ChevronRight } from 'lucide-vue-next'
+import { ChevronLeft, ChevronRight, Plus, Upload } from 'lucide-vue-next'
+import { computed, onMounted, reactive, ref } from 'vue'
 import SearchFilterBar from '@/components/global/SearchFilterBar.vue'
 import { useStudentStore } from '@/stores/students'
 
@@ -11,6 +13,11 @@ const itemsPerPage = 10
 // STORE INITIALIZATION
 const studentStore = useStudentStore()
 
+//  FETCH STUDENTS ON COMPONENT MOUNT
+onMounted(() => {
+  studentStore.fetchStudents()
+})
+
 // REFS & REACTIVE STATE
 const searchQuery = ref('')
 const filters = reactive<{ room: string }>({ room: '' })
@@ -19,10 +26,6 @@ const currentPage = ref(1)
 // COMPUTED PROPERTIES
 const students = computed(() => studentStore.students)
 
-const totalStudents = computed(() => filteredStudents.value.length)
-
-const totalPages = computed(() => Math.ceil(totalStudents.value / itemsPerPage))
-
 // FILTER AND PAGINATE STUDENTS BASED ON SEARCH AND ROOM FILTER
 const filteredStudents = computed(() => {
   let filtered = students.value
@@ -30,10 +33,10 @@ const filteredStudents = computed(() => {
   // FILTER BY SEARCH QUERY (NAME, EMAIL, OR STUDENT ID)
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(student =>
-      student.name.toLowerCase().includes(query) ||
-      student.email.toLowerCase().includes(query) ||
-      student.studentId.toLowerCase().includes(query)
+    filtered = filtered.filter((student: { name: string, email: string, studentId: string }) =>
+      student.name.toLowerCase().includes(query)
+      || student.email.toLowerCase().includes(query)
+      || student.studentId.toLowerCase().includes(query),
     )
   }
 
@@ -47,6 +50,10 @@ const filteredStudents = computed(() => {
   return filtered.slice(start, start + itemsPerPage)
 })
 
+const totalStudents = computed(() => filteredStudents.value.length)
+
+const totalPages = computed(() => Math.ceil(totalStudents.value / itemsPerPage))
+
 const startIndex = computed(() => (currentPage.value - 1) * itemsPerPage + 1)
 
 const endIndex = computed(() => Math.min(currentPage.value * itemsPerPage, totalStudents.value))
@@ -56,7 +63,7 @@ const visiblePages = computed(() => {
   const pages = []
   const start = Math.max(1, currentPage.value - 2)
   const end = Math.min(totalPages.value, currentPage.value + 2)
-  
+
   for (let i = start; i <= end; i++) {
     pages.push(i)
   }
@@ -65,12 +72,12 @@ const visiblePages = computed(() => {
 
 // METHODS
 // EDIT STUDENT INFORMATION
-const editStudent = (student: any) => {
+function editStudent(student: any) {
   console.log('Edit student:', student)
 }
 
 // DELETE STUDENT FROM STORE
-const deleteStudent = (studentId: string) => {
+function deleteStudent(studentId: string) {
   // CONFIRM BEFORE DELETION
   if (confirm('Are you sure you want to delete this student?')) {
     studentStore.removeStudent(studentId)
@@ -78,30 +85,31 @@ const deleteStudent = (studentId: string) => {
 }
 
 // NAVIGATE TO PREVIOUS PAGE
-const previousPage = () => {
+function previousPage() {
   if (currentPage.value > 1) {
     currentPage.value--
   }
 }
 
 // NAVIGATE TO NEXT PAGE
-const nextPage = () => {
+function nextPage() {
   if (currentPage.value < totalPages.value) {
     currentPage.value++
   }
 }
 
 // NAVIGATE TO SPECIFIC PAGE
-const goToPage = (page: number) => {
+function goToPage(page: number) {
   currentPage.value = page
 }
 </script>
 
-
 <template>
   <div>
     <div class="flex justify-between items-center mb-6">
-      <h2 class="text-2xl font-bold text-gray-800">Student Management</h2>
+      <h2 class="text-2xl font-bold text-gray-800">
+        Student Management
+      </h2>
       <div class="flex space-x-2">
         <button class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-[#2b6cb0] flex items-center transition-colors">
           <Plus class="mr-2 w-4 h-4" />
@@ -120,7 +128,6 @@ const goToPage = (page: number) => {
         <SearchFilterBar
           v-model="searchQuery"
           :filters="filters"
-          @update:filters="(v) => Object.assign(filters, v)"
           :filter-configs="[
             {
               key: 'room',
@@ -128,11 +135,12 @@ const goToPage = (page: number) => {
               options: [
                 { label: 'Slab 1', value: 'Slab 1' },
                 { label: 'Slab 2', value: 'Slab 2' },
-                { label: 'Slab 3', value: 'Slab 3' }
-              ]
-            }
+                { label: 'Slab 3', value: 'Slab 3' },
+              ],
+            },
           ]"
           placeholder="Search students..."
+          @update:filters="(v) => Object.assign(filters, v)"
         />
       </div>
 
@@ -223,19 +231,18 @@ const goToPage = (page: number) => {
             <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
               <button
                 class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-                @click="previousPage"
                 :disabled="currentPage === 1"
+                @click="previousPage"
               >
                 <ChevronLeft class="h-5 w-5" />
               </button>
               <button
                 v-for="page in visiblePages"
                 :key="page"
-                :class="[
-                  'relative inline-flex items-center px-4 py-2 border text-sm font-medium',
+                class="relative inline-flex items-center px-4 py-2 border text-sm font-medium" :class="[
                   page === currentPage
                     ? 'z-10 bg-[#ebf8ff] border-[#4299e1] text-blue-600'
-                    : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                    : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50',
                 ]"
                 @click="goToPage(page)"
               >
@@ -243,8 +250,8 @@ const goToPage = (page: number) => {
               </button>
               <button
                 class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-                @click="nextPage"
                 :disabled="currentPage === totalPages"
+                @click="nextPage"
               >
                 <ChevronRight class="h-5 w-5" />
               </button>
