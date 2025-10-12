@@ -1,7 +1,8 @@
+import type { Notification } from '@/interfaces/interfaces'
 // IMPORTS
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
-import type { Notification } from '@/interfaces/interfaces'
+import { computed, ref } from 'vue'
+import api from '@/boot/axios'
 
 // NOTIFICATION STORE DEFINITION
 export const useNotificationStore = defineStore('notifications', () => {
@@ -14,14 +15,14 @@ export const useNotificationStore = defineStore('notifications', () => {
       message: 'Jan Rosa assigned to Slab 2, Seat 12',
       type: 'success',
       time: '15 minutes ago',
-      read: true
-    }
+      read: true,
+    },
   ])
 
   // COMPUTED PROPERTIES
   // COUNT OF UNREAD NOTIFICATIONS
-  const unreadCount = computed(() => 
-    notifications.value.filter(n => !n.read).length
+  const unreadCount = computed(() =>
+    notifications.value.filter(n => !n.read).length,
   )
 
   // METHODS
@@ -31,10 +32,27 @@ export const useNotificationStore = defineStore('notifications', () => {
       ...notification,
       id: Date.now().toString(),
       time: 'Just now',
-      read: false
+      read: false,
     }
+
     // ADD TO BEGINNING OF ARRAY
     notifications.value.unshift(newNotification)
+  }
+
+  // FETCH NOTIFICATIONS FROM API
+  const fetchNotifications = async () => {
+    try {
+      const res = await api.get('/notifications')
+      notifications.value = res.data
+    }
+    catch (err) {
+      console.error('Failed to fetch notifications:', err)
+      addNotification({
+        title: 'Error',
+        message: 'Failed to fetch notifications',
+        type: 'error',
+      })
+    }
   }
 
   // MARK NOTIFICATION AS READ
@@ -61,9 +79,10 @@ export const useNotificationStore = defineStore('notifications', () => {
   return {
     notifications,
     unreadCount,
+    fetchNotifications,
     addNotification,
     markAsRead,
     markAllAsRead,
-    removeNotification
+    removeNotification,
   }
 })
