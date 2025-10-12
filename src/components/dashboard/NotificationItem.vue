@@ -1,8 +1,9 @@
 <script setup lang="ts">
 // IMPORTS
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { AlertCircle, AlertTriangle, CheckCircle } from 'lucide-vue-next'
 import type { Notification } from '@/interfaces/interfaces'
+import { useNotificationStore } from '@/stores/notifications'
 
 // PROPS & EMITS
 interface Props {
@@ -11,13 +12,21 @@ interface Props {
 
 const props = defineProps<Props>()
 
+// NOTIFICATION STORE
+const notificationStore = useNotificationStore()
+
+// AUTOMATIC FETCH WHEN COMPONENT MOUNTS
+onMounted(() => {
+  notificationStore.fetchNotifications()
+})
+
 // COMPUTED PROPERTIES
 // GET ICON COMPONENT BASED ON NOTIFICATION TYPE
 const iconComponent = computed(() => {
   const icons = {
     error: AlertCircle,
     warning: AlertTriangle,
-    success: CheckCircle
+    success: CheckCircle,
   }
   return icons[props.notification.type]
 })
@@ -27,7 +36,7 @@ const iconBgClass = computed(() => {
   const colors = {
     error: 'bg-red-100',
     warning: 'bg-yellow-100',
-    success: 'bg-green-100'
+    success: 'bg-green-100',
   }
   return colors[props.notification.type]
 })
@@ -37,7 +46,7 @@ const iconColorClass = computed(() => {
   const colors = {
     error: 'text-red-500',
     warning: 'text-yellow-500',
-    success: 'text-green-500'
+    success: 'text-green-500',
   }
   return colors[props.notification.type]
 })
@@ -60,4 +69,3 @@ const iconColorClass = computed(() => {
     </div>
   </div>
 </template>
-
