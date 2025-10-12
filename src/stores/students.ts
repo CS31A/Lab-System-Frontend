@@ -1,7 +1,8 @@
+import type { Student } from '@/interfaces/interfaces'
 // IMPORTS
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
-import type { Student } from '@/interfaces/interfaces'
+import { computed, ref } from 'vue'
+import api from '@/boot/axios'
 
 // STUDENT STORE DEFINITION
 export const useStudentStore = defineStore('students', () => {
@@ -15,7 +16,7 @@ export const useStudentStore = defineStore('students', () => {
       email: 'neil.vallecer@gmail.com',
       room: 'Slab 1',
       seat: 'Seat 12',
-      upcomingClasses: 3
+      upcomingClasses: 3,
     },
     {
       id: '2',
@@ -24,7 +25,7 @@ export const useStudentStore = defineStore('students', () => {
       email: 'chitoge.kirisaki@gmail.com',
       room: 'Slab 2',
       seat: 'Seat 5',
-      upcomingClasses: 2
+      upcomingClasses: 2,
     },
     {
       id: '3',
@@ -33,7 +34,7 @@ export const useStudentStore = defineStore('students', () => {
       email: 'taro.sakamoto@gmail.com',
       room: 'SCLAB',
       seat: 'Seat 8',
-      upcomingClasses: 4
+      upcomingClasses: 4,
     },
     {
       id: '4',
@@ -42,7 +43,7 @@ export const useStudentStore = defineStore('students', () => {
       email: 'jan.rosa@gmail.com',
       room: 'Slab 3',
       seat: 'Seat 15',
-      upcomingClasses: 1
+      upcomingClasses: 1,
     },
     {
       id: '5',
@@ -51,8 +52,8 @@ export const useStudentStore = defineStore('students', () => {
       email: 'ryan.maguinda@gmail.com',
       room: 'Linux',
       seat: 'Seat 10',
-      upcomingClasses: 3
-    }
+      upcomingClasses: 3,
+    },
   ])
 
   // METHODS
@@ -70,9 +71,9 @@ export const useStudentStore = defineStore('students', () => {
   const addStudent = (student: Omit<Student, 'id'>) => {
     const newStudent: Student = {
       ...student,
-      id: Date.now().toString()
+      id: Date.now().toString(),
     }
-    students.value.push(newStudent)
+    students.value.unshift(newStudent)
   }
 
   // UPDATE STUDENT DATA
@@ -105,28 +106,38 @@ export const useStudentStore = defineStore('students', () => {
     return students.value.filter(student => student.room === room)
   }
 
-  // SEARCH STUDENTS BY NAME, EMAIL, OR STUDENT ID
-  const searchStudents = (query: string) => {
-    const searchTerm = query.toLowerCase()
-    return students.value.filter(student =>
-      student.name.toLowerCase().includes(searchTerm) ||
-      student.email.toLowerCase().includes(searchTerm) ||
-      student.studentId.toLowerCase().includes(searchTerm)
-    )
-  }
-
   // COMPUTED PROPERTIES
   // TOTAL COUNT OF ALL STUDENTS
   const totalStudents = computed(() => students.value.length)
-  
+
   // COUNT STUDENTS GROUPED BY ROOM
   const studentsPerRoom = computed(() => {
     const roomCounts: Record<string, number> = {}
-    students.value.forEach(student => {
+    students.value.forEach((student) => {
       roomCounts[student.room] = (roomCounts[student.room] || 0) + 1
     })
     return roomCounts
   })
+  // SEARCH STUDENTS BY NAME, EMAIL, OR STUDENT ID
+  const searchStudents = (query: string) => {
+    const searchTerm = query.toLowerCase()
+    return students.value.filter(student =>
+      student.name.toLowerCase().includes(searchTerm)
+      || student.email.toLowerCase().includes(searchTerm)
+      || student.studentId.toLowerCase().includes(searchTerm),
+    )
+  }
+
+  // FETCH STUDENTS FROM API
+  const fetchStudents = async () => {
+    try {
+      const res = await api.get('/students')
+      students.value = res.data
+    }
+    catch (error) {
+      console.error('Error fetching students:', error)
+    }
+  }
 
   return {
     students,
@@ -139,6 +150,7 @@ export const useStudentStore = defineStore('students', () => {
     removeStudent,
     assignStudentToSeat,
     getStudentsByRoom,
-    searchStudents
+    searchStudents,
+    fetchStudents,
   }
 })
