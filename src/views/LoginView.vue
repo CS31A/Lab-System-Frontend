@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import type { AxiosError } from 'axios'
+import { isAxiosError } from 'axios'
 import { computed, defineAsyncComponent, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useToast } from 'vue-toastification'
-import api, { setAuthToken } from '@/boot/axios'
+import api from '@/boot/axios'
+import Toast from '@/components/global/Toast.vue'
 
 const router = useRouter()
-const toast = useToast()
+const toastRef = ref<InstanceType<typeof Toast> | null>(null)
 
 const Header = defineAsyncComponent(() => import('@/components/global/Header.vue'))
 const Footer = defineAsyncComponent(() => import('@/components/global/Footer.vue'))
@@ -14,7 +14,7 @@ const Footer = defineAsyncComponent(() => import('@/components/global/Footer.vue
 const username = ref('')
 const password = ref('')
 const rememberMe = ref(false)
-const showPassword = ref(false) // 👁️ Toggle state
+const showPassword = ref(false) // Toggle state
 const hasTriedSubmit = ref(false)
 
 const formattedUsername = computed({
@@ -82,50 +82,39 @@ const passwordInputClasses = computed<string>(() => {
 // Add API call here in real implementation
 async function handleLogin() {
   hasTriedSubmit.value = true
-  if (!isFormValid.value) {
-    if (import.meta.env.MODE === 'development') {
-      console.warn('Form validation failed', {
-        usernameError: usernameErrorMessage.value,
-        passwordError: passwordErrorMessage.value,
-      })
-    }
+  if (!isFormValid.value)
     return
-  }
-  if (import.meta.env.MODE === 'development') {
-    console.warn('Login clicked:', {
-      username: username.value,
-      password: password.value,
-      rememberMe: rememberMe.value,
-    })
-  }
+
   try {
-    const response = await api.post('/auth/login', {
-      username: username.value,
-      password: password.value,
-    })
-
-    const token = response.data.token
-
-    setAuthToken(token)
-
-    if (rememberMe.value) {
-      localStorage.setItem('authToken', token)
-    }
-
-    if (import.meta.env.MODE === 'development') {
-      console.warn('Login successful!', {
+    const response = await api.post(
+      '/auth/login',
+      {
         username: username.value,
+        password: password.value,
         rememberMe: rememberMe.value,
-      })
+      },
+      {
+        withCredentials: true,
+      },
+    )
+    if (import.meta.env.MODE === 'development') {
+      console.warn('Login successful!', response.data)
     }
-
-    toast.success('Login successful!')
     router.push('/dashboard')
   }
   catch (err) {
-    const error = err as AxiosError<{ message?: string }>
-    const msg = error.response?.data?.message ?? 'Login failed. Please try again.'
-    toast.error(msg)
+    if (isAxiosError(err)) {
+      if (!err.response) {
+        toastRef.value?.triggerToast('Network error. Please check your connection.', 'error')
+      }
+      else {
+        const msg = err.response?.data?.message ?? 'Login failed. Please try again.'
+        toastRef.value?.triggerToast(msg, 'error')
+      }
+    }
+    else {
+      toastRef.value?.triggerToast('An unexpected error occurred.', 'error')
+    }
   }
 }
 </script>
@@ -216,5 +205,9 @@ async function handleLogin() {
 
     <!-- Footer -->
     <Footer />
+    <div>
+      <!-- Toast -->
+      <Toast ref="toastRef" />
+    </div>
   </div>
 </template>
