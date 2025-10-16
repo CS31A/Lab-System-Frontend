@@ -1,12 +1,10 @@
 <script setup lang="ts">
 import { computed, defineAsyncComponent, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useToast } from 'vue-toastification'
 
 const Header = defineAsyncComponent(() => import('@/components/global/Header.vue'))
 const Footer = defineAsyncComponent(() => import('@/components/global/Footer.vue'))
 
-const toast = useToast()
 const router = useRouter()
 
 // Form state
@@ -51,12 +49,10 @@ function inputClass(hasError: boolean) {
 function handleChangePassword() {
   hasTriedSubmit.value = true
   if (passwordErrorMessage.value || confirmPasswordErrorMessage.value) {
-    toast.error('Please fix the errors in the form.')
-    return
+    return // just show validation errors
   }
 
-  // Mock success
-  toast.success('Password successfully changed! (Demo only)')
+  // Mock success → directly redirect
   router.push('/login')
 }
 </script>
