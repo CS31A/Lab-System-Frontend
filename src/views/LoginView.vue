@@ -100,6 +100,7 @@ async function handleLogin() {
     if (import.meta.env.MODE === 'development') {
       console.warn('Login successful!', response.data)
     }
+    sessionStorage.setItem('showLoginSuccessToast', 'true')
     router.push('/dashboard')
   }
   catch (err) {
