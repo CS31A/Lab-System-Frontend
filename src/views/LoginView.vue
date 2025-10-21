@@ -91,7 +91,7 @@ async function handleLogin() {
       {
         username: username.value,
         password: password.value,
-        rememberMe: rememberMe.value,
+        // rememberMe: rememberMe.value,
       },
       {
         withCredentials: true,
