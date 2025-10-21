@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import { computed, defineAsyncComponent, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useToast } from 'vue-toastification'
 
-const toast = useToast()
 const router = useRouter()
 
 const Header = defineAsyncComponent(() => import('@/components/global/Header.vue'))
@@ -36,12 +34,11 @@ async function handleForgotPassword() {
   hasTriedSubmit.value = true
 
   if (emailErrorMessage.value) {
-    toast.error('Please fix the errors in the form.')
     return
   }
 
   // Since API is not yet ready, just show a message
-  toast.info('Forgot password feature is under development.')
+
   // Optionally, navigate back to login
   router.push('/login')
 }
