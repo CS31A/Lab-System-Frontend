@@ -32,7 +32,9 @@ function updateCurrentDate() {
 
 async function fetchLabData() {
   try {
-    const response = await apiService.get<ApiResponse>('/laboratories')
+    const response = await apiService.get<ApiResponse>('/laboratories', {
+    withCredentials: true
+   })
     LabData.value = response.data.map((lab: ApiLab) => {
       let status: string
       let teacher: string
