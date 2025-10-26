@@ -160,7 +160,7 @@ function addSchedule() {
                 {{ teacher.email }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {{ teacher.assignedRooms.join(', ') }}
+                {{ teacher.assignedRooms }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {{ teacher.upcomingSchedules }} Schedules today
