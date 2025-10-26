@@ -9,51 +9,51 @@ export const useStudentStore = defineStore('students', () => {
   // REFS & REACTIVE STATE
   // LIST OF ALL STUDENTS
   const students = ref<Student[]>([
-    {
-      id: '1',
-      studentId: 'S23-MAN121-78432',
-      name: 'Neil Vallecer',
-      email: 'neil.vallecer@gmail.com',
-      room: 'Slab 1',
-      seat: 'Seat 12',
-      upcomingClasses: 3,
-    },
-    {
-      id: '2',
-      studentId: 'S23-MAN121-56789',
-      name: 'Chitoge Kirisaki',
-      email: 'chitoge.kirisaki@gmail.com',
-      room: 'Slab 2',
-      seat: 'Seat 5',
-      upcomingClasses: 2,
-    },
-    {
-      id: '3',
-      studentId: 'S23-MAN121-91234',
-      name: 'Taro Sakamoto',
-      email: 'taro.sakamoto@gmail.com',
-      room: 'SCLAB',
-      seat: 'Seat 8',
-      upcomingClasses: 4,
-    },
-    {
-      id: '4',
-      studentId: 'S23-MAN121-45678',
-      name: 'Jan Rosa',
-      email: 'jan.rosa@gmail.com',
-      room: 'Slab 3',
-      seat: 'Seat 15',
-      upcomingClasses: 1,
-    },
-    {
-      id: '5',
-      studentId: 'S23-MAN121-23456',
-      name: 'Ryan Maguinda',
-      email: 'ryan.maguinda@gmail.com',
-      room: 'Linux',
-      seat: 'Seat 10',
-      upcomingClasses: 3,
-    },
+    // {
+    //   id: '1',
+    //   studentId: 'S23-MAN121-78432',
+    //   name: 'Neil Vallecer',
+    //   email: 'neil.vallecer@gmail.com',
+    //   room: 'Slab 1',
+    //   seat: 'Seat 12',
+    //   upcomingClasses: 3,
+    // },
+    // {
+    //   id: '2',
+    //   studentId: 'S23-MAN121-56789',
+    //   name: 'Chitoge Kirisaki',
+    //   email: 'chitoge.kirisaki@gmail.com',
+    //   room: 'Slab 2',
+    //   seat: 'Seat 5',
+    //   upcomingClasses: 2,
+    // },
+    // {
+    //   id: '3',
+    //   studentId: 'S23-MAN121-91234',
+    //   name: 'Taro Sakamoto',
+    //   email: 'taro.sakamoto@gmail.com',
+    //   room: 'SCLAB',
+    //   seat: 'Seat 8',
+    //   upcomingClasses: 4,
+    // },
+    // {
+    //   id: '4',
+    //   studentId: 'S23-MAN121-45678',
+    //   name: 'Jan Rosa',
+    //   email: 'jan.rosa@gmail.com',
+    //   room: 'Slab 3',
+    //   seat: 'Seat 15',
+    //   upcomingClasses: 1,
+    // },
+    // {
+    //   id: '5',
+    //   studentId: 'S23-MAN121-23456',
+    //   name: 'Ryan Maguinda',
+    //   email: 'ryan.maguinda@gmail.com',
+    //   room: 'Linux',
+    //   seat: 'Seat 10',
+    //   upcomingClasses: 3,
+    // },
   ])
 
   // METHODS
@@ -131,8 +131,21 @@ export const useStudentStore = defineStore('students', () => {
   // FETCH STUDENTS FROM API
   const fetchStudents = async () => {
     try {
-      const res = await api.get('/students')
-      students.value = res.data
+      const studentRes = await api.get('/students')
+      const studentList: any[] = studentRes.data?.data || []
+
+      students.value = studentList.map((s): Student => ({
+        id: s.id,
+        studentId: s.student_id ?? 'No ID',
+        name: `${s.firstname ?? ''} ${s.lastname ?? ''}`.trim() || 'No name',
+        email: s.email ?? 'No email',
+        section: s.section ?? 'No section',
+        seat: s.seat ?? 'No seat',
+        upcomingClasses: s.upcomingClasses ?? 0,
+        avatar: s.avatar || undefined,
+        firstname: s.firstname ?? '',
+        lastname: s.lastname ?? '',
+      }))
     }
     catch (error) {
       console.error('Error fetching students:', error)
