@@ -39,12 +39,21 @@ export interface SimpleStudent {
 // TEACHER INTERFACES
 export interface Teacher {
   id: string
+  user_id: string
+  firstname: string | null
+  lastname: string | null
+  attendance: string
+  created_at: string
+  updated_at: string
+}
+
+// LABORATORY INTERFACE
+export interface Laboratory {
+  id: string
   name: string
-  email: string
-  subject: string
-  assignedRooms: string[]
-  upcomingSchedules: number
-  avatar?: string
+  status: boolean
+  created_at: string
+  updated_at: string
 }
 
 // CLASSROOM INTERFACES
