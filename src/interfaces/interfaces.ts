@@ -20,11 +20,13 @@ export interface User {
 
 // STUDENT INTERFACES
 export interface Student {
+  firstname: string
+  lastname: string
   id: string
   studentId: string
   name: string
   email: string
-  room: string
+  section: string
   seat: string
   upcomingClasses: number
   avatar?: string
@@ -42,7 +44,7 @@ export interface Teacher {
   name: string
   email: string
   subject: string
-  assignedRooms: string[]
+  assignedRooms: number
   upcomingSchedules: number
   avatar?: string
 }
