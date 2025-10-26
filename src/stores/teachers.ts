@@ -9,46 +9,7 @@ export const useTeacherStore = defineStore('teachers', () => {
   // REFS & REACTIVE STATE
   // LIST OF ALL TEACHERS
   const teachers = ref<Teacher[]>([
-    {
-      id: '1',
-      name: 'Donald Francisco',
-      email: 'donald.francisco@gmail.com',
-      subject: 'Automata',
-      assignedRooms: ['Slab 1', 'Slab 2'],
-      upcomingSchedules: 3,
-    },
-    {
-      id: '2',
-      name: 'Gojo Satoru',
-      email: 'gojo.satoru@gmail.com',
-      subject: 'Information Assurance',
-      assignedRooms: ['SCLAB'],
-      upcomingSchedules: 2,
-    },
-    {
-      id: '3',
-      name: 'Noel Lehitimas',
-      email: 'noel.lehitimas@gmail.com',
-      subject: 'Pagsasalin',
-      assignedRooms: ['Slab 3', 'Slab 4'],
-      upcomingSchedules: 1,
-    },
-    {
-      id: '4',
-      name: 'Winslie Dada',
-      email: 'winslie.dada@gmail.com',
-      subject: 'Computer Fundamentals',
-      assignedRooms: ['Linux'],
-      upcomingSchedules: 2,
-    },
-    {
-      id: '5',
-      name: 'Alice Mao',
-      email: 'alice.mao@gmail.com',
-      subject: 'Data Structure',
-      assignedRooms: ['Slab 5', 'SCLAB'],
-      upcomingSchedules: 4,
-    },
+
   ])
 
   // METHODS
@@ -124,8 +85,23 @@ export const useTeacherStore = defineStore('teachers', () => {
   // FETCH TEACHERS FROM API
   const fetchTeachers = async () => {
     try {
-      const res = await api.get('/teachers')
-      teachers.value = res.data
+      const teacherRes = await api.get('/teachers')
+      const userRes = await api.get('/users')
+
+      const teacherList: any[] = teacherRes.data?.data || []
+      const userList: any[] = userRes.data?.data || []
+
+      const userMap = new Map(userList.map(u => [u.id, u.email?.trim() ?? 'No email']))
+
+      teachers.value = teacherList.map(t => ({
+        id: t.id,
+        name: `${t.firstname ?? ''} ${t.lastname ?? ''}`.trim() || 'No name',
+        email: userMap.get(t.user_id) ?? 'No email',
+        subject: t.subject ?? 'No subject',
+        assignedRooms: t.assignedRooms ?? 'No rooms assigned',
+        upcomingSchedules: t.upcomingSchedules ?? 0,
+        avatar: t.avatar || undefined,
+      }))
     }
     catch (error) {
       console.error('Error fetching teachers:', error)
