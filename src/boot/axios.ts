@@ -19,8 +19,6 @@ export const api: AxiosInstance = axios.create({
   },
   withCredentials: true, // This is required for cookies to be sent and received
   timeout: 10000, // 10 second timeout,
-  xsrfCookieName: 'XSRF-TOKEN', // The name of the cookie with the XSRF token
-  xsrfHeaderName: 'X-XSRF-TOKEN', // The name of the http header that carries the XSRF token
 })
 
 // Request interceptor for auth token
