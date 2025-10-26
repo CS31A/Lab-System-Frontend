@@ -20,11 +20,13 @@ export interface User {
 
 // STUDENT INTERFACES
 export interface Student {
+  firstname: string
+  lastname: string
   id: string
   studentId: string
   name: string
   email: string
-  room: string
+  section: string
   seat: string
   upcomingClasses: number
   avatar?: string
@@ -54,6 +56,11 @@ export interface Laboratory {
   status: boolean
   created_at: string
   updated_at: string
+  email: string
+  subject: string
+  assignedRooms: number
+  upcomingSchedules: number
+  avatar?: string
 }
 
 // CLASSROOM INTERFACES

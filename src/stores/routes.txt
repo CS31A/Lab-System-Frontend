@@ -1,0 +1,67 @@
+GET /labratories/all
+Response:
+{
+  "message": "All laboratories retrieved successfully",
+  "data": [
+    {
+      "id": "2xMvjYmVvUEk",
+      "name": "Software Laboratory 4",
+      "status": true,
+      "created_at": "2025-09-08T10:45:27.104Z",
+      "updated_at": "2025-09-08T10:45:27.104Z"
+    },
+    {
+      "id": "TtYspD_uPw43",
+      "name": "Software Laboratory 2",
+      "status": true,
+      "created_at": "2025-09-08T10:45:30.472Z",
+      "updated_at": "2025-09-09T03:59:58.969Z"
+    },
+    {
+      "id": "ipltKA0kJf3f",
+      "name": "Software Laboratory 1",
+      "status": true,
+      "created_at": "2025-09-09T03:59:27.398Z",
+      "updated_at": "2025-09-09T03:59:27.398Z"
+    },
+    {
+      "id": "i5zbL5w5S3ko",
+      "name": "Linux Laboratory",
+      "status": true,
+      "created_at": "2025-10-06T00:47:39.552Z",
+      "updated_at": "2025-10-06T00:47:39.552Z"
+    },
+    {
+      "id": "xC3peG1EgnSJ",
+      "name": "Short Course Laboratory",
+      "status": true,
+      "created_at": "2025-10-06T00:47:55.799Z",
+      "updated_at": "2025-10-06T00:47:55.799Z"
+    }
+  ]
+}
+
+GET /teachers 
+Response if 200(success)
+{
+  "message": "string",
+  "data": [
+    {
+      "id": "string",
+      "user_id": "string",
+      "firstname": null,
+      "lastname": null,
+      "attendance": "string",
+      "created_at": "2025-10-25",
+      "updated_at": "2025-10-25"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 1,
+    "total": 1,
+    "totalPages": 1,
+    "hasNext": true,
+    "hasPrev": true
+  }
+}
