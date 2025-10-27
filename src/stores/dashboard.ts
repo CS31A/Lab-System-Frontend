@@ -1,75 +1,90 @@
+import type { Laboratory, Schedule, Teacher } from '@/interfaces/interfaces'
 // IMPORTS
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { Schedule } from '@/interfaces/interfaces'
+import { api } from '@/boot/axios'
 
 // DASHBOARD STORE DEFINITION
 export const useDashboardStore = defineStore('dashboard', () => {
   // REFS & REACTIVE STATE
   // UPCOMING SCHEDULES LIST
-  const upcomingSchedules = ref<Schedule[]>([
-    {
-      id: '1',
-      subject: 'Automata',
-      room: 'Slab 1',
-      time: '9:00 AM - 10:30 AM',
-      teacher: 'Donald Francisco',
-      color: 'primary'
-    },
-    {
-      id: '2',
-      subject: 'Information Assurance',
-      room: 'SCLAB',
-      time: '11:00 AM - 12:30 PM',
-      teacher: 'Gojo Satoru',
-      color: 'green'
-    },
-    {
-      id: '3',
-      subject: 'Pagsasalin',
-      room: 'Slab 3',
-      time: '2:00 PM - 3:30 PM',
-      teacher: 'Noel Lehitimas',
-      color: 'yellow'
-    }
-  ])
+  const upcomingSchedules = ref<Schedule[]>([])
+  const laboratories = ref<Laboratory[]>([])
+  const teachers = ref<Teacher[]>([])
 
   // DASHBOARD STATISTICS
   const stats = ref({
-    totalRooms: 7,
-    totalStudents: 5,
-    totalTeachers: 5,
-    activeSchedules: 7
+    totalRooms: 0,
+    totalStudents: 0,
+    totalTeachers: 0,
+    activeSchedules: 0,
   })
 
   // METHODS
-  // ADD NEW SCHEDULE
-  const addSchedule = (Schedule: Omit<Schedule, 'id'>) => {
-    const newSchedule: Schedule = {
-      ...Schedule,
-      id: Date.now().toString()
+  // FETCH DASHBOARD DATA
+  // const fetchDashboardData = async () => {
+  //   try {
+  //     const response = await api.get('/teachers/dashboard')
+  //     if (response.status === 200) {
+  //       const { data } = response.data
+  //       // upcomingSchedules.value = data.schedules.map((schedule: any) => ({
+  //       //   id: schedule.scheduleId,
+  //       //   subject: schedule.subjectName,
+  //       //   room: schedule.labName,
+  //       //   time: `${new Date(schedule.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${new Date(schedule.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+  //       //   teacher: '', // Teacher info not available in the response
+  //       //   color: 'primary'
+  //       // }))
+  //       stats.value = {
+  //         totalRooms: data.totalRooms,
+  //         totalStudents: data.totalStudents,
+  //         totalTeachers: data.totalTeachers,
+  //         activeSchedules: data.activeSchedules,
+  //       }
+  //     }
+  //   }
+  //   catch (error) {
+  //     console.error('Failed to fetch dashboard data:', error)
+  //   }
+  // }
+
+  const fetchLaboratories = async () => {
+    try {
+      const response = await api.get('/laboratories/all', {
+        withCredentials: true,
+      })
+      if (response.status === 200) {
+        laboratories.value = response.data.data
+        stats.value.totalRooms = response.data.data.length
+      }
     }
-    upcomingSchedules.value.push(newSchedule)
+    catch (error) {
+      console.error('Failed to fetch laboratories:', error)
+    }
   }
 
-  // REMOVE SCHEDULE BY ID
-  const removeSchedule = (id: string) => {
-    const index = upcomingSchedules.value.findIndex(s => s.id === id)
-    if (index > -1) {
-      upcomingSchedules.value.splice(index, 1)
+  const fetchTeachers = async () => {
+    try {
+      const response = await api.get('/teachers', {
+        withCredentials: true,
+      })
+      if (response.status === 200) {
+        teachers.value = response.data.data
+        stats.value.totalTeachers = response.data.data.length
+      }
     }
-  }
-
-  // UPDATE DASHBOARD STATISTICS
-  const updateStats = (newStats: Partial<typeof stats.value>) => {
-    stats.value = { ...stats.value, ...newStats }
+    catch (error) {
+      console.error('Failed to fetch teachers:', error)
+    }
   }
 
   return {
     upcomingSchedules,
     stats,
-    addSchedule,
-    removeSchedule,
-    updateStats
+    // fetchDashboardData,
+    laboratories,
+    teachers,
+    fetchLaboratories,
+    fetchTeachers,
   }
 })

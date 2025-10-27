@@ -4,7 +4,9 @@ import { computed, defineAsyncComponent, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '@/boot/axios'
 import Toast from '@/components/global/Toast.vue'
+import { useAuthStore } from '@/stores/auth'
 
+const authStore = useAuthStore()
 const router = useRouter()
 const toastRef = ref<InstanceType<typeof Toast> | null>(null)
 
@@ -86,22 +88,20 @@ async function handleLogin() {
     return
 
   try {
-    const response = await api.post(
-      '/auth/login',
-      {
-        username: username.value,
-        password: password.value,
-        // rememberMe: rememberMe.value,
-      },
-      {
-        withCredentials: true,
-      },
-    )
-    if (import.meta.env.MODE === 'development') {
-      console.warn('Login successful!', response.data)
+    const response = await authStore.login(username.value, password.value)
+    if (response.success) {
+      if (response.role === 'admin') {
+        sessionStorage.setItem('showLoginSuccessToast', 'true')
+        router.push('/admin/dashboard')
+      }
+      else if (response.role === 'teacher') {
+        sessionStorage.setItem('showLoginSuccessToast', 'true')
+        router.push('/teacher/dashboard')
+      }
+      else {
+        router.push('/login')
+      }
     }
-    sessionStorage.setItem('showLoginSuccessToast', 'true')
-    router.push('/dashboard')
   }
   catch (err) {
     if (isAxiosError(err)) {
