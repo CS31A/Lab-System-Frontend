@@ -8,7 +8,7 @@ defineOptions({
 })
 
 // Column names for the lab management table
-const ColumnName = ref(['Laboratory Name', 'Status', 'Teacher', 'Schedule'])
+const ColumnName = ref(['Laboratory Name', 'Status'])
 const TIME_INTERVAL = 300000 // 5 minutes in milliseconds
 const MAX_RETRIES = 3
 
@@ -37,30 +37,16 @@ async function fetchLabData() {
    })
     LabData.value = response.data.map((lab: ApiLab) => {
       let status: string
-      let teacher: string
-      let schedule: string
 
-      if (lab.vacancy_status === 'available') {
+      if (lab.status) {
         status = 'Available'
-        teacher = 'N/A'
-        schedule = 'N/A'
-      } else if (lab.vacancy_status === 'occupied' && lab.current_schedule) {
-        status = 'In Use'
-        teacher = lab.current_schedule.teacher_name
-        const start = new Date(lab.current_schedule.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        const end = new Date(lab.current_schedule.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        schedule = `${start} - ${end}`
       } else {
-        status = 'Maintenance'
-        teacher = 'N/A'
-        schedule = 'N/A'
+        status = 'Occupied'
       }
 
       return {
         name: lab.name,
         status,
-        teacher,
-        schedule,
       }
     })
   }
@@ -141,15 +127,9 @@ onBeforeUnmount(() => {
                   {{ lab.status }}
                 </span>
               </td>
-              <td class="p-4 text-gray-900 dark:text-black">
-                {{ lab.teacher }}
-              </td>
-              <td class="p-4 text-gray-900 dark:text-black">
-                {{ lab.schedule }}
-              </td>
             </tr>
             <tr v-if="LabData.length === 0">
-              <td colspan="4" class="text-center p-4 text-gray-500">No laboratories found</td>
+              <td colspan="2" class="text-center p-4 text-gray-500">No laboratories found</td>
             </tr>
           </tbody>
         </table>

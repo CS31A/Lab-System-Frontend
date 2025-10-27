@@ -153,23 +153,12 @@ export interface FilterConfig {
 export interface Lab {
   name: string
   status: string
-  teacher: string
-  schedule: string
 }
 
 export interface ApiLab {
   id: string
   name: string
   status: boolean
-  vacancy_status: 'available' | 'occupied' | 'maintenance'
-  current_schedule: {
-    id: string
-    section: string
-    start_time: string
-    end_time: string
-    subject_name: string
-    teacher_name: string
-  } | null
   created_at: string
   updated_at: string
 }
@@ -177,4 +166,12 @@ export interface ApiLab {
 export interface ApiResponse {
   message: string
   data: ApiLab[]
+  pagination: {
+    page: number
+    limit: number
+    total: number
+    totalPages: number
+    hasNext: boolean
+    hasPrev: boolean
+  }
 }
