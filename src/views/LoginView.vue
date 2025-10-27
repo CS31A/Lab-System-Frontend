@@ -2,11 +2,12 @@
 import { isAxiosError } from 'axios'
 import { computed, defineAsyncComponent, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import api from '@/boot/axios'
 import Toast from '@/components/global/Toast.vue'
 import { useAuthStore } from '@/stores/auth'
 
-const router = useRouter()
 const authStore = useAuthStore()
+const router = useRouter()
 const toastRef = ref<InstanceType<typeof Toast> | null>(null)
 
 const Header = defineAsyncComponent(() => import('@/components/global/Header.vue'))
@@ -87,20 +88,20 @@ async function handleLogin() {
     return
 
   try {
-    const { success, error } = await authStore.login(username.value, password.value)
-
-    if (!success) {
-      throw new Error(error || 'Login failed')
+    const response = await authStore.login(username.value, password.value)
+    if (response.success) {
+      if (response.role === 'admin') {
+        sessionStorage.setItem('showLoginSuccessToast', 'true')
+        router.push('/admin/dashboard')
+      }
+      else if (response.role === 'teacher') {
+        sessionStorage.setItem('showLoginSuccessToast', 'true')
+        router.push('/teacher/dashboard')
+      }
+      else {
+        router.push('/login')
+      }
     }
-
-    // Check if login was successful
-    if (!authStore.isAuthenticated) {
-      throw new Error('Login failed: Not authenticated')
-    }
-
-    console.warn('Login successful!')
-    sessionStorage.setItem('showLoginSuccessToast', 'true')
-    router.push('/admin/dashboard')
   }
   catch (err) {
     if (isAxiosError(err)) {

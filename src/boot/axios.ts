@@ -13,11 +13,11 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000
 // Create axios instance
 export const api: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
+  withCredentials: true, // This is required for cookies to be sent and received
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
-  withCredentials: true, // This is required for cookies to be sent and received
   timeout: 10000, // 10 second timeout,
   xsrfCookieName: 'XSRF-TOKEN', // The name of the cookie with the XSRF token
   xsrfHeaderName: 'X-XSRF-TOKEN', // The name of the http header that carries the XSRF token

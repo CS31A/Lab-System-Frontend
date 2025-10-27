@@ -18,30 +18,7 @@ export const useAuthStore = defineStore('auth', () => {
   // LOGIN USER
   const login = async (username: string, password: string) => {
     try {
-      console.warn('Pre-login cookies:', document.cookie)
-
       const response = await api.post('/auth/login', { username, password }, {
-        withCredentials: true,
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Credentials': 'true',
-        },
-      })
-
-      // Check if we got a success response
-      if (response.status !== 200) {
-        throw new Error('Login failed: Invalid response status')
-      }
-
-      // Log the login response details
-      const setCookieHeader = response.headers['set-cookie'] || []
-      console.warn('Login Response:', {
-        status: response.status,
-        headers: response.headers,
-        setCookie: setCookieHeader,
-        cookies: document.cookie,
-        data: response.data,
       })
 
       // If we got a successful response, set authenticated state
@@ -51,15 +28,16 @@ export const useAuthStore = defineStore('auth', () => {
         if (response.data.data?.user) {
           user.value = response.data.data.user
         }
+        user.value = response.data.data
       }
       else {
         throw new Error('Login response missing success message')
       }
-
-      // Check cookies after login
-      console.warn('Post-login cookies:', document.cookie, 'All cookies:', document.cookie.split(';'))
-
-      return { success: true }
+      return {
+        success: true,
+        data: response.data.data,
+        role: response.data.data?.role ?? null,
+      }
     }
     catch (error) {
       // Type assertion for axios error
@@ -78,7 +56,11 @@ export const useAuthStore = defineStore('auth', () => {
 
       user.value = null
       isAuthenticated.value = false
-      return { success: false, error: error instanceof Error ? error.message : 'Login failed' }
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Login failed',
+        data: null,
+      }
     }
   }
 

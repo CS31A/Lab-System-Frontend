@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Calendar, FilePlus, Home, Plus, Upload, User, UserPlus, Users } from 'lucide-vue-next'
+import { storeToRefs } from 'pinia'
 // IMPORTS
 import { computed, defineAsyncComponent, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
@@ -17,6 +18,10 @@ const router = useRouter()
 const authStore = useAuthStore()
 const dashboardStore = useDashboardStore()
 
+// Use storeToRefs for reactive store properties
+// const { isAuthenticated } = storeToRefs(authStore)
+const { upcomingSchedules } = storeToRefs(dashboardStore)
+
 // FETCH DATA ON MOUNT
 onMounted(async () => {
   try {
@@ -28,7 +33,7 @@ onMounted(async () => {
     }
 
     // Fetch dashboard data if authenticated
-    await Promise.all([
+    await Promise.allSettled([
       dashboardStore.fetchLaboratories(),
       dashboardStore.fetchTeachers(),
       // dashboardStore.fetchDashboardData()
@@ -41,7 +46,6 @@ onMounted(async () => {
 })
 
 // COMPUTED PROPERTIES
-const upcomingSchedules = computed(() => dashboardStore.upcomingSchedules)
 const stats = computed(() => [
   {
     title: 'Total Rooms',
