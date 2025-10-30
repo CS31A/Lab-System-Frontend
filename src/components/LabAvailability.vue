@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref, provide } from 'vue'
 import { apiService } from '@/services/api'
 import type { Lab, ApiLab, ApiResponse } from '@/interfaces/interfaces'
+import LabOccupancyModal from '@/components/modals/LabOccupancyModal.vue'
 import Header from '@/components/layout/Header.vue'
 import Sidebar from '@/components/layout/Sidebar.vue'
 import Footer from '@/components/global/Footer.vue'
@@ -19,10 +20,22 @@ let timeoutId: number | null = null
 let isScheduled = false
 let retryCount = 0
 
-
-
+const showModal = ref(false)
+const selectedLab = ref<Lab | null>(null)
+const activeModal = ref<string | null>(null)
 
 const LabData = ref<Lab[]>([])
+
+// PROVIDE MODAL METHODS
+const showModalMethod = (modalName: string) => {
+  activeModal.value = modalName
+}
+
+const hideModal = () => {
+  activeModal.value = null
+}
+
+provide('showModal', showModalMethod)
 
 // Current date display
 const currentDate = ref('')
@@ -91,6 +104,18 @@ onBeforeUnmount(() => {
   if (timeoutId !== null)
     clearTimeout(timeoutId)
 })
+
+const handleLabClick = (lab: Lab) => {
+  if (lab.status === 'Occupied') {
+    selectedLab.value = lab
+    showModal.value = true
+  }
+}
+
+const closeModal = () => {
+  showModal.value = false
+  selectedLab.value = null
+}
 </script>
 
 
@@ -120,7 +145,7 @@ onBeforeUnmount(() => {
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(lab, index) in LabData" :key="index" class="border-b border-gray-200 dark:border-gray-700">
+            <tr v-for="(lab, index) in LabData" :key="index" class="border-b border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50" @click="handleLabClick(lab)">
               <td class="p-4 text-gray-900 dark:text-black font-semibold text-base text-center">
                 {{ lab.name }}
               </td>
@@ -157,6 +182,9 @@ onBeforeUnmount(() => {
       </main>
       <Footer />
     </div>
+
+    <!-- MODAL -->
+    <LabOccupancyModal v-if="showModal" :lab="selectedLab" @close="closeModal" />
   </div>
 </template>
 
