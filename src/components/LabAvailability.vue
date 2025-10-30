@@ -2,6 +2,9 @@
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { apiService } from '@/services/api'
 import type { Lab, ApiLab, ApiResponse } from '@/interfaces/interfaces'
+import Header from '@/components/layout/Header.vue'
+import Sidebar from '@/components/layout/Sidebar.vue'
+import Footer from '@/components/global/Footer.vue'
 
 defineOptions({
   name: 'LabAvailability',
@@ -92,8 +95,12 @@ onBeforeUnmount(() => {
 
 
 <template>
-  <div class="flex-1 p-6 bg-white min-h-screen flex flex-col items-center">
-    <div class="mb-6 flex flex-col items-center">
+  <div class="min-h-screen bg-gray-50 flex">
+    <Sidebar />
+    <div class="flex-1 flex flex-col">
+      <Header />
+      <main class="flex-1 p-6 bg-white flex flex-col items-center">
+        <div class="mb-6 flex flex-col items-center w-full">
 
       <h2 class="text-4xl font-bold text-[#013aae] mb-1 text-center" style="font-family: var(--konkhmer-font);">
         Lab Availability
@@ -114,10 +121,10 @@ onBeforeUnmount(() => {
           </thead>
           <tbody>
             <tr v-for="(lab, index) in LabData" :key="index" class="border-b border-gray-200 dark:border-gray-700">
-              <td class="p-4 text-gray-900 dark:text-black font-semibold text-base">
+              <td class="p-4 text-gray-900 dark:text-black font-semibold text-base text-center">
                 {{ lab.name }}
               </td>
-              <td class="p-4 text-gray-900 dark:text-black">
+              <td class="p-4 text-gray-900 dark:text-black text-center">
                 <span
                   class="px-4 py-1 rounded-full text-sm font-medium"
                   :class="lab.status === 'Available'
@@ -146,6 +153,9 @@ onBeforeUnmount(() => {
           <span class="text-gray-700">In Use</span>
         </div>
       </div>
+        </div>
+      </main>
+      <Footer />
     </div>
   </div>
 </template>
