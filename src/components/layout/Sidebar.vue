@@ -1,15 +1,27 @@
 <script setup lang="ts">
 // IMPORTS
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import api from '@/boot/axios'
 
 // ROUTER INITIALIZATION
 const router = useRouter()
 const route = useRoute()
 
+// LABORATORY INTERFACE
+interface Laboratory {
+  id: string
+  name: string
+  status: boolean
+  created_at: string
+  updated_at: string
+}
+
 // REFS & REACTIVE STATE
 const isLabsOpen = ref(false)
 const isSidebarOpen = ref(true)
+const laboratories = ref<Laboratory[]>([])
+const isLoading = ref(true)
 
 // COMPUTED
 // GET CURRENT SECTION FROM ROUTE
@@ -23,6 +35,23 @@ const currentSection = computed(() => {
     return `slab${labNum}`
   }
   return ''
+})
+
+// FETCH LABORATORIES
+const fetchLaboratories = async () => {
+  try {
+    const res = await api.get('/laboratories')
+    laboratories.value = res.data.data
+  } catch (err) {
+    console.error('Failed to fetch laboratories:', err)
+  } finally {
+    isLoading.value = false
+  }
+}
+
+// LIFECYCLE HOOKS
+onMounted(() => {
+  fetchLaboratories()
 })
 
 // METHODS
@@ -135,7 +164,7 @@ function handleLogout() {
 
           <transition name="fade">
             <div v-show="isSidebarOpen && isLabsOpen" class="mt-1 ml-3 border-l border-gray-200 pl-3 space-y-0.5">
-              <!-- LABORATORIES ENTRY -->
+              <!-- ALL LABS ENTRY -->
               <button
                 class="group w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors text-gray-700 hover:bg-blue-100 cursor-pointer"
                 :class="isActive('classrooms') ? 'bg-blue-50 text-blue-700 ring-1 ring-blue-200' : ''"
@@ -146,36 +175,30 @@ function handleLogout() {
                 </svg>
                 <span v-show="isSidebarOpen" class="transition-colors group-hover:text-blue-700">All Labs</span>
               </button>
+              
+              <!-- LOADING STATE -->
+              <div v-if="isLoading" class="flex justify-center py-2">
+                <div class="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-blue-500"></div>
+              </div>
+              
+              <!-- LABORATORY LIST -->
               <button
+                v-for="lab in laboratories"
+                :key="lab.id"
                 class="group w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors text-gray-700 hover:bg-blue-100 cursor-pointer"
-                :class="isActive('slab1') ? 'bg-blue-50 text-blue-700 ring-1 ring-blue-200' : ''"
-                @click="navigate('slab1')"
+                :class="isActive(`slab${lab.id}`) ? 'bg-blue-50 text-blue-700 ring-1 ring-blue-200' : ''"
+                @click="navigate(`slab${lab.id}`)"
               >
-                <svg class="w-5 h-5 transition-colors group-hover:text-blue-600" :class="iconColor('slab1')" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <svg class="w-5 h-5 transition-colors group-hover:text-blue-600" :class="iconColor(`slab${lab.id}`)" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                   <path d="M7 3a1 1 0 0 0-1 1v4H4a1 1 0 0 0-1 1v10h18V9a1 1 0 0 0-1-1h-2V4a1 1 0 0 0-1-1H7zm1 2h8v3H8V5zm-3 5h14v6H5v-6z" />
                 </svg>
-                <span v-show="isSidebarOpen" class="transition-colors group-hover:text-blue-700">Lab 1</span>
+                <span v-show="isSidebarOpen" class="transition-colors group-hover:text-blue-700">{{ lab.name }}</span>
               </button>
-              <button
-                class="group w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors text-gray-700 hover:bg-blue-100 cursor-pointer"
-                :class="isActive('slab2') ? 'bg-blue-50 text-blue-700 ring-1 ring-blue-200' : ''"
-                @click="navigate('slab2')"
-              >
-                <svg class="w-5 h-5 transition-colors group-hover:text-blue-600" :class="iconColor('slab2')" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path d="M7 3a1 1 0 0 0-1 1v4H4a1 1 0 0 0-1 1v10h18V9a1 1 0 0 0-1-1h-2V4a1 1 0 0 0-1-1H7zm1 2h8v3H8V5zm-3 5h14v6H5v-6z" />
-                </svg>
-                <span v-show="isSidebarOpen" class="transition-colors group-hover:text-blue-700">Lab 2</span>
-              </button>
-              <button
-                class="group w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors text-gray-700 hover:bg-blue-100 cursor-pointer"
-                :class="isActive('slab3') ? 'bg-blue-50 text-blue-700 ring-1 ring-blue-200' : ''"
-                @click="navigate('slab3')"
-              >
-                <svg class="w-5 h-5 transition-colors group-hover:text-blue-600" :class="iconColor('slab3')" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path d="M7 3a1 1 0 0 0-1 1v4H4a1 1 0 0 0-1 1v10h18V9a1 1 0 0 0-1-1h-2V4a1 1 0 0 0-1-1H7zm1 2h8v3H8V5zm-3 5h14v6H5v-6z" />
-                </svg>
-                <span v-show="isSidebarOpen" class="transition-colors group-hover:text-blue-700">Lab 3</span>
-              </button>
+              
+              <!-- NO LABS MESSAGE -->
+              <div v-if="!isLoading && laboratories.length === 0" class="px-3 py-2 text-sm text-gray-500">
+                No laboratories found
+              </div>
               <button
                 class="group w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors text-gray-700 hover:bg-blue-100 cursor-pointer"
                 :class="isActive('slab4') ? 'bg-blue-50 text-blue-700 ring-1 ring-blue-200' : ''"
