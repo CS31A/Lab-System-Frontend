@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref, nextTick, computed } from 'vue'
-import { Monitor, Calendar, Clock, User, Info, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-vue-next'
+import { ref, computed } from 'vue'
+import { Calendar, Clock, User, ChevronLeft, ChevronRight } from 'lucide-vue-next'
 
 // CALENDAR
-const isCalendarExpanded = ref(false)
+const isCalendarExpanded = ref(true)
 const today = new Date()
 const currentYear = today.getFullYear()
 const currentMonth = today.getMonth()
@@ -18,12 +18,7 @@ const monthYear = computed(() =>
 )
 
 const visibleDays = computed(() => {
-  if (isCalendarExpanded.value) {
-    return allDays.value
-  }
-  const todayIndex = allDays.value.findIndex(d => d.isToday)
-  const start = Math.floor(todayIndex / 7) * 7
-  return allDays.value.slice(start, start + 7)
+  return allDays.value
 })
 
 function generateMonthDays(year: number, month: number) {
@@ -88,19 +83,13 @@ function previousTimeSlot() {
 // INSTRUCTOR & PC INFO
 // const instructorName = ref('')
 // const subjectName = ref('')
-const studentName = ref('')
-const yearLevel = ref('')
 
 // const isEditingInstructor = ref(false)
-const isEditingPC = ref(false)
 
 // const instructorConfirmed = ref(false)
-const pcConfirmed = ref(false)
 
 // const instructorNameRef = ref<HTMLInputElement | null>(null)
 // const subjectNameRef = ref<HTMLInputElement | null>(null)
-const studentNameRef = ref<HTMLInputElement | null>(null)
-const yearLevelRef = ref<HTMLInputElement | null>(null)
 
 // function toggleEditInstructor() {
 //   isEditingInstructor.value = true
@@ -117,33 +106,13 @@ const yearLevelRef = ref<HTMLInputElement | null>(null)
 //   isEditingInstructor.value = false
 //   instructorConfirmed.value = true
 //   alert('instructor and subject confirmed!')
-
+//
 // }
-
-function toggleEditPC() {
-  isEditingPC.value = true
-  nextTick(() => {
-    if (!studentName.value) {
-      studentNameRef.value?.focus()
-    } else if (!yearLevel.value) {
-      yearLevelRef.value?.focus()
-    }
-  })
-}
-
-function confirmEditPC() {
-  isEditingPC.value = false
-  pcConfirmed.value = true
-  alert('pc infor confirmed!')
-}
 </script>
 
 <template>
   <div class="w-full lg:w-[400px] bg-white shadow-xl flex flex-col border-r border-[#aeb9d4] h-full">
-    <aside class="w-full h-full overflow-y-auto" :class="{
-      'overflow-y-auto': !isCalendarExpanded,
-      'overflow-y-hidden': isCalendarExpanded
-    }">
+    <aside class="w-full h-full">
       <!-- Calendar -->
       <div class="p-4 w-full border-b border-[#aeb9d4] p-4 pb-5">
         <div class="flex justify-between items-center mb-4">
@@ -153,11 +122,6 @@ function confirmEditPC() {
             </div>
             <h2 class="font-bold text-lg text-[#3C3939]">{{ monthYear }}</h2>
           </div>
-          <button @click="isCalendarExpanded = !isCalendarExpanded" class="flex items-center gap-1 px-3 py-1"
-            aria-label="Toggle calendar view">
-            <ChevronDown class="translate-y-[-3px] text-gray-400 hover:text-gray-600 cursor-pointer transition-transform duration-200"
-              :class="{ 'rotate-180': isCalendarExpanded }" />
-          </button>
         </div>
 
         <div class="grid grid-cols-7 place-items-center text-center font-semibold text-gray-600/80 mb-2 text-xs sm:text-sm">
@@ -219,47 +183,6 @@ function confirmEditPC() {
           <input class="font-semibold text-gray-600 w-full text-center p-2" value="Information Assurance"
             disabled />
         </div>
-      </div>
-
-      <!-- PC Info -->
-      <div class="flex justify-between items-center px-4 pt-4">
-        <div class="flex items-center gap-2.5">
-          <div class="flex items-center justify-center w-8 h-8">
-            <Info class="text-base text-[#5b8ae5]" />
-          </div>
-          <h2 class="font-bold text-lg text-[#3C3939]">PC Information</h2>
-        </div>
-        <button @click="isEditingPC ? confirmEditPC() : toggleEditPC()"
-          class="px-5 py-2 text-xs font-medium text-white bg-[linear-gradient(to_bottom,#5b8ae5,#013aae)] hover:border-[#2b6cb0] rounded-full transition-colors cursor-pointer shadow-md">{{
-            isEditingPC ? 'Confirm' : 'Edit' }}</button>
-      </div>
-      <div class="mt-auto pb-4 border-b border-[#aeb9d4] p-4 px-12 pb-5 pt-2">
-        <div class="text-center">
-          <div class="flex flex-col items-center pt-3.5 translate-y-[-10px] ">
-            <div class="bg-[#5b8ae5] text-white px-3 py-1 rounded-full absolute bottom-11 z-10">
-              <h3 class="text-xs font-bold">12</h3>
-            </div>
-            <Monitor class=" h-16 w-18 text-[#5b8ae5]" />
-          </div>
-          <div class="bg-gray-100 rounded-lg shadow-md px-4">
-            <input ref="studentNameRef" v-model="studentName" placeholder="Student Name" :readonly="!isEditingPC"
-              class="font-bold border-b border-[#9D9D9D] w-full mx-auto text-center text-[#013aae] placeholder-[#013aae] p-2 focus:outline-none" />
-            <input ref="yearLevelRef" v-model="yearLevel" placeholder="Year & Level" :readonly="!isEditingPC"
-              class="font-bold text-gray-600 placeholder-gray-600 w-full text-center p-2 focus:outline-none"  />
-          </div>
-        </div>
-
-
-        <!-- <div class="flex flex-col sm:flex-row justify-evenly mt-3 gap-3 sm:gap-0">
-          <button @click="toggleEditPC"
-            class="w-full sm:w-[30%] py-2 bg-gradient-to-r from-[#013aae] to-[#5b8ae5] text-white font-bold rounded-lg shadow-md hover:brightness-110 transition text-base sm:text-lg">
-            Edit
-          </button>
-          <button @click="confirmEditPC" :disabled="!studentName || !yearLevel"
-            class="w-full sm:w-[30%] py-2 bg-gradient-to-r from-[#013aae] to-[#5b8ae5] text-white font-bold rounded-lg shadow-md hover:brightness-110 transition disabled:opacity-50 disabled:cursor-not-allowed text-base sm:text-lg">
-            Confirm
-          </button>
-        </div> -->
       </div>
 
     </aside>
