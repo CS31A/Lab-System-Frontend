@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { defineEmits } from 'vue'
-import type { Lab } from '@/interfaces/interfaces'
+import { defineEmits, ref, watch, onMounted } from 'vue'
+import { apiService } from '@/services/api'
+import type { Lab, Schedule } from '@/interfaces/interfaces'
 
 interface Props {
   lab: Lab | null
@@ -16,8 +17,86 @@ const handleClose = () => {
   emit('close')
 }
 
-// Harcode sa
-const teacherName = 'Sir Noel'
+const teacherName = ref('Loading...')
+const schedule = ref<Schedule | null>(null)
+const loading = ref(false)
+const error = ref('')
+
+const fetchSchedule = async (labId: string) => {
+  loading.value = true
+  error.value = ''
+  try {
+    const response = await apiService.get<{
+      message: string,
+      data: Array<{
+        id: string
+        section: string
+        start_time: string
+        end_time: string
+        status: string | null
+        created_at: string
+        updated_at: string
+        subject: {
+          id: string
+          name: string
+          code: string
+        }
+        teacher: {
+          id: string
+          firstname: string | null
+          lastname: string | null
+        }
+        laboratory: {
+          id: string
+          name: string
+        }
+      }>
+    }>(`/teachers/laboratories/${labId}/schedule`)
+
+    if (response.data.length > 0) {
+      const currentSchedule = response.data[0] 
+      const teacher = currentSchedule.teacher
+      teacherName.value = `${teacher.firstname || ''} ${teacher.lastname || ''}`.trim() || 'Unknown'
+
+      // Format time from ISO strings to readable format
+      const startTime = new Date(currentSchedule.start_time).toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      })
+      const endTime = new Date(currentSchedule.end_time).toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      })
+
+      schedule.value = {
+        id: currentSchedule.id,
+        subject: currentSchedule.subject.name,
+        room: currentSchedule.laboratory.name,
+        time: `${startTime} - ${endTime}`,
+        teacher: teacherName.value,
+        color: 'primary' // Default color
+      }
+    } else {
+      teacherName.value = 'No schedule found'
+      schedule.value = null
+    }
+  } catch (err) {
+    console.error('Failed to fetch schedule:', err)
+    error.value = 'Failed to load schedule data.'
+    teacherName.value = 'Unknown'
+    schedule.value = null
+  } finally {
+    loading.value = false
+  }
+}
+
+watch(() => props.lab, (newLab) => {
+  if (newLab && newLab.id) {
+    fetchSchedule(newLab.id)
+  }
+}, { immediate: true })
 </script>
 
 <template>
@@ -44,6 +123,15 @@ const teacherName = 'Sir Noel'
         <div class="mb-4">
           <p class="text-xs text-gray-500 uppercase tracking-wide">Teacher</p>
           <p class="text-sm font-medium text-gray-800">{{ teacherName }}</p>
+        </div>
+
+        <div v-if="schedule" class="mb-4">
+          <p class="text-xs text-gray-500 uppercase tracking-wide">Schedule</p>
+          <p class="text-sm font-medium text-gray-800">{{ schedule.subject }} - {{ schedule.time }}</p>
+        </div>
+
+        <div v-if="error" class="mb-4">
+          <p class="text-sm text-red-600">{{ error }}</p>
         </div>
 
         <div class="flex justify-end">
