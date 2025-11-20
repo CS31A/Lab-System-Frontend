@@ -199,3 +199,29 @@ export interface ApiSchedule {
   created_at: string
   updated_at: string
 }
+
+export interface ApiSubject {
+  id: string
+  subject_name: string
+  subject_code: string
+  created_at: string
+  updated_at: string
+}
+
+export interface ApiLaboratoryDetail {
+  id: string
+  name: string
+  status: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface ApiTeacher {
+  id: string
+  user_id: string
+  firstname: string | null
+  lastname: string | null
+  attendance: string
+  created_at: string
+  updated_at: string
+}
