@@ -177,3 +177,25 @@ export interface ApiResponse {
     hasPrev: boolean
   }
 }
+
+export interface ApiPagination {
+  page: number
+  limit: number
+  total: number
+  totalPages: number
+  hasNext: boolean
+  hasPrev: boolean
+}
+
+export interface ApiSchedule {
+  id: string
+  laboratory_id: string
+  teacher_id: string
+  subject_id: string
+  section: string
+  start_time: string
+  end_time: string
+  status: string | null
+  created_at: string
+  updated_at: string
+}
