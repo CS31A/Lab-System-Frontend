@@ -153,6 +153,7 @@ export interface FilterConfig {
 
 // LAB INTERFACES
 export interface Lab {
+  id: string
   name: string
   status: string
 }
