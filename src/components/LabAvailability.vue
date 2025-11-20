@@ -61,6 +61,7 @@ async function fetchLabData() {
       }
 
       return {
+        id: lab.id,
         name: lab.name,
         status,
       }
