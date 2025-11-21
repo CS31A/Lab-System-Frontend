@@ -26,6 +26,7 @@ const currentPage = ref(1)
 const showAddModal = ref(false)
 const showDeleteModal = ref(false)
 const studentToDelete = ref<Student | null>(null)
+const recentlyAddedId = ref<string | null>(null)
 
 function openDeleteModal(student: Student) {
   studentToDelete.value = student
@@ -106,7 +107,7 @@ async function saveStudent() {
     })
   }
   else {
-    await studentStore.addStudent({
+    const addedId = await studentStore.addStudent({
       firstname: newStudent.firstname,
       lastname: newStudent.lastname,
       student_id: newStudent.student_id,
@@ -114,6 +115,10 @@ async function saveStudent() {
       course: newStudent.course,
     })
 
+    // Set the recently added ID (persists until next student is added)
+    recentlyAddedId.value = addedId
+
+    // Reset to page 1 to show the newly added student
     currentPage.value = 1
   }
   closeAddModal()
@@ -164,8 +169,9 @@ async function confirmDeleteStudent() {
     return
   await studentStore.removeStudent(studentToDelete.value.id)
 
-  if (currentPage.value > totalPages.value) {
-    currentPage.value = totalPages.value || 1
+  // Fix pagination after deletion
+  if (filteredStudents.value.length === 0 && currentPage.value > 1) {
+    currentPage.value = Math.max(1, currentPage.value - 1)
   }
 
   closeDeleteModal()
@@ -182,6 +188,11 @@ const visiblePages = computed(() => {
   }
   return pages
 })
+
+// Check if a student is recently added
+function isRecentlyAdded(studentId: string) {
+  return recentlyAddedId.value === studentId
+}
 
 // METHODS
 
@@ -292,17 +303,25 @@ function goToPage(page: number) {
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
-            <tr v-for="student in filteredStudents" :key="student.id">
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+            <tr
+              v-for="student in filteredStudents"
+              :key="student.id"
+              :class="{ 'bg-green-50': isRecentlyAdded(student.id) }"
+              class="transition-colors duration-300"
+            >
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium uppercase" :class="isRecentlyAdded(student.id) ? 'text-green-700' : 'text-gray-900'">
                 {{ student.studentId }}
+                <span v-if="isRecentlyAdded(student.id)" class="ml-2 text-xs font-semibold text-green-600 bg-green-100 px-2 py-1 rounded">
+                  NEW
+                </span>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <td class="px-6 py-4 whitespace-nowrap text-sm capitalize" :class="isRecentlyAdded(student.id) ? 'text-green-700 font-semibold' : 'text-gray-500'">
                 {{ student.name }}
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <td class="px-6 py-4 whitespace-nowrap text-sm uppercase" :class="isRecentlyAdded(student.id) ? 'text-green-700' : 'text-gray-500'">
                 {{ student.section }}
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <td class="px-6 py-4 whitespace-nowrap text-sm capitalize" :class="isRecentlyAdded(student.id) ? 'text-green-700' : 'text-gray-500'">
                 {{ student.course }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -347,10 +366,18 @@ function goToPage(page: number) {
       <!-- PAGINATION -->
       <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
         <div class="flex-1 flex justify-between sm:hidden">
-          <button class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+          <button
+            class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            :disabled="currentPage === 1"
+            @click="previousPage"
+          >
             Previous
           </button>
-          <button class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+          <button
+            class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            :disabled="currentPage === totalPages"
+            @click="nextPage"
+          >
             Next
           </button>
         </div>
@@ -369,7 +396,7 @@ function goToPage(page: number) {
           <div>
             <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
               <button
-                class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 :disabled="currentPage === 1"
                 @click="previousPage"
               >
@@ -388,7 +415,7 @@ function goToPage(page: number) {
                 {{ page }}
               </button>
               <button
-                class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 :disabled="currentPage === totalPages"
                 @click="nextPage"
               >
