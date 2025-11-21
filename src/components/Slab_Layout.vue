@@ -2,6 +2,7 @@
 import { ref, computed, watchEffect } from 'vue'
 import { Monitor } from 'lucide-vue-next'
 import PcStatusModal from './modals/PcStatusModal.vue'
+import type { PcCondition, SeatStatus, SeatCell, LayoutConfig, SlabStudentInfo } from '@/interfaces/interfaces'
 
 defineOptions({
   name: 'SlabLayout',
@@ -21,18 +22,6 @@ const emit = defineEmits<{
 }>()
 
 const title = computed(() => props.title ?? 'SLAB LAYOUT')
-
-interface Seat {
-  id: number
-  row: number
-  col: number
-}
-
-type SeatCell = null | string
-
-interface LayoutConfig {
-  layout: SeatCell[][]
-}
 
 const layoutConfigs: Record<string, LayoutConfig> = {
   slab1: {
@@ -93,7 +82,7 @@ const layoutConfigs: Record<string, LayoutConfig> = {
   },
 }
 
-const initialStudents: Record<string, { pcLabel: string; studentName: string; studentYear: string; studentCourse: string }[]> = {
+const initialStudents: Record<string, SlabStudentInfo[]> = {
   slab1: [
     { pcLabel: 'PC1', studentName: 'Neil Vallecer', studentYear: '1st Year', studentCourse: 'BSIT' },
     { pcLabel: 'PC2', studentName: 'Chitoge Kirisaki', studentYear: '2nd Year', studentCourse: 'BSIT' },
@@ -114,17 +103,6 @@ const initialStudents: Record<string, { pcLabel: string; studentName: string; st
     { pcLabel: 'PC2', studentName: 'Angel Bogah', studentYear: '2nd Year', studentCourse: 'BSIT' },
     { pcLabel: 'PC3', studentName: 'Uzziah Lanz', studentYear: '3rd Year', studentCourse: 'BSCS' },
   ],
-}
-
-type PcCondition = 'complete' | 'missing' | 'broken'
-type SeatStatus = Seat & {
-  status: 'assigned' | 'selected' | 'unassigned'
-  pcStatus: PcCondition
-  missingOrbrokenDetails?: string
-  studentName?: string
-  studentYear?: string
-  studentCourse?: string
-  pcLabel?: string
 }
 
 const layoutKey = computed(() => props.layout ?? 'slab1')
