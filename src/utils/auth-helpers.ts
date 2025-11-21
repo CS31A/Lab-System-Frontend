@@ -1,6 +1,6 @@
 /**
  * Authentication Helper Utilities
- * 
+ *
  * Centralized auth utilities to avoid circular dependencies
  */
 
@@ -19,7 +19,7 @@ export function normalizeUserData(data: AuthLoginResponse['data'] | AuthMeRespon
       role: data.role,
     }
   }
-  
+
   // This is from /auth/login (has 'id' and 'username' fields)
   return {
     id: data.id,

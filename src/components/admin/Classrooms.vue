@@ -1,8 +1,9 @@
 <script setup lang="ts">
-// IMPORTS
-import { onMounted, defineAsyncComponent } from 'vue'
 import { Plus } from 'lucide-vue-next'
+// IMPORTS
+import { defineAsyncComponent, onMounted } from 'vue'
 import { useLaboratoryStore } from '@/stores/laboratory'
+
 const ClassroomCard = defineAsyncComponent(() => import('@/components/classrooms/ClassroomCard.vue'))
 const SeatMapView = defineAsyncComponent(() => import('@/components/classrooms/SeatMapView.vue'))
 const LaboratoryBuilder = defineAsyncComponent(() => import('@/components/admin/LaboratoryBuilder.vue'))
@@ -14,7 +15,7 @@ onMounted(async () => {
   await laboratoryStore.fetchLaboratories()
 })
 
-const handleDeleteClassroom = async () => {
+async function handleDeleteClassroom() {
   await laboratoryStore.fetchLaboratories()
 }
 </script>
@@ -22,9 +23,11 @@ const handleDeleteClassroom = async () => {
 <template>
   <div>
     <div class="flex justify-between items-center mb-6">
-      <h2 class="text-2xl font-bold text-gray-800">Laboratory Management</h2>
-      <div class="flex space-x-2" v-if="!laboratoryStore.isBuildingLayout">
-        <button 
+      <h2 class="text-2xl font-bold text-gray-800">
+        Laboratory Management
+      </h2>
+      <div v-if="!laboratoryStore.isBuildingLayout" class="flex space-x-2">
+        <button
           class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center transition-colors cursor-pointer"
           @click="laboratoryStore.startLayoutBuilder"
         >
@@ -36,7 +39,7 @@ const handleDeleteClassroom = async () => {
 
     <!-- LOADING STATE -->
     <div v-if="laboratoryStore.isLoading" class="flex justify-center items-center py-12">
-      <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500" />
     </div>
 
     <!-- ERROR STATE -->
@@ -48,7 +51,9 @@ const handleDeleteClassroom = async () => {
           </svg>
         </div>
         <div class="ml-3">
-          <p class="text-sm text-red-700">{{ laboratoryStore.error }}</p>
+          <p class="text-sm text-red-700">
+            {{ laboratoryStore.error }}
+          </p>
         </div>
       </div>
     </div>
@@ -64,7 +69,7 @@ const handleDeleteClassroom = async () => {
             name: lab.name,
             capacity: lab.capacity,
             assigned: lab.assigned,
-            nextSchedule: lab.nextSchedule
+            nextSchedule: lab.nextSchedule,
           }"
           @view-seats="laboratoryStore.showSeatMapForRoom"
           @delete-classroom="handleDeleteClassroom"
@@ -104,7 +109,9 @@ const handleDeleteClassroom = async () => {
   height: 36px;
   border-radius: 0.375rem;
   cursor: pointer;
-  transition: transform 0.2s ease, background-color 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease;
 }
 
 .layout-cell:hover {

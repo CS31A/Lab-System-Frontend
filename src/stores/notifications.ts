@@ -61,7 +61,8 @@ export const useNotificationStore = defineStore('notifications', () => {
 
   const markAsRead = (id: string) => {
     const notification = notifications.value.find(n => n.id === id)
-    if (notification) notification.read = true
+    if (notification)
+      notification.read = true
   }
 
   const markAllAsRead = () => {
@@ -70,7 +71,8 @@ export const useNotificationStore = defineStore('notifications', () => {
 
   const removeNotification = (id: string) => {
     const index = notifications.value.findIndex(n => n.id === id)
-    if (index > -1) notifications.value.splice(index, 1)
+    if (index > -1)
+      notifications.value.splice(index, 1)
   }
 
   return {

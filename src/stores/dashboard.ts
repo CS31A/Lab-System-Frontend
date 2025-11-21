@@ -1,7 +1,5 @@
 import type {
-  ApiLaboratoryDetail,
   ApiSchedule,
-  ApiSubject,
   ApiTeacher,
   Schedule,
 } from '@/interfaces/interfaces'
@@ -16,10 +14,10 @@ export const useDashboardStore = defineStore('dashboard', () => {
   const upcomingSchedules = ref<Schedule[]>([])
 
   const stats = ref({
-    totalRooms: 0, 
-    totalStudents: 0, 
-    totalTeachers: 0, 
-    activeSchedules: 0, 
+    totalRooms: 0,
+    totalStudents: 0,
+    totalTeachers: 0,
+    activeSchedules: 0,
   })
 
   const isLoading = ref(false)

@@ -140,7 +140,7 @@ function handleQuickAction(action: string) {
           <ScheduleCard
             v-for="schedule in upcomingSchedules"
             :key="schedule.id"
-            :Schedule="schedule"
+            :schedule="schedule"
           />
         </div>
       </div>

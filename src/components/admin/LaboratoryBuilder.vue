@@ -4,7 +4,7 @@ import api from '@/boot/axios'
 
 const emits = defineEmits<{
   cancel: []
-  save: [payload: { name: string; layout: boolean[] }]
+  save: [payload: { name: string, layout: boolean[] }]
 }>()
 
 const GRID_SIZE = 10
@@ -15,17 +15,17 @@ const labName = ref('')
 const hasActiveCells = () => layoutCells.value.some(cell => cell)
 
 // TOGGLES THE ACTIVE/INACTIVE STATE OF A SINGLE GRID CELL BY INDEX
-const toggleLayoutCell = (index: number) => {
+function toggleLayoutCell(index: number) {
   layoutCells.value[index] = !layoutCells.value[index]
 }
 
 // EMITS A CANCEL EVENT TO GO BACK WITHOUT SAVING
-const handleCancel = () => {
+function handleCancel() {
   emits('cancel')
 }
 
 // VALIDATES INPUT, SAVES THE LABORATORY TO THE BACKEND, EMITS SAVE EVENT, AND RESETS THE FORM
-const handleSave = async () => {
+async function handleSave() {
   const trimmedName = labName.value.trim()
   if (!trimmedName || !hasActiveCells())
     return
@@ -34,13 +34,14 @@ const handleSave = async () => {
 
   try {
     await api.post('/laboratories', { name: trimmedName })
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Failed to save laboratory to backend:', error)
   }
 
   emits('save', { name: trimmedName, layout: snapshot })
 
-// RESETS GRID
+  // RESETS GRID
   layoutCells.value = Array.from({ length: GRID_SIZE * GRID_SIZE }, () => false)
   labName.value = ''
 }
@@ -51,8 +52,12 @@ const handleSave = async () => {
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
       <div class="flex flex-col gap-2">
-        <h3 class="text-lg font-semibold text-[#2b6cb0]">Build Laboratory Layout</h3>
-        <p class="text-sm text-gray-500">Click boxes to mark where computers or seats will be.</p>
+        <h3 class="text-lg font-semibold text-[#2b6cb0]">
+          Build Laboratory Layout
+        </h3>
+        <p class="text-sm text-gray-500">
+          Click boxes to mark where computers or seats will be.
+        </p>
         <div class="flex items-center gap-2">
           <label class="text-sm text-gray-700" for="lab-name">Laboratory name</label>
           <input
@@ -61,7 +66,7 @@ const handleSave = async () => {
             type="text"
             class="px-3 py-1.5 text-sm rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 min-w-[220px]"
             placeholder="Enter laboratory name"
-          />
+          >
         </div>
       </div>
       <div class="flex items-center gap-2 self-start md:self-auto">
@@ -87,11 +92,10 @@ const handleSave = async () => {
         <div
           v-for="(cell, index) in layoutCells"
           :key="index"
-          @click="toggleLayoutCell(index)"
-          :class="[
-            'layout-cell',
-            cell ? 'layout-cell--active' : 'layout-cell--inactive'
+          class="layout-cell" :class="[
+            cell ? 'layout-cell--active' : 'layout-cell--inactive',
           ]"
+          @click="toggleLayoutCell(index)"
         />
       </div>
     </div>
@@ -114,7 +118,9 @@ const handleSave = async () => {
   height: 36px;
   border-radius: 0.375rem;
   cursor: pointer;
-  transition: transform 0.2s ease, background-color 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease;
 }
 
 .layout-cell:hover {
