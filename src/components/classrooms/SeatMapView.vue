@@ -96,7 +96,7 @@ const handleSeatClick = (seatId: string, isOccupied: boolean) => {
       <div class="flex items-center space-x-4">
         <button
           @click="handleBack"
-          class="flex items-center text-gray-600 hover:text-gray-800 transition-colors"
+          class="flex items-center text-gray-600 hover:text-gray-800 transition-colors cursor-pointer"
         >
           <ArrowLeft class="mr-2 w-4 h-4" />
           Back to Classrooms
@@ -121,7 +121,7 @@ const handleSeatClick = (seatId: string, isOccupied: boolean) => {
       <div class="bg-white px-4 py-3 rounded-md shadow-sm">
         <div class="flex justify-between items-center">
           <div class="flex gap-2">
-            <button class="px-3 py-1.5 text-sm rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50">
+            <!-- <button class="px-3 py-1.5 text-sm rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50">
               Import Assign
             </button>
             <button class="px-3 py-1.5 text-sm rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50">
@@ -129,7 +129,7 @@ const handleSeatClick = (seatId: string, isOccupied: boolean) => {
             </button>
             <button class="px-3 py-1.5 text-sm rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50">
               Export
-            </button>
+            </button> -->
           </div>
 
           <div class="flex gap-6 items-center">

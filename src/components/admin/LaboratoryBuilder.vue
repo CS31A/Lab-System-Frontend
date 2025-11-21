@@ -66,13 +66,13 @@ const handleSave = async () => {
       </div>
       <div class="flex items-center gap-2 self-start md:self-auto">
         <button
-          class="px-3 py-1.5 text-sm rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50"
+          class="px-3 py-1.5 text-sm rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 cursor-pointer"
           @click="handleCancel"
         >
           Back
         </button>
         <button
-          class="px-3 py-1.5 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed"
+          class="px-3 py-1.5 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
           :disabled="!labName.trim() || !hasActiveCells()"
           @click="handleSave"
         >
