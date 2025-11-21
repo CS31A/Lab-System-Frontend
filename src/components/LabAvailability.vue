@@ -3,6 +3,7 @@ import { onBeforeUnmount, onMounted, ref, provide } from 'vue'
 import { apiService } from '@/services/api'
 import type { Lab, ApiLab, ApiResponse } from '@/interfaces/interfaces'
 import LabOccupancyModal from '@/components/modals/LabOccupancyModal.vue'
+import TopHeader from '@/components/global/Header.vue'
 import Header from '@/components/layout/Header.vue'
 import Sidebar from '@/components/layout/Sidebar.vue'
 import Footer from '@/components/global/Footer.vue'
@@ -121,11 +122,13 @@ const closeModal = () => {
 
 
 <template>
-  <div class="min-h-screen bg-gray-50 flex">
-    <Sidebar />
-    <div class="flex-1 flex flex-col">
-      <Header />
-      <main class="flex-1 p-6 bg-white flex flex-col items-center">
+  <div class="min-h-screen bg-gray-50 flex flex-col">
+    <TopHeader />
+    <div class="flex flex-1">
+      <Sidebar />
+      <div class="flex-1 flex flex-col">
+        <Header />
+        <main class="flex-1 p-6 bg-white flex flex-col items-center">
         <div class="mb-6 flex flex-col items-center w-full">
 
       <h2 class="text-4xl font-bold text-[#013aae] mb-1 text-center" style="font-family: var(--konkhmer-font);">
@@ -180,8 +183,9 @@ const closeModal = () => {
         </div>
       </div>
         </div>
-      </main>
-      <Footer />
+        </main>
+        <Footer />
+      </div>
     </div>
 
     <!-- MODAL -->
