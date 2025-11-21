@@ -23,5 +23,3 @@ defineEmits<{
     {{ action.label }}
   </button>
 </template>
-
-
