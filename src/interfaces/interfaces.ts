@@ -12,10 +12,29 @@ export interface Activity {
 // AUTH INTERFACES
 export interface User {
   id: string
-  name: string
-  email: string
+  username: string // Primary field from backend
+  name?: string // Optional for backward compatibility
+  email?: string // Optional for backward compatibility
   role: 'admin' | 'teacher'
   avatar?: string
+}
+
+// AUTH API RESPONSE INTERFACES
+export interface AuthMeResponse {
+  message: string
+  data: {
+    sub: string
+    role: 'admin' | 'teacher'
+  }
+}
+
+export interface AuthLoginResponse {
+  message: string
+  data: {
+    id: string
+    username: string
+    role: 'admin' | 'teacher'
+  }
 }
 
 // STUDENT INTERFACES
@@ -199,6 +218,8 @@ export interface ApiSchedule {
   start_time: string
   end_time: string
   status: string | null
+}
+
 // LAB LAYOUT LOCAL STORAGE & BACKEND MODELS
 export interface LocalLab {
   id: string
@@ -238,6 +259,8 @@ export interface ApiTeacher {
   attendance: string
   created_at: string
   updated_at: string
+}
+
 // SLAB LAYOUT INTERFACES
 export type PcCondition = 'complete' | 'missing' | 'broken'
 

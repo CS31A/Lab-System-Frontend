@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { Calendar, FilePlus, Home, Plus, Upload, User, UserPlus, Users } from 'lucide-vue-next'
-import { computed, defineAsyncComponent, onMounted } from 'vue' // Added onMounted
+import { computed, defineAsyncComponent, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useDashboardStore } from '@/stores/dashboard'
+import { useNotificationStore } from '@/stores/notifications'
 
 const StatsCard = defineAsyncComponent(() => import('@/components/dashboard/StatsCard.vue'))
 const ScheduleCard = defineAsyncComponent(() => import('@/components/dashboard/ScheduleCard.vue'))
@@ -11,14 +12,17 @@ const QuickActionButton = defineAsyncComponent(() => import('@/components/dashbo
 // ROUTER & STORE INITIALIZATION
 const router = useRouter()
 const dashboardStore = useDashboardStore()
+const notificationStore = useNotificationStore()
 
 // LIFECYCLE: Fetch API Data on Load
 onMounted(() => {
   dashboardStore.initDashboard()
+  notificationStore.forceFetchNotifications()
 })
 
 // COMPUTED PROPERTIES
 const upcomingSchedules = computed(() => dashboardStore.upcomingSchedules)
+const recentNotifications = computed(() => notificationStore.notifications.slice(0, 3))
 
 // Map Store Stats to UI Format
 const stats = computed(() => [
@@ -46,7 +50,7 @@ const stats = computed(() => [
     icon: Calendar,
     color: 'purple',
   },
-]
+])
 
 const quickActions = [
   {
@@ -70,22 +74,6 @@ const quickActions = [
     action: 'import-data',
   },
 ]
-
-// ROUTER & STORE INITIALIZATION
-const router = useRouter()
-const notificationStore = useNotificationStore()
-
-// FETCH NOTIFICATIONS WHEN DASHBOARD MOUNTS
-onMounted(() => {
-  notificationStore.forceFetchNotifications()
-})
-const dashboardStore = useDashboardStore()
-
-// COMPUTED PROPERTIES
-const upcomingSchedules = computed(() => dashboardStore.upcomingSchedules)
-
-// GET RECENT 3 NOTIFICATIONS
-const recentNotifications = computed(() => notificationStore.notifications.slice(0, 3))
 
 // METHODS
 // HANDLE QUICK ACTION BUTTON CLICKS
