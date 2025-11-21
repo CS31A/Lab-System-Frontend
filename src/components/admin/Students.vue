@@ -27,6 +27,7 @@ const showAddModal = ref(false)
 const showDeleteModal = ref(false)
 const studentToDelete = ref<Student | null>(null)
 const recentlyAddedId = ref<string | null>(null)
+const recentlyUpdatedId = ref<string | null>(null)
 
 function openDeleteModal(student: Student) {
   studentToDelete.value = student
@@ -105,6 +106,13 @@ async function saveStudent() {
       section: newStudent.section,
       course: newStudent.course,
     })
+
+    // Set the recently updated ID
+    recentlyUpdatedId.value = newStudent.id
+    // Clear the recently added ID if it was the same student
+    if (recentlyAddedId.value === newStudent.id) {
+      recentlyAddedId.value = null
+    }
   }
   else {
     const addedId = await studentStore.addStudent({
@@ -117,6 +125,8 @@ async function saveStudent() {
 
     // Set the recently added ID (persists until next student is added)
     recentlyAddedId.value = addedId
+    // Clear the recently updated ID
+    recentlyUpdatedId.value = null
 
     // Reset to page 1 to show the newly added student
     currentPage.value = 1
@@ -192,6 +202,11 @@ const visiblePages = computed(() => {
 // Check if a student is recently added
 function isRecentlyAdded(studentId: string) {
   return recentlyAddedId.value === studentId
+}
+
+// Check if a student is recently updated
+function isRecentlyUpdated(studentId: string) {
+  return recentlyUpdatedId.value === studentId
 }
 
 // METHODS
@@ -306,22 +321,40 @@ function goToPage(page: number) {
             <tr
               v-for="student in filteredStudents"
               :key="student.id"
-              :class="{ 'bg-green-50': isRecentlyAdded(student.id) }"
+              :class="{
+                'bg-green-50': isRecentlyAdded(student.id),
+                'bg-blue-50': isRecentlyUpdated(student.id),
+              }"
               class="transition-colors duration-300"
             >
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium uppercase" :class="isRecentlyAdded(student.id) ? 'text-green-700' : 'text-gray-900'">
+              <td
+                class="px-6 py-4 whitespace-nowrap text-sm font-medium uppercase"
+                :class="isRecentlyAdded(student.id) ? 'text-green-700' : isRecentlyUpdated(student.id) ? 'text-blue-700' : 'text-gray-900'"
+              >
                 {{ student.studentId }}
                 <span v-if="isRecentlyAdded(student.id)" class="ml-2 text-xs font-semibold text-green-600 bg-green-100 px-2 py-1 rounded">
                   NEW
                 </span>
+                <span v-if="isRecentlyUpdated(student.id)" class="ml-2 text-xs font-semibold text-blue-600 bg-blue-100 px-2 py-1 rounded">
+                  UPDATED
+                </span>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm capitalize" :class="isRecentlyAdded(student.id) ? 'text-green-700 font-semibold' : 'text-gray-500'">
+              <td
+                class="px-6 py-4 whitespace-nowrap text-sm capitalize"
+                :class="isRecentlyAdded(student.id) ? 'text-green-700 font-semibold' : isRecentlyUpdated(student.id) ? 'text-blue-700 font-semibold' : 'text-gray-500'"
+              >
                 {{ student.name }}
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm uppercase" :class="isRecentlyAdded(student.id) ? 'text-green-700' : 'text-gray-500'">
+              <td
+                class="px-6 py-4 whitespace-nowrap text-sm uppercase"
+                :class="isRecentlyAdded(student.id) ? 'text-green-700' : isRecentlyUpdated(student.id) ? 'text-blue-700' : 'text-gray-500'"
+              >
                 {{ student.section }}
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm capitalize" :class="isRecentlyAdded(student.id) ? 'text-green-700' : 'text-gray-500'">
+              <td
+                class="px-6 py-4 whitespace-nowrap text-sm capitalize"
+                :class="isRecentlyAdded(student.id) ? 'text-green-700' : isRecentlyUpdated(student.id) ? 'text-blue-700' : 'text-gray-500'"
+              >
                 {{ student.course }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
