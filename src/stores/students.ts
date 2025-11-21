@@ -8,53 +8,7 @@ import api from '@/boot/axios'
 export const useStudentStore = defineStore('students', () => {
   // REFS & REACTIVE STATE
   // LIST OF ALL STUDENTS
-  const students = ref<Student[]>([
-    // {
-    //   id: '1',
-    //   studentId: 'S23-MAN121-78432',
-    //   name: 'Neil Vallecer',
-    //   email: 'neil.vallecer@gmail.com',
-    //   room: 'Slab 1',
-    //   seat: 'Seat 12',
-    //   upcomingClasses: 3,
-    // },
-    // {
-    //   id: '2',
-    //   studentId: 'S23-MAN121-56789',
-    //   name: 'Chitoge Kirisaki',
-    //   email: 'chitoge.kirisaki@gmail.com',
-    //   room: 'Slab 2',
-    //   seat: 'Seat 5',
-    //   upcomingClasses: 2,
-    // },
-    // {
-    //   id: '3',
-    //   studentId: 'S23-MAN121-91234',
-    //   name: 'Taro Sakamoto',
-    //   email: 'taro.sakamoto@gmail.com',
-    //   room: 'SCLAB',
-    //   seat: 'Seat 8',
-    //   upcomingClasses: 4,
-    // },
-    // {
-    //   id: '4',
-    //   studentId: 'S23-MAN121-45678',
-    //   name: 'Jan Rosa',
-    //   email: 'jan.rosa@gmail.com',
-    //   room: 'Slab 3',
-    //   seat: 'Seat 15',
-    //   upcomingClasses: 1,
-    // },
-    // {
-    //   id: '5',
-    //   studentId: 'S23-MAN121-23456',
-    //   name: 'Ryan Maguinda',
-    //   email: 'ryan.maguinda@gmail.com',
-    //   room: 'Linux',
-    //   seat: 'Seat 10',
-    //   upcomingClasses: 3,
-    // },
-  ])
+  const students = ref<Student[]>([])
 
   // METHODS
   // GET STUDENT BY ID
@@ -67,18 +21,19 @@ export const useStudentStore = defineStore('students', () => {
     return students.value.find(student => student.studentId === studentId)
   }
 
-  // ADD NEW STUDENT
+  // ADD NEW STUDENT - Returns the ID of the newly added student
   const addStudent = async (student: {
     firstname: string
     lastname: string
     student_id: string
     section: string
     course: string
-  }) => {
+  }): Promise<string> => {
     try {
       const res = await api.post('/students', student)
+      const studentId = res.data.id || Date.now().toString()
       const newStudent: Student = {
-        id: res.data.id || Date.now().toString(),
+        id: studentId,
         studentId: student.student_id,
         name: `${student.firstname} ${student.lastname}`.trim(),
         email: res.data.email || 'No email',
@@ -91,9 +46,11 @@ export const useStudentStore = defineStore('students', () => {
         lastname: student.lastname,
       }
       students.value.unshift(newStudent)
+      return studentId
     }
     catch (error) {
       console.error(error)
+      throw error
     }
   }
 
@@ -103,9 +60,14 @@ export const useStudentStore = defineStore('students', () => {
       const res = await api.patch(`/students/${id}`, updates)
       const index = students.value.findIndex(student => student.id === id)
       if (index > -1) {
+        // Update the name if firstname or lastname changed
+        const updatedStudent = { ...students.value[index], ...res.data, ...updates }
+        if (updates.firstname || updates.lastname) {
+          updatedStudent.name = `${updatedStudent.firstname} ${updatedStudent.lastname}`.trim()
+        }
         students.value = [
           ...students.value.slice(0, index),
-          { ...students.value[index], ...res.data, ...updates },
+          updatedStudent,
           ...students.value.slice(index + 1),
         ]
       }
@@ -149,6 +111,7 @@ export const useStudentStore = defineStore('students', () => {
     })
     return roomCounts
   })
+
   // SEARCH STUDENTS BY NAME, EMAIL, OR STUDENT ID
   const searchStudents = (query: string) => {
     const searchTerm = query.toLowerCase()
