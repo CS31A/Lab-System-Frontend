@@ -32,7 +32,10 @@ const isEditingStudent = ref(false)
 const isConfirmingUnassign = ref(false)
 const unassignConfirmText = ref('')
 const studentError = ref('')
+const studentSuccess = ref('')
+const wasUnassigned = ref(false)
 let studentErrorTimeout: number | null = null
+let studentSuccessTimeout: number | null = null
 
 // COMPUTES LABEL AND COLORS FOR CURRENT PC STATUS CHIP
 const statusChip = computed(() => {
@@ -65,6 +68,8 @@ watch(
       isConfirmingUnassign.value = false
       unassignConfirmText.value = ''
       studentError.value = ''
+      studentSuccess.value = ''
+      wasUnassigned.value = false
       return
     }
     const allowed = new Set(['complete', 'missing', 'broken'])
@@ -79,6 +84,8 @@ watch(
     isConfirmingUnassign.value = false
     unassignConfirmText.value = ''
     studentError.value = ''
+    studentSuccess.value = ''
+    wasUnassigned.value = false
 
     nextTick(() => nameInputRef.value?.focus())
   },
@@ -108,12 +115,52 @@ function handleDone() {
   if (!localPc.value)
     return
 
+  // If we didn't just unassign a student, enforce student info validation
+  if (!wasUnassigned.value && (!studentName.value.trim() || !studentYear.value || !studentCourse.value)) {
+    studentError.value = 'Please fill out student name, year, and course.'
+    if (studentErrorTimeout !== null)
+      window.clearTimeout(studentErrorTimeout)
+    studentErrorTimeout = window.setTimeout(() => {
+      studentError.value = ''
+      studentErrorTimeout = null
+    }, 3000)
+    return
+  }
+
+  if (
+    (localPc.value.status === 'missing' || localPc.value.status === 'broken')
+    && !localPc.value.missingOrbrokenDetails?.trim()
+  ) {
+    studentError.value = localPc.value.status === 'missing'
+      ? 'Please state what is missing for this PC.'
+      : 'Please state what is broken for this PC.'
+    if (studentErrorTimeout !== null)
+      window.clearTimeout(studentErrorTimeout)
+    studentErrorTimeout = window.setTimeout(() => {
+      studentError.value = ''
+      studentErrorTimeout = null
+    }, 3000)
+    return
+  }
+
   emit('save', {
     ...localPc.value,
     studentName: studentName.value,
     studentYear: studentYear.value,
     studentCourse: studentCourse.value,
   })
+
+  // If this Save is after an unassign, show the unassigned toast here
+  if (wasUnassigned.value) {
+    studentSuccess.value = 'Student unassigned successfully.'
+    if (studentSuccessTimeout !== null)
+      window.clearTimeout(studentSuccessTimeout)
+    studentSuccessTimeout = window.setTimeout(() => {
+      studentSuccess.value = ''
+      studentSuccessTimeout = null
+    }, 3000)
+    wasUnassigned.value = false
+  }
   emit('close')
 }
 
@@ -142,6 +189,13 @@ function handleStudentEditClick() {
     }
     emit('student-save', updated)
     localPc.value = updated
+    studentSuccess.value = 'Assigned student successfully.'
+    if (studentSuccessTimeout !== null)
+      window.clearTimeout(studentSuccessTimeout)
+    studentSuccessTimeout = window.setTimeout(() => {
+      studentSuccess.value = ''
+      studentSuccessTimeout = null
+    }, 3000)
     isEditingStudent.value = false
     return
   }
@@ -179,6 +233,13 @@ function handleStudentEditClick() {
     }
     emit('student-save', updated)
     localPc.value = updated
+    studentSuccess.value = 'Student information updated.'
+    if (studentSuccessTimeout !== null)
+      window.clearTimeout(studentSuccessTimeout)
+    studentSuccessTimeout = window.setTimeout(() => {
+      studentSuccess.value = ''
+      studentSuccessTimeout = null
+    }, 3000)
     isEditingStudent.value = false
   }
 }
@@ -192,6 +253,7 @@ function handleStudentUnassignClick() {
     isConfirmingUnassign.value = true
     unassignConfirmText.value = ''
     studentError.value = ''
+    studentSuccess.value = ''
     return
   }
 
@@ -220,6 +282,7 @@ function handleStudentUnassignClick() {
   isConfirmingUnassign.value = false
   unassignConfirmText.value = ''
   studentError.value = ''
+  wasUnassigned.value = true
   localPc.value = updated
 }
 
@@ -316,6 +379,12 @@ function handleClose() {
                 class="text-xs text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2"
               >
                 {{ studentError }}
+              </div>
+              <div
+                v-if="studentSuccess"
+                class="text-xs text-green-700 bg-green-50 border border-green-200 rounded-md px-3 py-2"
+              >
+                {{ studentSuccess }}
               </div>
               <div
                 v-if="hasExistingStudent && isConfirmingUnassign"
