@@ -48,6 +48,7 @@ export interface Student {
   section: string
   seat: string
   room?: string
+  course: string
   upcomingClasses: number
   avatar?: string
 }
