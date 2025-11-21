@@ -3,7 +3,7 @@
 <script setup lang="ts">
 import type { Student } from '@/interfaces/interfaces'
 // IMPORTS
-import { ChevronLeft, ChevronRight, Plus, Upload } from 'lucide-vue-next'
+import { ChevronLeft, ChevronRight, Plus, Upload, X } from 'lucide-vue-next'
 import { computed, onMounted, reactive, ref } from 'vue'
 import SearchFilterBar from '@/components/global/SearchFilterBar.vue'
 import { useStudentStore } from '@/stores/students'
@@ -25,9 +25,14 @@ const filters = reactive<{ room: string }>({ room: '' })
 const currentPage = ref(1)
 const showAddModal = ref(false)
 const showDeleteModal = ref(false)
+const showImportModal = ref(false)
 const studentToDelete = ref<Student | null>(null)
 const recentlyAddedId = ref<string | null>(null)
-const recentlyUpdatedId = ref<string | null>(null)
+const fileInput = ref<HTMLInputElement | null>(null)
+const importFile = ref<File | null>(null)
+const importPreview = ref<any[]>([])
+const importError = ref<string>('')
+const isImporting = ref(false)
 
 function openDeleteModal(student: Student) {
   studentToDelete.value = student
@@ -37,6 +42,154 @@ function openDeleteModal(student: Student) {
 function closeDeleteModal() {
   studentToDelete.value = null
   showDeleteModal.value = false
+}
+
+// IMPORT MODAL FUNCTIONS
+function openImportModal() {
+  showImportModal.value = true
+  importError.value = ''
+  importPreview.value = []
+  importFile.value = null
+}
+
+function closeImportModal() {
+  showImportModal.value = false
+  importError.value = ''
+  importPreview.value = []
+  importFile.value = null
+  if (fileInput.value) {
+    fileInput.value.value = ''
+  }
+}
+
+function triggerFileInput() {
+  fileInput.value?.click()
+}
+
+async function handleFileSelect(event: Event) {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
+
+  if (!file)
+    return
+
+  if (!file.name.endsWith('.csv')) {
+    importError.value = 'Please select a CSV file'
+    return
+  }
+
+  importFile.value = file
+  importError.value = ''
+
+  // Parse and preview CSV
+  try {
+    const text = await file.text()
+    const lines = text.split('\n').filter(line => line.trim())
+
+    if (lines.length < 2) {
+      importError.value = 'CSV file is empty or has no data rows'
+      return
+    }
+
+    // Parse header
+    const header = lines[0].split(',').map(h => h.trim().toLowerCase())
+
+    // Check required columns
+    const requiredColumns = ['student_id', 'firstname', 'lastname']
+    const missingColumns = requiredColumns.filter(col => !header.includes(col))
+
+    if (missingColumns.length > 0) {
+      importError.value = `Missing required columns: ${missingColumns.join(', ')}`
+      return
+    }
+
+    // Parse data rows (show first 5 for preview)
+    const preview = lines.slice(1, 6).map((line) => {
+      const values = line.split(',').map(v => v.trim())
+      const row: any = {}
+      header.forEach((col, index) => {
+        row[col] = values[index] || ''
+      })
+      return row
+    })
+
+    importPreview.value = preview
+  }
+  catch (error) {
+    importError.value = 'Error reading CSV file'
+    console.error(error)
+  }
+}
+
+async function confirmImport() {
+  if (!importFile.value)
+    return
+
+  isImporting.value = true
+  importError.value = ''
+
+  try {
+    const text = await importFile.value.text()
+    const lines = text.split('\n').filter(line => line.trim())
+    const header = lines[0].split(',').map(h => h.trim().toLowerCase())
+
+    let successCount = 0
+    let errorCount = 0
+
+    // Process each row
+    for (let i = 1; i < lines.length; i++) {
+      try {
+        const values = lines[i].split(',').map(v => v.trim())
+        const row: any = {}
+        header.forEach((col, index) => {
+          row[col] = values[index] || ''
+        })
+
+        // Validate required fields
+        if (!row.student_id || !row.firstname || !row.lastname) {
+          errorCount++
+          continue
+        }
+
+        // Add student
+        await studentStore.addStudent({
+          firstname: row.firstname,
+          lastname: row.lastname,
+          student_id: row.student_id,
+          section: row.section || '',
+          course: row.course || '',
+        })
+
+        successCount++
+      }
+      catch (error) {
+        errorCount++
+        console.error(`Error importing row ${i}:`, error)
+      }
+    }
+
+    alert(`Import complete!\nSuccessfully imported: ${successCount}\nFailed: ${errorCount}`)
+    closeImportModal()
+    currentPage.value = 1
+  }
+  catch (error) {
+    importError.value = 'Error processing CSV file'
+    console.error(error)
+  }
+  finally {
+    isImporting.value = false
+  }
+}
+
+function downloadTemplate() {
+  const csv = 'student_id,firstname,lastname,section,course\n2021-00001,John,Doe,BSCS-3A,Computer Science\n2021-00002,Jane,Smith,BSIT-2B,Information Technology'
+  const blob = new Blob([csv], { type: 'text/csv' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'students_template.csv'
+  a.click()
+  URL.revokeObjectURL(url)
 }
 
 // NEW / EDIT STUDENT
@@ -106,13 +259,6 @@ async function saveStudent() {
       section: newStudent.section,
       course: newStudent.course,
     })
-
-    // Set the recently updated ID
-    recentlyUpdatedId.value = newStudent.id
-    // Clear the recently added ID if it was the same student
-    if (recentlyAddedId.value === newStudent.id) {
-      recentlyAddedId.value = null
-    }
   }
   else {
     const addedId = await studentStore.addStudent({
@@ -125,8 +271,6 @@ async function saveStudent() {
 
     // Set the recently added ID (persists until next student is added)
     recentlyAddedId.value = addedId
-    // Clear the recently updated ID
-    recentlyUpdatedId.value = null
 
     // Reset to page 1 to show the newly added student
     currentPage.value = 1
@@ -204,11 +348,6 @@ function isRecentlyAdded(studentId: string) {
   return recentlyAddedId.value === studentId
 }
 
-// Check if a student is recently updated
-function isRecentlyUpdated(studentId: string) {
-  return recentlyUpdatedId.value === studentId
-}
-
 // METHODS
 
 // NAVIGATE TO PREVIOUS PAGE
@@ -260,16 +399,122 @@ function goToPage(page: number) {
                 Cancel
               </button>
               <button class="px-4 py-2 bg-blue-600 text-white rounded" @click="saveStudent">
-                {{ isEditMode ? 'Update' : 'Save' }}
+                {{ isEditMode ? 'Update' : 'Add' }}
               </button>
             </div>
           </div>
         </div>
 
-        <button class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 flex items-center transition-colors">
+        <button class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 flex items-center transition-colors" @click="openImportModal">
           <Upload class="mr-2 w-4 h-4" />
           Import
         </button>
+
+        <!-- IMPORT MODAL -->
+        <div v-if="showImportModal" class="fixed inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm z-50">
+          <div class="bg-white rounded-lg p-6 w-full max-w-2xl border border-zinc-800">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-lg font-bold">
+                Import Students from CSV
+              </h3>
+              <button class="text-gray-500 hover:text-gray-700" @click="closeImportModal">
+                <X class="w-5 h-5" />
+              </button>
+            </div>
+
+            <div class="mb-4">
+              <p class="text-sm text-gray-600 mb-2">
+                Upload a CSV file with the following columns: <strong>student_id, firstname, lastname, section, course</strong>
+              </p>
+              <button class="text-blue-600 hover:text-blue-800 text-sm underline" @click="downloadTemplate">
+                Download CSV Template
+              </button>
+            </div>
+
+            <input
+              ref="fileInput"
+              type="file"
+              accept=".csv"
+              class="hidden"
+              @change="handleFileSelect"
+            >
+
+            <div
+              class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors cursor-pointer"
+              @click="triggerFileInput"
+            >
+              <Upload class="w-12 h-12 mx-auto text-gray-400 mb-3" />
+              <p class="text-sm text-gray-600">
+                {{ importFile ? importFile.name : 'Click to select CSV file or drag and drop' }}
+              </p>
+            </div>
+
+            <div v-if="importError" class="mt-4 p-3 bg-red-50 border border-red-200 rounded text-sm text-red-600">
+              {{ importError }}
+            </div>
+
+            <div v-if="importPreview.length > 0" class="mt-4">
+              <h4 class="font-semibold mb-2 text-sm">
+                Preview (first 5 rows):
+              </h4>
+              <div class="border rounded overflow-hidden">
+                <table class="min-w-full text-sm">
+                  <thead class="bg-gray-50">
+                    <tr>
+                      <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        Student ID
+                      </th>
+                      <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        First Name
+                      </th>
+                      <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        Last Name
+                      </th>
+                      <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        Section
+                      </th>
+                      <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        Course
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody class="bg-white divide-y divide-gray-200">
+                    <tr v-for="(row, index) in importPreview" :key="index">
+                      <td class="px-3 py-2">
+                        {{ row.student_id }}
+                      </td>
+                      <td class="px-3 py-2">
+                        {{ row.firstname }}
+                      </td>
+                      <td class="px-3 py-2">
+                        {{ row.lastname }}
+                      </td>
+                      <td class="px-3 py-2">
+                        {{ row.section }}
+                      </td>
+                      <td class="px-3 py-2">
+                        {{ row.course }}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="mt-6 flex justify-end space-x-2">
+              <button class="px-4 py-2 bg-gray-200 rounded" @click="closeImportModal">
+                Cancel
+              </button>
+              <button
+                class="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                :disabled="!importFile || importError.length > 0 || isImporting"
+                @click="confirmImport"
+              >
+                {{ isImporting ? 'Importing...' : 'Import Students' }}
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -321,40 +566,22 @@ function goToPage(page: number) {
             <tr
               v-for="student in filteredStudents"
               :key="student.id"
-              :class="{
-                'bg-green-50': isRecentlyAdded(student.id),
-                'bg-blue-50': isRecentlyUpdated(student.id),
-              }"
+              :class="{ 'bg-green-50': isRecentlyAdded(student.id) }"
               class="transition-colors duration-300"
             >
-              <td
-                class="px-6 py-4 whitespace-nowrap text-sm font-medium uppercase"
-                :class="isRecentlyAdded(student.id) ? 'text-green-700' : isRecentlyUpdated(student.id) ? 'text-blue-700' : 'text-gray-900'"
-              >
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium uppercase" :class="isRecentlyAdded(student.id) ? 'text-green-700' : 'text-gray-900'">
                 {{ student.studentId }}
                 <span v-if="isRecentlyAdded(student.id)" class="ml-2 text-xs font-semibold text-green-600 bg-green-100 px-2 py-1 rounded">
                   NEW
                 </span>
-                <span v-if="isRecentlyUpdated(student.id)" class="ml-2 text-xs font-semibold text-blue-600 bg-blue-100 px-2 py-1 rounded">
-                  UPDATED
-                </span>
               </td>
-              <td
-                class="px-6 py-4 whitespace-nowrap text-sm capitalize"
-                :class="isRecentlyAdded(student.id) ? 'text-green-700 font-semibold' : isRecentlyUpdated(student.id) ? 'text-blue-700 font-semibold' : 'text-gray-500'"
-              >
+              <td class="px-6 py-4 whitespace-nowrap text-sm capitalize" :class="isRecentlyAdded(student.id) ? 'text-green-700 font-semibold' : 'text-gray-500'">
                 {{ student.name }}
               </td>
-              <td
-                class="px-6 py-4 whitespace-nowrap text-sm uppercase"
-                :class="isRecentlyAdded(student.id) ? 'text-green-700' : isRecentlyUpdated(student.id) ? 'text-blue-700' : 'text-gray-500'"
-              >
+              <td class="px-6 py-4 whitespace-nowrap text-sm uppercase" :class="isRecentlyAdded(student.id) ? 'text-green-700' : 'text-gray-500'">
                 {{ student.section }}
               </td>
-              <td
-                class="px-6 py-4 whitespace-nowrap text-sm capitalize"
-                :class="isRecentlyAdded(student.id) ? 'text-green-700' : isRecentlyUpdated(student.id) ? 'text-blue-700' : 'text-gray-500'"
-              >
+              <td class="px-6 py-4 whitespace-nowrap text-sm capitalize" :class="isRecentlyAdded(student.id) ? 'text-green-700' : 'text-gray-500'">
                 {{ student.course }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
