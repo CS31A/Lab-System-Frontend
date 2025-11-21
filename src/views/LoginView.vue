@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { isAxiosError } from 'axios'
 import { computed, defineAsyncComponent, ref } from 'vue'
-import { useRouter } from 'vue-router'
-import api from '@/boot/axios'
+import { useRoute, useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 import Toast from '@/components/global/Toast.vue'
 
 const router = useRouter()
+const route = useRoute()
+const authStore = useAuthStore()
 const toastRef = ref<InstanceType<typeof Toast> | null>(null)
 
 const Header = defineAsyncComponent(() => import('@/components/global/Header.vue'))
@@ -14,8 +15,9 @@ const Footer = defineAsyncComponent(() => import('@/components/global/Footer.vue
 const username = ref('')
 const password = ref('')
 const rememberMe = ref(false)
-const showPassword = ref(false) // Toggle state
+const showPassword = ref(false)
 const hasTriedSubmit = ref(false)
+const isLoading = ref(false)
 
 const formattedUsername = computed({
   get: () => username.value,
@@ -79,43 +81,43 @@ const passwordInputClasses = computed<string>(() => {
     : 'w-full px-3 py-2 rounded focus:outline-none focus:ring-2 pr-16 border border-gray-300 focus:ring-[#4299e1]'
 })
 
-// Add API call here in real implementation
 async function handleLogin() {
   hasTriedSubmit.value = true
   if (!isFormValid.value)
     return
 
+  isLoading.value = true
+
   try {
-    const response = await api.post(
-      '/auth/login',
-      {
-        username: username.value,
-        password: password.value,
-        // rememberMe: rememberMe.value,
-      },
-      {
-        withCredentials: true,
-      },
-    )
-    if (import.meta.env.MODE === 'development') {
-      console.warn('Login successful!', response.data)
-    }
-    sessionStorage.setItem('showLoginSuccessToast', 'true')
-    router.push('/dashboard')
-  }
-  catch (err) {
-    if (isAxiosError(err)) {
-      if (!err.response) {
-        toastRef.value?.triggerToast('Network error. Please check your connection.', 'error')
+    const result = await authStore.login(username.value, password.value)
+
+    if (result.success) {
+      // Store success message for display after redirect
+      sessionStorage.setItem('showLoginSuccessToast', 'true')
+
+      // Get redirect parameter or default based on role
+      const redirectPath = route.query.redirect as string
+
+      if (redirectPath && redirectPath !== '/login') {
+        // Redirect to intended destination
+        await router.push(redirectPath)
       }
       else {
-        const msg = err.response?.data?.message ?? 'Login failed. Please try again.'
-        toastRef.value?.triggerToast(msg, 'error')
+        // Default redirect based on role
+        const defaultPath = authStore.isAdmin ? '/admin/dashboard' : '/home'
+        await router.push(defaultPath)
       }
     }
     else {
-      toastRef.value?.triggerToast('An unexpected error occurred.', 'error')
+      toastRef.value?.triggerToast(result.error || 'Login failed. Please try again.', 'error')
     }
+  }
+  catch (err: any) {
+    const message = err.response?.data?.message ?? 'An unexpected error occurred.'
+    toastRef.value?.triggerToast(message, 'error')
+  }
+  finally {
+    isLoading.value = false
   }
 }
 </script>
@@ -144,6 +146,7 @@ async function handleLogin() {
               :class="usernameInputClasses"
               :aria-invalid="shouldShowUsernameError"
               aria-describedby="username-error"
+              :disabled="isLoading"
             >
             <p
               v-if="shouldShowUsernameError"
@@ -164,11 +167,14 @@ async function handleLogin() {
                 :class="passwordInputClasses"
                 :aria-invalid="shouldShowPasswordError"
                 aria-describedby="password-error"
+                :disabled="isLoading"
+                @keyup.enter="handleLogin"
               >
               <button
                 type="button"
                 class="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 text-gray-500 hover:text-blue-600 focus:outline-none"
                 :aria-label="showPassword ? 'Hide password' : 'Show password'"
+                :disabled="isLoading"
                 @click="togglePasswordVisibility"
               >
                 <svg
@@ -213,7 +219,7 @@ async function handleLogin() {
           <!-- Options -->
           <div class="flex items-center justify-between text-sm text-gray-600">
             <label class="flex items-center">
-              <input v-model="rememberMe" type="checkbox" class="mr-2">
+              <input v-model="rememberMe" type="checkbox" class="mr-2" :disabled="isLoading">
               Remember me
             </label>
             <router-link to="/forgot-password" class="text-blue-600 hover:underline">
@@ -223,10 +229,18 @@ async function handleLogin() {
 
           <!-- Login Button -->
           <button
-            class="w-full bg-[#2b6cb0] text-white font-bold py-2 rounded hover:bg-blue-800 transition"
+            class="w-full bg-[#2b6cb0] text-white font-bold py-2 rounded hover:bg-blue-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            :disabled="isLoading"
             @click="handleLogin"
           >
-            Login
+            <span v-if="isLoading" class="flex items-center justify-center">
+              <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
+              Logging in...
+            </span>
+            <span v-else>Login</span>
           </button>
         </div>
       </div>

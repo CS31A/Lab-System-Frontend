@@ -1,66 +1,139 @@
-import type { User } from '@/interfaces/interfaces'
-// IMPORTS
+import type { AuthLoginResponse, AuthMeResponse, User } from '@/interfaces/interfaces'
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import api from '@/boot/axios'
+import { normalizeUserData } from '@/utils/auth-helpers'
 
-// AUTH STORE DEFINITION
 export const useAuthStore = defineStore('auth', () => {
   // REFS & REACTIVE STATE
-  // CURRENT AUTHENTICATED USER - INITIALIZE FROM LOCALSTORAGE IF AVAILABLE
-  const storedUser = localStorage.getItem('user')
-  const user = ref<User | null>(storedUser ? JSON.parse(storedUser) : null)
+  const user = ref<User | null>(null)
+  const isLoading = ref(false)
+  const isInitialized = ref(false)
 
   // COMPUTED PROPERTIES
-  // CHECK IF USER IS AUTHENTICATED
   const isAuthenticated = computed(() => !!user.value)
-  // GET CURRENT USER DATA
   const currentUser = computed(() => user.value)
+  const isAdmin = computed(() => user.value?.role === 'admin')
+  const isTeacher = computed(() => user.value?.role === 'teacher')
 
   // METHODS
-  // LOGIN USER WITH EMAIL AND PASSWORD
-  const login = async (email: string, password: string) => {
+
+  /**
+   * Fetch user data from session cookie
+   * @param retries - Number of retry attempts for network errors
+   * @returns Promise<boolean> - Success status
+   */
+  const fetchUser = async (retries = 2): Promise<boolean> => {
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      try {
+        isLoading.value = true
+        const response = await api.get<AuthMeResponse>('/auth/me')
+
+        // Normalize user data using helper function
+        user.value = normalizeUserData(response.data.data)
+
+        return true
+      }
+      catch (error: any) {
+        // Only retry on network errors, not auth failures (401)
+        if (error.response?.status === 401 || attempt === retries) {
+          console.error('Session verification failed:', error)
+          user.value = null
+          return false
+        }
+
+        // Wait before retry (exponential backoff)
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000))
+      }
+      finally {
+        isLoading.value = false
+      }
+    }
+
+    return false
+  }
+
+  /**
+   * Initialize authentication state on app start
+   * Prevents multiple simultaneous initializations
+   */
+  const initializeAuth = async (): Promise<void> => {
+    // Prevent multiple simultaneous initializations
+    if (isLoading.value || isInitialized.value) {
+      return
+    }
+
     try {
-      // CALL AUTHENTICATION API (COOKIE-BASED)
-      const response = await api.post('/auth/login', {
-        email,
+      isLoading.value = true
+      await fetchUser()
+    }
+    finally {
+      isInitialized.value = true
+      isLoading.value = false
+    }
+  }
+
+  /**
+   * Login user with username and password
+   * Uses cookie-based authentication
+   */
+  const login = async (username: string, password: string) => {
+    try {
+      isLoading.value = true
+
+      // Call authentication API (cookie-based)
+      const response = await api.post<AuthLoginResponse>('/auth/login', {
+        username,
         password,
       })
 
-      // SET USER DATA FROM API RESPONSE
-      user.value = response.data.user
+      // Normalize user data using helper function
+      user.value = normalizeUserData(response.data.data)
 
-      // PERSIST USER TO LOCALSTORAGE
-      localStorage.setItem('user', JSON.stringify(response.data.user))
-
-      return { success: true }
+      return { success: true, user: user.value }
     }
     catch (error: any) {
       console.error('Login failed:', error)
+      user.value = null
       return {
         success: false,
         error: error.response?.data?.message || 'Invalid credentials',
       }
     }
+    finally {
+      isLoading.value = false
+    }
   }
 
-  // LOGOUT USER AND CLEAR SESSION
+  /**
+   * Logout user and clear session
+   */
   const logout = async () => {
     try {
-      // CALL LOGOUT API TO CLEAR COOKIE
       await api.post('/auth/logout')
     }
     catch (error) {
       console.error('Logout API call failed:', error)
     }
     finally {
-      // CLEAR LOCAL USER DATA REGARDLESS OF API RESPONSE
+      // Clear user data (memory only)
       user.value = null
-      localStorage.removeItem('user')
+      isInitialized.value = false
     }
   }
 
-  // UPDATE USER PROFILE DATA
+  /**
+   * Check if user has one of the specified roles
+   */
+  const hasRole = (roles: Array<'admin' | 'teacher'>): boolean => {
+    if (!user.value)
+      return false
+    return roles.includes(user.value.role)
+  }
+
+  /**
+   * Update user profile data locally
+   */
   const updateProfile = (userData: Partial<User>) => {
     if (user.value) {
       user.value = { ...user.value, ...userData }
@@ -68,11 +141,21 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   return {
+    // State
     user,
+    isLoading,
+    isInitialized,
+    // Computed
     isAuthenticated,
     currentUser,
+    isAdmin,
+    isTeacher,
+    // Methods
     login,
     logout,
+    fetchUser,
+    initializeAuth,
+    hasRole,
     updateProfile,
   }
 })

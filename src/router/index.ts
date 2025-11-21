@@ -1,6 +1,16 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
+
+// Extend RouteMeta interface for type safety
+declare module 'vue-router' {
+  interface RouteMeta {
+    requiresAuth?: boolean
+    roles?: Array<'admin' | 'teacher'>
+    redirectIfAuthenticated?: boolean
+  }
+}
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -13,40 +23,43 @@ const router = createRouter({
       path: '/home',
       name: 'home',
       component: HomeView,
+      meta: { requiresAuth: true, roles: ['admin', 'teacher'] },
     },
     {
       path: '/login',
       name: 'Login',
       component: LoginView,
+      meta: { redirectIfAuthenticated: true },
     },
     {
       path: '/about',
       name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
       component: () => import('../views/AboutView.vue'),
     },
     {
       path: '/forgot-password',
       name: 'forgot-password',
       component: () => import('../views/ForgotPasswordView.vue'),
+      meta: { requiresAuth: false },
     },
     {
       path: '/reset-password',
       name: 'ResetPassword',
       component: () => import('../views/ResetPasswordView.vue'),
+      meta: { requiresAuth: false },
     },
     {
       path: '/laboratory/:id',
       name: 'laboratory',
       component: () => import('../views/Slab.vue'),
+      meta: { requiresAuth: true, roles: ['admin', 'teacher'] },
     },
     {
       path: '/admin',
       name: 'admin',
       component: () => import('../views/AdminView.vue'),
       redirect: '/admin/dashboard',
+      meta: { requiresAuth: true, roles: ['admin'] },
       children: [
         {
           path: 'dashboard',
@@ -91,6 +104,76 @@ const router = createRouter({
       component: () => import('../components/LabAvailability.vue'),
     },
   ],
+})
+
+// Navigation guard for authentication and authorization
+router.beforeEach(async (to, _from, next) => {
+  const authStore = useAuthStore()
+
+  // Wait for auth initialization on first navigation
+  if (!authStore.isInitialized && !authStore.isLoading) {
+    await authStore.initializeAuth()
+  }
+  else if (authStore.isLoading) {
+    // Wait for any pending auth operations to complete efficiently
+    await new Promise<void>((resolve) => {
+      const checkLoading = () => {
+        if (!authStore.isLoading) {
+          resolve()
+        }
+        else {
+          setTimeout(checkLoading, 50)
+        }
+      }
+      checkLoading()
+    })
+  }
+
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
+  const redirectIfAuthenticated = to.meta.redirectIfAuthenticated
+
+  // Collect roles from all matched route records (parent + child)
+  const allowedRoles = to.matched.reduce<Array<'admin' | 'teacher'>>((roles, record) => {
+    if (record.meta.roles) {
+      return [...roles, ...record.meta.roles]
+    }
+    return roles
+  }, [])
+
+  // Handle authenticated users trying to access login page
+  if (redirectIfAuthenticated && authStore.isAuthenticated) {
+    const redirectPath = authStore.isAdmin ? '/admin/dashboard' : '/home'
+    return next(redirectPath)
+  }
+
+  // Public routes - allow access
+  if (!requiresAuth) {
+    return next()
+  }
+
+  // Protected routes - check authentication
+  if (!authStore.isAuthenticated) {
+    // Store intended destination for redirect after login
+    return next({
+      name: 'Login',
+      query: { redirect: to.fullPath },
+    })
+  }
+
+  // Check role-based access using collected roles from route hierarchy
+  if (allowedRoles.length > 0 && !authStore.hasRole(allowedRoles)) {
+    console.warn(
+      `Access denied: User role '${authStore.user?.role}' not in allowed roles:`,
+      allowedRoles,
+    )
+
+    // Redirect to appropriate home page based on role
+    const fallbackPath = authStore.isAdmin ? '/admin/dashboard' : '/home'
+    return next(fallbackPath)
+  }
+
+  // All checks passed
+  next()
 })
 
 export default router
