@@ -1,25 +1,9 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import api from '@/boot/axios'
-import type { Classroom } from '@/interfaces/interfaces'
+import type { Classroom, LocalLab, BackendLab } from '@/interfaces/interfaces'
 
 const LOCAL_LABS_KEY = 'local-laboratories'
-
-// DEFINES INTERFACE FOR LOCAL LABORATORY LAYOUT DATA PERSISTED IN LOCAL STORAGE
-interface LocalLab {
-  id: string
-  name: string
-  layout: boolean[]
-}
-
-// DEFINES INTERFACE FOR BACKEND LABORATORY API RESPONSE SHAPE
-interface BackendLab {
-  id: string
-  name: string
-  status: boolean
-  created_at: string
-  updated_at: string
-}
 
 // DEFINES PINIA LABORATORY STORE ENTRY POINT
 export const useLaboratoryStore = defineStore('laboratory', () => {

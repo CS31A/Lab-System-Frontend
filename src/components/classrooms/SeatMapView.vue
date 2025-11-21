@@ -150,7 +150,10 @@ const handleSeatClick = (seatId: string, isOccupied: boolean) => {
       </div>
 
       <div class="flex-1 p-6 bg-white space-y-4">
-        <div class="mb-4 flex flex-col items-center">
+        <div
+          v-if="isLocalRoom"
+          class="mb-4 flex flex-col items-center"
+        >
           <h2
             class="text-4xl font-bold text-[#013aae] mb-1 text-center"
             style="font-family: var(--konkhmer-font);"
