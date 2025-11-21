@@ -29,10 +29,10 @@ const studentYear = ref('')
 const studentCourse = ref('')
 const nameInputRef = ref<HTMLInputElement | null>(null)
 const isEditingStudent = ref(false)
+const isConfirmingUnassign = ref(false)
+const unassignConfirmText = ref('')
 const studentError = ref('')
-const studentSuccess = ref('')
 let studentErrorTimeout: number | null = null
-let studentSuccessTimeout: number | null = null
 
 // COMPUTES LABEL AND COLORS FOR CURRENT PC STATUS CHIP
 const statusChip = computed(() => {
@@ -59,8 +59,9 @@ watch(
       studentYear.value = ''
       studentCourse.value = ''
       isEditingStudent.value = false
+      isConfirmingUnassign.value = false
+      unassignConfirmText.value = ''
       studentError.value = ''
-      studentSuccess.value = ''
       return
     }
     const allowed = new Set(['complete', 'missing', 'broken'])
@@ -72,8 +73,9 @@ watch(
 
     const hadExistingStudent = !!(newPc.studentName && newPc.studentName.trim().length > 0)
     isEditingStudent.value = !hadExistingStudent
+    isConfirmingUnassign.value = false
+    unassignConfirmText.value = ''
     studentError.value = ''
-    studentSuccess.value = ''
 
     nextTick(() => nameInputRef.value?.focus())
   },
@@ -137,13 +139,6 @@ function handleStudentEditClick() {
     }
     emit('student-save', updated)
     localPc.value = updated
-    studentSuccess.value = 'Assigned student successfully.'
-    if (studentSuccessTimeout !== null)
-      window.clearTimeout(studentSuccessTimeout)
-    studentSuccessTimeout = window.setTimeout(() => {
-      studentSuccess.value = ''
-      studentSuccessTimeout = null
-    }, 3000)
     isEditingStudent.value = false
     return
   }
@@ -181,15 +176,48 @@ function handleStudentEditClick() {
     }
     emit('student-save', updated)
     localPc.value = updated
-    studentSuccess.value = 'PC information updated.'
-    if (studentSuccessTimeout !== null)
-      window.clearTimeout(studentSuccessTimeout)
-    studentSuccessTimeout = window.setTimeout(() => {
-      studentSuccess.value = ''
-      studentSuccessTimeout = null
-    }, 3000)
     isEditingStudent.value = false
   }
+}
+
+// HANDLES STUDENT UNASSIGNMENT WITH CONFIRMATION DIALOG AND VALIDATION
+function handleStudentUnassignClick() {
+  if (!localPc.value)
+    return
+
+  if (!isConfirmingUnassign.value) {
+    isConfirmingUnassign.value = true
+    unassignConfirmText.value = ''
+    studentError.value = ''
+    return
+  }
+
+  if (unassignConfirmText.value.trim().toLowerCase() !== 'unassign') {
+    studentError.value = 'Please type "unassign" to confirm.'
+    if (studentErrorTimeout !== null)
+      window.clearTimeout(studentErrorTimeout)
+    studentErrorTimeout = window.setTimeout(() => {
+      studentError.value = ''
+      studentErrorTimeout = null
+    }, 3000)
+    return
+  }
+
+  const updated = {
+    ...localPc.value,
+    studentName: '',
+    studentYear: '',
+    studentCourse: '',
+  }
+
+  studentName.value = ''
+  studentYear.value = ''
+  studentCourse.value = ''
+  isEditingStudent.value = false
+  isConfirmingUnassign.value = false
+  unassignConfirmText.value = ''
+  studentError.value = ''
+  localPc.value = updated
 }
 
 // EMITS CLOSE EVENT FOR MODAL
@@ -254,13 +282,23 @@ function handleClose() {
           <div class="space-y-3">
             <div class="flex items-center justify-between">
               <h3 class="text-xs font-semibold tracking-wide uppercase text-gray-500">Student</h3>
-              <button
-                type="button"
-                class="px-3 py-1 rounded-full bg-gradient-to-r from-[#013aae] to-[#5b8ae5] text-[11px] font-semibold text-white shadow-sm hover:shadow-md transition-all cursor-pointer"
-                @click="handleStudentEditClick"
-              >
-                {{ hasExistingStudent ? (isEditingStudent ? 'Save' : 'Edit') : 'Save' }}
-              </button>
+              <div class="flex items-center gap-2">
+                <button
+                  v-if="hasExistingStudent"
+                  type="button"
+                  class="px-3 py-1 rounded-full border border-red-200 text-[11px] font-semibold text-red-600 bg-red-50 hover:bg-red-100 transition-all cursor-pointer"
+                  @click="handleStudentUnassignClick"
+                >
+                  {{ isConfirmingUnassign ? 'Confirm' : 'Unassign' }}
+                </button>
+                <button
+                  type="button"
+                  class="px-3 py-1 rounded-full bg-gradient-to-r from-[#013aae] to-[#5b8ae5] text-[11px] font-semibold text-white shadow-sm hover:shadow-md transition-all cursor-pointer"
+                  @click="handleStudentEditClick"
+                >
+                  {{ hasExistingStudent ? (isEditingStudent ? 'Save' : 'Edit') : 'Save' }}
+                </button>
+              </div>
             </div>
             <div class="space-y-4 bg-gray-50/60 p-4 rounded-xl border border-gray-100">
               <div
@@ -270,10 +308,16 @@ function handleClose() {
                 {{ studentError }}
               </div>
               <div
-                v-if="studentSuccess"
-                class="text-xs text-green-700 bg-green-50 border border-green-200 rounded-md px-3 py-2"
+                v-if="hasExistingStudent && isConfirmingUnassign"
+                class="space-y-1 text-[11px] text-gray-600"
               >
-                {{ studentSuccess }}
+                <p>To confirm unassigning this student, type <span class="font-semibold">unassign</span> below and click <span class="font-semibold">Confirm</span>.</p>
+                <input
+                  v-model="unassignConfirmText"
+                  type="text"
+                  placeholder="Type &quot;unassign&quot; to confirm"
+                  class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-300 placeholder:text-gray-400"
+                >
               </div>
               <div>
                 <input
