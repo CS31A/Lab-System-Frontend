@@ -1,7 +1,7 @@
+import type { Admin, NotificationSettings, Room, SeatLayout } from '@/interfaces/interfaces'
 // IMPORTS
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { SeatLayout, NotificationSettings, Room, Admin } from '@/interfaces/interfaces'
 
 // SETTINGS STORE DEFINITION
 export const useSettingsStore = defineStore('settings', () => {
@@ -9,14 +9,14 @@ export const useSettingsStore = defineStore('settings', () => {
   // SEAT LAYOUT CONFIGURATION
   const seatLayout = ref<SeatLayout>({
     rows: 4,
-    columns: 5
+    columns: 5,
   })
 
   // NOTIFICATION SETTINGS
   const notificationSettings = ref<NotificationSettings>({
     emailNotifications: true,
     systemLogs: true,
-    conflictAlerts: true
+    conflictAlerts: true,
   })
 
   // LIST OF ROOMS
@@ -27,7 +27,7 @@ export const useSettingsStore = defineStore('settings', () => {
     { id: '4', name: 'Slab 4', capacity: 25 },
     { id: '5', name: 'Slab 5', capacity: 25 },
     { id: '6', name: 'SCLAB', capacity: 30 },
-    { id: '7', name: 'Linux', capacity: 15 }
+    { id: '7', name: 'Linux', capacity: 15 },
   ])
 
   // LIST OF ADMINS
@@ -36,14 +36,14 @@ export const useSettingsStore = defineStore('settings', () => {
       id: '1',
       name: 'Admin',
       email: 'admin@gmail.com',
-      lastLogin: 'Today, 09:45 AM'
+      lastLogin: 'Today, 09:45 AM',
     },
     {
       id: '2',
       name: 'System Administrator',
       email: 'system.admin@gmail.com',
-      lastLogin: 'Yesterday, 4:30 PM'
-    }
+      lastLogin: 'Yesterday, 4:30 PM',
+    },
   ])
 
   // METHODS
@@ -61,7 +61,7 @@ export const useSettingsStore = defineStore('settings', () => {
   const addRoom = (room: Omit<Room, 'id'>) => {
     const newRoom: Room = {
       ...room,
-      id: Date.now().toString()
+      id: Date.now().toString(),
     }
     rooms.value.push(newRoom)
   }
@@ -79,7 +79,7 @@ export const useSettingsStore = defineStore('settings', () => {
     const newAdmin: Admin = {
       ...admin,
       id: Date.now().toString(),
-      lastLogin: 'Never'
+      lastLogin: 'Never',
     }
     admins.value.push(newAdmin)
   }
@@ -111,6 +111,6 @@ export const useSettingsStore = defineStore('settings', () => {
     removeRoom,
     addAdmin,
     removeAdmin,
-    updateAdmin
+    updateAdmin,
   }
 })

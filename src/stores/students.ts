@@ -114,7 +114,9 @@ export const useStudentStore = defineStore('students', () => {
   const studentsPerRoom = computed(() => {
     const roomCounts: Record<string, number> = {}
     students.value.forEach((student) => {
-      roomCounts[student.room] = (roomCounts[student.room] || 0) + 1
+      if (student.room) {
+        roomCounts[student.room] = (roomCounts[student.room] || 0) + 1
+      }
     })
     return roomCounts
   })

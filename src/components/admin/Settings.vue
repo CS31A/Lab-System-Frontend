@@ -1,18 +1,18 @@
 <script setup lang="ts">
+import { Download, Upload } from 'lucide-vue-next'
 // IMPORTS
 import { ref } from 'vue'
-import { Download, Upload } from 'lucide-vue-next'
 
 // REFS & REACTIVE STATE
 const seatLayout = ref({
   rows: '4',
-  columns: '5'
+  columns: '5',
 })
 
 const notificationSettings = ref({
   emailNotifications: true,
   systemLogs: true,
-  conflictAlerts: true
+  conflictAlerts: true,
 })
 
 const newRoomName = ref('')
@@ -21,7 +21,7 @@ const newRoomCapacity = ref<number | null>(null)
 const newAdmin = ref({
   name: '',
   email: '',
-  password: ''
+  password: '',
 })
 
 const rooms = ref([
@@ -31,7 +31,7 @@ const rooms = ref([
   { id: '4', name: 'Slab 4', capacity: 25 },
   { id: '5', name: 'Slab 5', capacity: 25 },
   { id: '6', name: 'SCLAB', capacity: 30 },
-  { id: '7', name: 'Linux', capacity: 15 }
+  { id: '7', name: 'Linux', capacity: 15 },
 ])
 
 const admins = ref([
@@ -39,30 +39,31 @@ const admins = ref([
     id: '1',
     name: 'Admin',
     email: 'admin@gmail.com',
-    lastLogin: 'Today, 09:45 AM'
+    lastLogin: 'Today, 09:45 AM',
   },
   {
     id: '2',
     name: 'Albert Einstein',
     email: 'albert.einstein@gmail.com',
-    lastLogin: 'Yesterday, 4:30 PM'
-  }
+    lastLogin: 'Yesterday, 4:30 PM',
+  },
 ])
 
 // METHODS
 // UPDATE SEAT LAYOUT CONFIGURATION
-const updateSeatLayout = () => {
+function updateSeatLayout() {
+  // eslint-disable-next-line no-console
   console.log('Updating seat layout:', seatLayout.value)
 }
 
 // ADD NEW ROOM TO ROOMS LIST
-const addRoom = () => {
+function addRoom() {
   // VALIDATE REQUIRED FIELDS
   if (newRoomName.value && newRoomCapacity.value) {
     rooms.value.push({
       id: Date.now().toString(),
       name: newRoomName.value,
-      capacity: newRoomCapacity.value
+      capacity: newRoomCapacity.value,
     })
     // RESET FORM FIELDS
     newRoomName.value = ''
@@ -71,8 +72,9 @@ const addRoom = () => {
 }
 
 // REMOVE ROOM FROM ROOMS LIST
-const removeRoom = (roomId: string) => {
+function removeRoom(roomId: string) {
   // CONFIRM BEFORE DELETION
+  // eslint-disable-next-line no-alert
   if (confirm('Are you sure you want to remove this room?')) {
     const index = rooms.value.findIndex(room => room.id === roomId)
     if (index > -1) {
@@ -82,19 +84,20 @@ const removeRoom = (roomId: string) => {
 }
 
 // SAVE NOTIFICATION SETTINGS
-const saveNotificationSettings = () => {
+function saveNotificationSettings() {
+  // eslint-disable-next-line no-console
   console.log('Saving notification settings:', notificationSettings.value)
 }
 
 // ADD NEW ADMIN ACCOUNT
-const addAdmin = () => {
+function addAdmin() {
   // VALIDATE ALL REQUIRED FIELDS
   if (newAdmin.value.name && newAdmin.value.email && newAdmin.value.password) {
     admins.value.push({
       id: Date.now().toString(),
       name: newAdmin.value.name,
       email: newAdmin.value.email,
-      lastLogin: 'Never'
+      lastLogin: 'Never',
     })
     // RESET FORM FIELDS
     newAdmin.value = { name: '', email: '', password: '' }
@@ -102,8 +105,9 @@ const addAdmin = () => {
 }
 
 // DELETE ADMIN ACCOUNT
-const deleteAdmin = (adminId: string) => {
+function deleteAdmin(adminId: string) {
   // CONFIRM BEFORE DELETION
+  // eslint-disable-next-line no-alert
   if (confirm('Are you sure you want to delete this admin?')) {
     const index = admins.value.findIndex(admin => admin.id === adminId)
     if (index > -1) {
@@ -115,12 +119,16 @@ const deleteAdmin = (adminId: string) => {
 
 <template>
   <div>
-    <h2 class="text-2xl font-bold text-gray-800 mb-6">System Settings</h2>
-    
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">
+      System Settings
+    </h2>
+
     <!-- SEAT LAYOUT -->
     <div class="bg-white rounded-lg shadow overflow-hidden mb-6">
       <div class="p-4 border-b border-gray-200">
-        <h3 class="text-lg font-medium text-gray-800">Seat Layout Configuration</h3>
+        <h3 class="text-lg font-medium text-gray-800">
+          Seat Layout Configuration
+        </h3>
       </div>
       <div class="p-6">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -130,9 +138,15 @@ const deleteAdmin = (adminId: string) => {
               v-model="seatLayout.rows"
               class="block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#4299e1] focus:border-[#4299e1]"
             >
-              <option value="4">4</option>
-              <option value="5">5</option>
-              <option value="6">6</option>
+              <option value="4">
+                4
+              </option>
+              <option value="5">
+                5
+              </option>
+              <option value="6">
+                6
+              </option>
             </select>
           </div>
           <div>
@@ -141,9 +155,15 @@ const deleteAdmin = (adminId: string) => {
               v-model="seatLayout.columns"
               class="block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#4299e1] focus:border-[#4299e1]"
             >
-              <option value="5">5</option>
-              <option value="6">6</option>
-              <option value="7">7</option>
+              <option value="5">
+                5
+              </option>
+              <option value="6">
+                6
+              </option>
+              <option value="7">
+                7
+              </option>
             </select>
           </div>
         </div>
@@ -159,7 +179,9 @@ const deleteAdmin = (adminId: string) => {
     <!-- LAB MANAGEMENT -->
     <div class="bg-white rounded-lg shadow overflow-hidden mb-6">
       <div class="p-4 border-b border-gray-200">
-        <h3 class="text-lg font-medium text-gray-800">Lab Management</h3>
+        <h3 class="text-lg font-medium text-gray-800">
+          Lab Management
+        </h3>
       </div>
       <div class="p-6">
         <div class="space-y-4">
@@ -169,8 +191,12 @@ const deleteAdmin = (adminId: string) => {
             class="flex items-center justify-between"
           >
             <div>
-              <p class="text-sm font-medium text-gray-800">{{ room.name }}</p>
-              <p class="text-xs text-gray-500">Capacity: {{ room.capacity }} seats</p>
+              <p class="text-sm font-medium text-gray-800">
+                {{ room.name }}
+              </p>
+              <p class="text-xs text-gray-500">
+                Capacity: {{ room.capacity }} seats
+              </p>
             </div>
             <button
               class="text-red-600 hover:text-red-900 text-sm font-medium transition-colors"
@@ -212,14 +238,20 @@ const deleteAdmin = (adminId: string) => {
       <!-- NOTIFICATION SETTINGS -->
       <div class="bg-white rounded-lg shadow overflow-hidden">
         <div class="p-4 border-b border-gray-200">
-          <h3 class="text-lg font-medium text-gray-800">Notification Settings</h3>
+          <h3 class="text-lg font-medium text-gray-800">
+            Notification Settings
+          </h3>
         </div>
         <div class="p-6">
           <div class="space-y-4">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm font-medium text-gray-800">Email Notifications</p>
-                <p class="text-xs text-gray-500">Receive email alerts for important changes</p>
+                <p class="text-sm font-medium text-gray-800">
+                  Email Notifications
+                </p>
+                <p class="text-xs text-gray-500">
+                  Receive email alerts for important changes
+                </p>
               </div>
               <label class="inline-flex items-center cursor-pointer">
                 <input
@@ -227,13 +259,17 @@ const deleteAdmin = (adminId: string) => {
                   type="checkbox"
                   class="sr-only peer"
                 >
-                <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600" />
               </label>
             </div>
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm font-medium text-gray-800">System Logs</p>
-                <p class="text-xs text-gray-500">Keep records of all admin activities</p>
+                <p class="text-sm font-medium text-gray-800">
+                  System Logs
+                </p>
+                <p class="text-xs text-gray-500">
+                  Keep records of all admin activities
+                </p>
               </div>
               <label class="inline-flex items-center cursor-pointer">
                 <input
@@ -241,13 +277,17 @@ const deleteAdmin = (adminId: string) => {
                   type="checkbox"
                   class="sr-only peer"
                 >
-                <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600" />
               </label>
             </div>
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm font-medium text-gray-800">Conflict Alerts</p>
-                <p class="text-xs text-gray-500">Notify about scheduling conflicts</p>
+                <p class="text-sm font-medium text-gray-800">
+                  Conflict Alerts
+                </p>
+                <p class="text-xs text-gray-500">
+                  Notify about scheduling conflicts
+                </p>
               </div>
               <label class="inline-flex items-center cursor-pointer">
                 <input
@@ -255,7 +295,7 @@ const deleteAdmin = (adminId: string) => {
                   type="checkbox"
                   class="sr-only peer"
                 >
-                <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600" />
               </label>
             </div>
           </div>
@@ -271,7 +311,9 @@ const deleteAdmin = (adminId: string) => {
       <!-- DATA MANAGEMENT -->
       <div class="bg-white rounded-lg shadow overflow-hidden">
         <div class="p-4 border-b border-gray-200">
-          <h3 class="text-lg font-medium text-gray-800">Data Management</h3>
+          <h3 class="text-lg font-medium text-gray-800">
+            Data Management
+          </h3>
         </div>
         <div class="p-6">
           <div class="space-y-4">
@@ -297,7 +339,9 @@ const deleteAdmin = (adminId: string) => {
     <!-- ADMIN ACCOUNTS -->
     <div class="bg-white rounded-lg shadow overflow-hidden">
       <div class="p-4 border-b border-gray-200">
-        <h3 class="text-lg font-medium text-gray-800">Admin Accounts</h3>
+        <h3 class="text-lg font-medium text-gray-800">
+          Admin Accounts
+        </h3>
       </div>
       <div class="p-6">
         <div class="overflow-x-auto">
@@ -345,7 +389,9 @@ const deleteAdmin = (adminId: string) => {
           </table>
         </div>
         <div class="mt-6">
-          <h4 class="text-sm font-medium text-gray-700 mb-2">Add New Admin</h4>
+          <h4 class="text-sm font-medium text-gray-700 mb-2">
+            Add New Admin
+          </h4>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label class="block text-xs font-medium text-gray-500 mb-1">Name</label>

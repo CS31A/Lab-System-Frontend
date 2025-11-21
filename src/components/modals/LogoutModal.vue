@@ -14,11 +14,11 @@ const router = useRouter()
 const authStore = useAuthStore()
 
 // METHODS
-const handleClose = () => {
+function handleClose() {
   emit('close')
 }
 
-const handleLogout = () => {
+function handleLogout() {
   authStore.logout()
   emit('close')
   router.push('/login')
@@ -36,7 +36,9 @@ const handleLogout = () => {
           <div class="p-2 rounded-full bg-red-100 text-red-600 mr-3">
             <AlertTriangle :size="20" />
           </div>
-          <h3 class="text-lg font-medium text-gray-900">Confirm Logout</h3>
+          <h3 class="text-lg font-medium text-gray-900">
+            Confirm Logout
+          </h3>
         </div>
         <p class="text-sm text-gray-500 mb-6">
           Are you sure you want to log out? You'll need to sign in again to access the system.

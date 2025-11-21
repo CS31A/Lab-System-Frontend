@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import { Monitor } from 'lucide-vue-next'
+import { ref } from 'vue'
 
 defineOptions({
   name: 'PCLayout',
@@ -37,7 +37,9 @@ function getStatusColor(status: string) {
 <template>
   <div class="flex-1 p-6 bg-white">
     <div class="mb-6 flex flex-col items-center">
-      <h2 class="text-4xl font-bold text-[#013aae] mb-1 text-center" style="font-family: var(--konkhmer-font);">SLAB 2</h2>
+      <h2 class="text-4xl font-bold text-[#013aae] mb-1 text-center" style="font-family: var(--konkhmer-font);">
+        SLAB 2
+      </h2>
       <span class="text-[#39A249] bg-[#C9F6CB] text-sm rounded-2xl py-1 px-3">Attended</span>
 
       <!-- PC LAYOUT -->
@@ -45,13 +47,12 @@ function getStatusColor(status: string) {
         <Monitor
           v-for="pc in pcStatus"
           :key="pc.id"
-          @click="selectPC(pc)"
-          :class="[
+          class="w-9 h-9 cursor-pointer transition-all duration-200 hover:scale-110" :class="[
             `div${pc.id}`,
-            'w-9 h-9 cursor-pointer transition-all duration-200 hover:scale-110',
-            getStatusColor(pc.status)
+            getStatusColor(pc.status),
           ]"
           :title="`PC ${pc.id}${pc.status === 'assigned' ? '' : ''}`"
+          @click="selectPC(pc)"
         />
       </div>
 

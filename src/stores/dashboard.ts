@@ -1,7 +1,7 @@
+import type { Schedule } from '@/interfaces/interfaces'
 // IMPORTS
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { Schedule } from '@/interfaces/interfaces'
 
 // DASHBOARD STORE DEFINITION
 export const useDashboardStore = defineStore('dashboard', () => {
@@ -14,7 +14,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
       room: 'Slab 1',
       time: '9:00 AM - 10:30 AM',
       teacher: 'Donald Francisco',
-      color: 'primary'
+      color: 'primary',
     },
     {
       id: '2',
@@ -22,7 +22,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
       room: 'SCLAB',
       time: '11:00 AM - 12:30 PM',
       teacher: 'Gojo Satoru',
-      color: 'green'
+      color: 'green',
     },
     {
       id: '3',
@@ -30,8 +30,8 @@ export const useDashboardStore = defineStore('dashboard', () => {
       room: 'Slab 3',
       time: '2:00 PM - 3:30 PM',
       teacher: 'Noel Lehitimas',
-      color: 'yellow'
-    }
+      color: 'yellow',
+    },
   ])
 
   // DASHBOARD STATISTICS
@@ -39,7 +39,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
     totalRooms: 7,
     totalStudents: 5,
     totalTeachers: 5,
-    activeSchedules: 7
+    activeSchedules: 7,
   })
 
   // METHODS
@@ -47,7 +47,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
   const addSchedule = (Schedule: Omit<Schedule, 'id'>) => {
     const newSchedule: Schedule = {
       ...Schedule,
-      id: Date.now().toString()
+      id: Date.now().toString(),
     }
     upcomingSchedules.value.push(newSchedule)
   }
@@ -70,6 +70,6 @@ export const useDashboardStore = defineStore('dashboard', () => {
     stats,
     addSchedule,
     removeSchedule,
-    updateStats
+    updateStats,
   }
 })

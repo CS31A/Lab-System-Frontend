@@ -1,8 +1,8 @@
 <script setup lang="ts">
+import type { FilterConfig } from '@/interfaces/interfaces'
+import { Search } from 'lucide-vue-next'
 // IMPORTS
 import { computed, reactive, watch } from 'vue'
-import { Search } from 'lucide-vue-next'
-import type { Option, FilterConfig } from '@/interfaces/interfaces'
 
 // PROPS
 const props = defineProps<{
@@ -22,7 +22,7 @@ const emits = defineEmits<{
 // REFS & REACTIVE STATE
 const localSearch = computed({
   get: () => props.modelValue ?? '',
-  set: (v: string) => emits('update:modelValue', v)
+  set: (v: string) => emits('update:modelValue', v),
 })
 
 const localFilters = reactive<Record<string, any>>({ ...(props.filters || {}) })
@@ -33,7 +33,7 @@ watch(
   (val) => {
     Object.assign(localFilters, val || {})
   },
-  { deep: true }
+  { deep: true },
 )
 
 watch(
@@ -41,11 +41,11 @@ watch(
   (val) => {
     emits('update:filters', { ...val })
   },
-  { deep: true }
+  { deep: true },
 )
 
 // METHODS
-const onEnter = () => {
+function onEnter() {
   emits('search', localSearch.value)
 }
 </script>
@@ -63,7 +63,7 @@ const onEnter = () => {
         class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-[#4299e1] focus:border-[#4299e1] sm:text-sm"
         :placeholder="placeholder || 'Search...'"
         @keyup.enter="onEnter"
-      />
+      >
     </div>
 
     <!-- FILTERS -->
@@ -73,7 +73,9 @@ const onEnter = () => {
           v-model="localFilters[cfg.key]"
           class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#4299e1] focus:border-[#4299e1]"
         >
-          <option :value="''">All</option>
+          <option value="">
+            All
+          </option>
           <option v-for="opt in cfg.options" :key="opt.value" :value="opt.value">
             {{ opt.label }}
           </option>
