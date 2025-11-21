@@ -81,12 +81,12 @@ const emit = defineEmits<{
 }>()
 
 // METHODS
-const handleBack = () => {
+function handleBack() {
   emit('back')
 }
 
-const handleSeatClick = (seatId: string, isOccupied: boolean) => {
-  emit('seat-click', seatId, isOccupied)
+function handleSeatClick(seatId: string, isOccupied: boolean) {
+  emit('seatClick', seatId, isOccupied)
 }
 </script>
 
@@ -101,7 +101,9 @@ const handleSeatClick = (seatId: string, isOccupied: boolean) => {
           <ArrowLeft class="mr-2 w-4 h-4" />
           Back to Classrooms
         </button>
-        <h2 class="text-2xl font-bold text-gray-800">{{ room.name }} Seat Map</h2>
+        <h2 class="text-2xl font-bold text-gray-800">
+          {{ room.name }} Seat Map
+        </h2>
       </div>
       <div class="flex space-x-2">
         <select class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#4299e1] focus:border-[#4299e1]">

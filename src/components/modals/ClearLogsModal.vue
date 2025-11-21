@@ -8,11 +8,12 @@ const emit = defineEmits<{
 }>()
 
 // METHODS
-const handleClose = () => {
+function handleClose() {
   emit('close')
 }
 
-const handleClearLogs = () => {
+function handleClearLogs() {
+  // eslint-disable-next-line no-console
   console.log('Clearing logs...')
   emit('close')
 }
@@ -29,7 +30,9 @@ const handleClearLogs = () => {
           <div class="p-2 rounded-full bg-red-100 text-red-600 mr-3">
             <AlertTriangle :size="20" />
           </div>
-          <h3 class="text-lg font-medium text-gray-900">Clear Activity Logs</h3>
+          <h3 class="text-lg font-medium text-gray-900">
+            Clear Activity Logs
+          </h3>
         </div>
         <p class="text-sm text-gray-500 mb-6">
           Are you sure you want to clear all activity logs? This action cannot be undone.

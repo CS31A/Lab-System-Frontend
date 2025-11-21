@@ -12,12 +12,12 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000
 
 // Create axios instance
 export const api: AxiosInstance = axios.create({
-	baseURL: API_BASE_URL,
-	headers: {
-		'Content-Type': 'application/json',
-	},
-	timeout: 10000, // 10 second timeout
-	withCredentials: true
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  timeout: 10000, // 10 second timeout
+  withCredentials: true,
 })
 
 let isRefreshing = false
@@ -41,13 +41,13 @@ const processQueue = (error: any = null) => {
 
 // Request interceptor for auth token
 api.interceptors.request.use(
-	(config) => {
-		// Auth token will be added here if set
-		return config
-	},
-	(error) => {
-		return Promise.reject(error)
-	},
+  (config) => {
+    // Auth token will be added here if set
+    return config
+  },
+  (error) => {
+    return Promise.reject(error)
+  },
 )
 
 // Response interceptor for error handling
@@ -111,20 +111,20 @@ api.interceptors.response.use(
 			// This can be customized based on your auth flow
 		}
 
-		return Promise.reject(error)
-	},
+    return Promise.reject(error)
+  },
 )
 
 /**
  * Set authorization token for all future requests
  */
 export function setAuthToken(token: string | null) {
-	if (token) {
-		api.defaults.headers.common.Authorization = `Bearer ${token}`
-	}
-	else {
-		delete api.defaults.headers.common.Authorization
-	}
+  if (token) {
+    api.defaults.headers.common.Authorization = `Bearer ${token}`
+  }
+  else {
+    delete api.defaults.headers.common.Authorization
+  }
 }
 
 // Export default axios instance

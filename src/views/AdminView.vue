@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // IMPORTS
-import { ref, provide, defineAsyncComponent } from 'vue'
+import { defineAsyncComponent, provide, ref } from 'vue'
 import { RouterView } from 'vue-router'
 
 // LAYOUT COMPONENTS
@@ -16,11 +16,11 @@ const StudentInfoModal = defineAsyncComponent(() => import('@/components/modals/
 // MODAL STATE
 const activeModal = ref<string | null>(null)
 
-const showModal = (modalName: string) => {
+function showModal(modalName: string) {
   activeModal.value = modalName
 }
 
-const hideModal = () => {
+function hideModal() {
   activeModal.value = null
 }
 
@@ -39,7 +39,7 @@ provide('showModal', showModal)
       <div class="content-area flex-1 flex flex-col overflow-hidden">
         <!-- Layout Header -->
         <LayoutHeader />
-        
+
         <!-- DYNAMIC CONTENT -->
         <main class="flex-1 overflow-auto p-6">
           <RouterView />

@@ -34,6 +34,9 @@ const currentSection = computed(() => {
     const labNum = path.split('/')[2]
     return `slab${labNum}`
   }
+  if (path === '/lab_availability') {
+    return 'lab_availability'
+  }
   return ''
 })
 
@@ -107,7 +110,7 @@ function handleLogout() {
   <aside
     class="h-full border-r border-gray-200 bg-white transition-all duration-300 flex flex-col"
     :class="[
-      isSidebarOpen ? 'w-60' : 'w-16'
+      isSidebarOpen ? 'w-60' : 'w-16',
     ]"
   >
     <div class="p-3 flex flex-col h-full">
@@ -254,8 +257,10 @@ function handleLogout() {
 
       <!-- BOTTOM ACTIONS -->
       <div class="pt-4 mt-auto">
-        <h3 v-show="isSidebarOpen" class="px-3 py-1 text-xs font-medium text-gray-500">Support</h3>
-        <button 
+        <h3 v-show="isSidebarOpen" class="px-3 py-1 text-xs font-medium text-gray-500">
+          Support
+        </h3>
+        <button
           class="group w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-blue-100 cursor-pointer"
           :class="isActive('settings') ? 'bg-blue-50 text-blue-700 ring-1 ring-blue-200' : ''"
           @click="navigate('settings')"
@@ -277,16 +282,15 @@ function handleLogout() {
       </div>
     </div>
   </aside>
-
 </template>
 
 <style scoped>
  .fade-enter-active,
- .fade-leave-active {
-   transition: opacity 0.15s ease;
- }
- .fade-enter-from,
- .fade-leave-to {
-   opacity: 0;
- }
+.fade-leave-active {
+  transition: opacity 0.15s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
 </style>

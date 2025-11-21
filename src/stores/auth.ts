@@ -1,18 +1,15 @@
+import type { User } from '@/interfaces/interfaces'
 // IMPORTS
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
-import type { User } from '@/interfaces/interfaces'
+import { computed, ref } from 'vue'
+import api from '@/boot/axios'
 
 // AUTH STORE DEFINITION
 export const useAuthStore = defineStore('auth', () => {
   // REFS & REACTIVE STATE
-  // CURRENT AUTHENTICATED USER
-  const user = ref<User | null>({
-    id: '1',
-    name: 'Admin',
-    email: 'admin@gmail.com',
-    role: 'admin'
-  })
+  // CURRENT AUTHENTICATED USER - INITIALIZE FROM LOCALSTORAGE IF AVAILABLE
+  const storedUser = localStorage.getItem('user')
+  const user = ref<User | null>(storedUser ? JSON.parse(storedUser) : null)
 
   // COMPUTED PROPERTIES
   // CHECK IF USER IS AUTHENTICATED
@@ -24,26 +21,43 @@ export const useAuthStore = defineStore('auth', () => {
   // LOGIN USER WITH EMAIL AND PASSWORD
   const login = async (email: string, password: string) => {
     try {
-      // SIMULATE API CALL DELAY
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      // SET USER DATA
-      user.value = {
-        id: '1',
-        name: 'Admin',
+      // CALL AUTHENTICATION API (COOKIE-BASED)
+      const response = await api.post('/auth/login', {
         email,
-        role: 'admin'
-      }
-      
+        password,
+      })
+
+      // SET USER DATA FROM API RESPONSE
+      user.value = response.data.user
+
+      // PERSIST USER TO LOCALSTORAGE
+      localStorage.setItem('user', JSON.stringify(response.data.user))
+
       return { success: true }
-    } catch (error) {
-      return { success: false, error: 'Invalid credentials' }
+    }
+    catch (error: any) {
+      console.error('Login failed:', error)
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Invalid credentials',
+      }
     }
   }
 
   // LOGOUT USER AND CLEAR SESSION
-  const logout = () => {
-    user.value = null
+  const logout = async () => {
+    try {
+      // CALL LOGOUT API TO CLEAR COOKIE
+      await api.post('/auth/logout')
+    }
+    catch (error) {
+      console.error('Logout API call failed:', error)
+    }
+    finally {
+      // CLEAR LOCAL USER DATA REGARDLESS OF API RESPONSE
+      user.value = null
+      localStorage.removeItem('user')
+    }
   }
 
   // UPDATE USER PROFILE DATA
@@ -59,6 +73,6 @@ export const useAuthStore = defineStore('auth', () => {
     currentUser,
     login,
     logout,
-    updateProfile
+    updateProfile,
   }
 })

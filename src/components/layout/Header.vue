@@ -1,8 +1,8 @@
 <script setup lang="ts">
+import { AlertCircle, AlertTriangle, Bell, CheckCircle, ChevronDown, Menu, User } from 'lucide-vue-next'
 // IMPORTS
-import { ref, computed, inject } from 'vue'
+import { computed, inject, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { Menu, Bell, User, ChevronDown, AlertCircle, AlertTriangle, CheckCircle } from 'lucide-vue-next'
 import SearchFilterBar from '@/components/global/SearchFilterBar.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useNotificationStore } from '@/stores/notifications'
@@ -19,6 +19,8 @@ const showModal = inject<(modalName: string) => void>('showModal')!
 const searchQuery = ref('')
 const isProfileDropdownOpen = ref(false)
 const isNotificationsOpen = ref(false)
+// Debounce timer reference for notification fetch
+let notificationFetchTimer: number | null = null
 const isMobileMenuOpen = ref(false)
 
 // COMPUTED PROPERTIES
@@ -28,43 +30,75 @@ const notificationCount = computed(() => notificationStore.unreadCount)
 
 // METHODS
 // TOGGLE MOBILE MENU VISIBILITY
-const toggleMobileMenu = () => {
+function toggleMobileMenu() {
   isMobileMenuOpen.value = !isMobileMenuOpen.value
 }
 
 // TOGGLE PROFILE DROPDOWN AND CLOSE NOTIFICATIONS
-const toggleProfileDropdown = () => {
+function toggleProfileDropdown() {
   isProfileDropdownOpen.value = !isProfileDropdownOpen.value
   isNotificationsOpen.value = false
 }
 
 // TOGGLE NOTIFICATIONS DROPDOWN AND CLOSE PROFILE
-const toggleNotifications = () => {
+function toggleNotifications() {
   isNotificationsOpen.value = !isNotificationsOpen.value
   isProfileDropdownOpen.value = false
+  // Fetch latest notifications when opened
+  if (isNotificationsOpen.value) {
+    // Debounce notification fetching to avoid multiple calls when toggling
+    if (notificationFetchTimer) {
+      window.clearTimeout(notificationFetchTimer)
+    }
+    notificationFetchTimer = window.setTimeout(() => {
+      notificationStore.forceFetchNotifications()
+      notificationFetchTimer = null
+    }, 300) // 300ms debounce
+  }
+}
+
+// MARK NOTIFICATION AS READ
+function markAsRead(notificationId: string) {
+  notificationStore.markAsRead(notificationId)
 }
 
 // HANDLE SEARCH FUNCTIONALITY
-const handleSearch = () => {
+function handleSearch() {
   if (searchQuery.value.trim()) {
-    console.log('Searching for:', searchQuery.value)
+    // Navigate to appropriate page based on current route or search context
+    const currentRoute = router.currentRoute.value.path
+
+    // If in admin section, stay in admin and apply search
+    if (currentRoute.includes('/admin/students')) {
+      router.push(`/admin/students?search=${encodeURIComponent(searchQuery.value)}`)
+    }
+    else if (currentRoute.includes('/admin/teachers')) {
+      router.push(`/admin/teachers?search=${encodeURIComponent(searchQuery.value)}`)
+    }
+    else if (currentRoute.includes('/admin/schedules')) {
+      router.push(`/admin/schedules?search=${encodeURIComponent(searchQuery.value)}`)
+    }
+    else {
+      // Default: go to dashboard with search query
+      router.push(`/admin/dashboard?search=${encodeURIComponent(searchQuery.value)}`)
+    }
   }
 }
 
 // NAVIGATE TO USER PROFILE PAGE
-const goToProfile = () => {
+function goToProfile() {
   router.push('/profile')
   isProfileDropdownOpen.value = false
 }
 
 // NAVIGATE TO SETTINGS PAGE
-const goToSettings = () => {
+function goToSettings() {
   router.push('/settings')
   isProfileDropdownOpen.value = false
 }
 
 // SHOW LOGOUT CONFIRMATION MODAL
-const showLogoutModal = () => {
+function showLogoutModal() {
   showModal('logout')
   isProfileDropdownOpen.value = false
 }
@@ -93,7 +127,7 @@ document.addEventListener('click', (event) => {
 
         <!-- SEARCH BAR -->
         <div class="ml-4 w-full max-w-md">
-          <SearchFilterBar v-model="searchQuery" :placeholder="'Search...'" @search="handleSearch" />
+          <SearchFilterBar v-model="searchQuery" placeholder="Search..." @search="handleSearch" />
         </div>
       </div>
 
@@ -163,31 +197,43 @@ document.addEventListener('click', (event) => {
       class="absolute right-4 top-16 w-80 bg-white rounded-md shadow-lg border border-gray-200 z-20"
     >
       <div class="p-4 border-b border-gray-200">
-        <h3 class="text-lg font-medium text-gray-800">Notifications</h3>
+        <h3 class="text-lg font-medium text-gray-800">
+          Notifications
+        </h3>
       </div>
       <div class="max-h-96 overflow-y-auto">
         <div
           v-for="notification in notifications"
           :key="notification.id"
-          class="flex items-start p-4 hover:bg-gray-50 transition-colors"
+          class="flex items-start p-4 hover:bg-gray-50 transition-colors cursor-pointer" :class="[
+            notification.read ? 'opacity-60' : '',
+          ]"
+          @click="markAsRead(notification.id)"
         >
-          <div :class="[
-            'p-1 rounded-full mr-3',
-            notification.type === 'error' ? 'bg-red-100 text-red-500' :
-            notification.type === 'warning' ? 'bg-yellow-100 text-yellow-500' :
-            'bg-green-100 text-green-500'
-          ]">
+          <div
+            class="p-1 rounded-full mr-3" :class="[
+              notification.type === 'error' ? 'bg-red-100 text-red-500'
+              : notification.type === 'warning' ? 'bg-yellow-100 text-yellow-500'
+                : 'bg-green-100 text-green-500',
+            ]"
+          >
             <component
-              :is="notification.type === 'error' ? AlertCircle : 
-                   notification.type === 'warning' ? AlertTriangle : 
-                   CheckCircle"
+              :is="notification.type === 'error' ? AlertCircle
+                : notification.type === 'warning' ? AlertTriangle
+                  : CheckCircle"
               :size="16"
             />
           </div>
           <div class="flex-1">
-            <p class="text-sm font-medium text-gray-800">{{ notification.title }}</p>
-            <p class="text-xs text-gray-500">{{ notification.message }}</p>
-            <p class="text-xs text-gray-400 mt-1">{{ notification.time }}</p>
+            <p class="text-sm font-medium text-gray-800">
+              {{ notification.title }}
+            </p>
+            <p class="text-xs text-gray-500">
+              {{ notification.message }}
+            </p>
+            <p class="text-xs text-gray-400 mt-1">
+              {{ notification.time }}
+            </p>
           </div>
         </div>
       </div>

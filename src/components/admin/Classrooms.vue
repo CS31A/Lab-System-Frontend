@@ -19,7 +19,6 @@ const handleDeleteClassroom = async () => {
 }
 </script>
 
-
 <template>
   <div>
     <div class="flex justify-between items-center mb-6">

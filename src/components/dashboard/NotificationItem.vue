@@ -1,9 +1,8 @@
 <script setup lang="ts">
-// IMPORTS
-import { computed, onMounted } from 'vue'
-import { AlertCircle, AlertTriangle, CheckCircle } from 'lucide-vue-next'
 import type { Notification } from '@/interfaces/interfaces'
-import { useNotificationStore } from '@/stores/notifications'
+import { AlertCircle, AlertTriangle, CheckCircle } from 'lucide-vue-next'
+// IMPORTS
+import { computed } from 'vue'
 
 // PROPS & EMITS
 interface Props {
@@ -13,13 +12,6 @@ interface Props {
 const props = defineProps<Props>()
 
 // NOTIFICATION STORE
-const notificationStore = useNotificationStore()
-
-// AUTOMATIC FETCH WHEN COMPONENT MOUNTS
-onMounted(() => {
-  notificationStore.fetchNotifications()
-})
-
 // COMPUTED PROPERTIES
 // GET ICON COMPONENT BASED ON NOTIFICATION TYPE
 const iconComponent = computed(() => {
@@ -55,17 +47,22 @@ const iconColorClass = computed(() => {
 <template>
   <!-- NOTIFICATION ITEM CONTAINER -->
   <div class="flex items-start">
-    <div :class="[
-      'p-1 rounded-full mr-3',
-      iconBgClass,
-      iconColorClass
-    ]">
+    <div
+      class="p-1 rounded-full mr-3" :class="[
+        iconBgClass,
+        iconColorClass,
+      ]"
+    >
       <component :is="iconComponent" class="w-4 h-4" />
     </div>
     <!-- NOTIFICATION CONTENT -->
     <div>
-      <p class="text-sm font-medium text-gray-800">{{ notification.title }}</p>
-      <p class="text-xs text-gray-500">{{ notification.message }}</p>
+      <p class="text-sm font-medium text-gray-800">
+        {{ notification.title }}
+      </p>
+      <p class="text-xs text-gray-500">
+        {{ notification.message }}
+      </p>
     </div>
   </div>
 </template>

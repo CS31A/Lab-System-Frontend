@@ -44,7 +44,6 @@ const handleConfirmDelete = (id: string) => {
 }
 </script>
 
-
 <template>
   <!-- CLASSROOM CARD -->
   <div class="bg-white rounded-lg shadow overflow-hidden">
@@ -86,7 +85,7 @@ const handleConfirmDelete = (id: string) => {
       </div>
       <!-- NEXT SCHEDULE INFO -->
       <div class="flex justify-between text-xs text-gray-500 mb-3">
-        <span>Next Schedule: {{ classroom.nextSchedule?.subject || 'None' }} 
+        <span>Next Schedule: {{ classroom.nextSchedule?.subject || 'None' }}
           {{ classroom.nextSchedule?.time ? `(${classroom.nextSchedule.time})` : '' }}
         </span>
         <span>{{ classroom.nextSchedule?.teacher || '' }}</span>
