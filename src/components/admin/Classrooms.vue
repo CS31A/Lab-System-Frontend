@@ -13,6 +13,10 @@ const laboratoryStore = useLaboratoryStore()
 onMounted(async () => {
   await laboratoryStore.fetchLaboratories()
 })
+
+const handleDeleteClassroom = async () => {
+  await laboratoryStore.fetchLaboratories()
+}
 </script>
 
 
@@ -22,7 +26,7 @@ onMounted(async () => {
       <h2 class="text-2xl font-bold text-gray-800">Laboratory Management</h2>
       <div class="flex space-x-2" v-if="!laboratoryStore.isBuildingLayout">
         <button 
-          class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center transition-colors"
+          class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center transition-colors cursor-pointer"
           @click="laboratoryStore.startLayoutBuilder"
         >
           <Plus class="mr-2 w-4 h-4" />
@@ -64,6 +68,7 @@ onMounted(async () => {
             nextSchedule: lab.nextSchedule
           }"
           @view-seats="laboratoryStore.showSeatMapForRoom"
+          @delete-classroom="handleDeleteClassroom"
         />
       </div>
 

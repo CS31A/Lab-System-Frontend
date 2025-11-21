@@ -52,7 +52,7 @@ const handleConfirmDelete = (id: string) => {
       <h3 class="font-medium text-[#2b6cb0]">{{ classroom.name }}</h3>
       <div class="relative">
         <button
-          class="p-1 rounded-full hover:bg-blue-100 text-[#2b6cb0] transition-colors"
+          class="p-1 rounded-full hover:bg-blue-100 text-[#2b6cb0] transition-colors cursor-pointer"
           @click.stop="toggleMenu"
         >
           <MoreVertical class="w-4 h-4" />
@@ -92,7 +92,7 @@ const handleConfirmDelete = (id: string) => {
         <span>{{ classroom.nextSchedule?.teacher || '' }}</span>
       </div>
       <button
-        class="w-full py-2 bg-primary-100 text-[#2b6cb0] rounded-md hover:bg-primary-200 flex items-center justify-center transition-colors"
+        class="w-full py-2 bg-primary-100 text-[#2b6cb0] rounded-md hover:bg-primary-200 flex items-center justify-center transition-colors cursor-pointer"
         @click="$emit('view-seats', classroom.id)"
       >
         <Eye class="mr-2 w-4 h-4" />
