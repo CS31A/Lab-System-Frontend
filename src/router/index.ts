@@ -34,7 +34,7 @@ const router = createRouter({
       component: () => import('../views/ChangePasswordView.vue'),
     },
     {
-      path: '/laboratory/:id(1|2|3|4)',
+      path: '/laboratory/:id',
       name: 'laboratory',
       component: () => import('../views/Slab.vue'),
     },
