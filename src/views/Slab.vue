@@ -7,16 +7,22 @@ import StudentSidebar from '@/components/StudentListSidebar.vue'
 import { useLaboratoryStore } from '@/stores/laboratory'
 
 const route = useRoute()
+
 const laboratoryStore = useLaboratoryStore()
+
 const hasSelectedSeat = ref(false)
+
+// HOLDS STUDENT LIST DATA USED BY THE STUDENT SIDEBAR
 const studentsForSidebar = ref<{ id: number; name: string }[]>([])
 
+// FETCHES LABORATORIES ON INITIAL LOAD WHEN STORE IS EMPTY
 onMounted(async () => {
   if (!laboratoryStore.laboratories.length) {
     await laboratoryStore.fetchLaboratories()
   }
 })
 
+// RESOLVES CURRENT ROOM OBJECT BASED ON ROUTE PARAMS AND LABORATORY STORE
 const room = computed(() => {
   const idParam = route.params.id as string | undefined
   if (!idParam) return null
@@ -39,8 +45,10 @@ const room = computed(() => {
   return found
 })
 
+// CHECKS IF CURRENT ROOM IS A LOCALLY GENERATED ROOM (ID STARTS WITH LOCAL-)
 const isLocalRoom = computed(() => room.value?.id.startsWith('local-') ?? false)
 
+// DETERMINES WHICH SLAB LAYOUT CONFIGURATION TO USE FOR THE CURRENT ROOM
 const layoutKey = computed<'slab1' | 'slab2' | 'slab3' | 'slab4'>(() => {
   const r = room.value
   if (!r) return 'slab1'
@@ -64,12 +72,15 @@ const layoutKey = computed<'slab1' | 'slab2' | 'slab3' | 'slab4'>(() => {
   return 'slab1'
 })
 
+// PROVIDES THE DISPLAY TITLE FOR THE CURRENT SLAB ROOM
 const slabTitle = computed(() => room.value?.name ?? '')
 
+// HANDLES EMITTED FLAG WHENEVER A SEAT IS SELECTED OR DESELECTED
 function handleSeatSelectedChange(hasSelected: boolean) {
   hasSelectedSeat.value = hasSelected
 }
 
+// UPDATES STUDENT SIDEBAR LIST WHEN SEATS EMIT STUDENT CHANGES
 function handleStudentsChange(students: { id: number; name: string }[]) {
   studentsForSidebar.value = students
 }
@@ -80,6 +91,7 @@ function handleStudentsChange(students: { id: number; name: string }[]) {
     <Sidebar
       class="flex-shrink-0"
       :has-selected-seat="hasSelectedSeat"
+      :laboratory-id="room?.id"
     />
     <SlabLayout
       class="flex-1"
