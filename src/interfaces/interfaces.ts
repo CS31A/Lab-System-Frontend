@@ -28,6 +28,7 @@ export interface Student {
   email: string
   section: string
   seat: string
+  room?: string
   upcomingClasses: number
   avatar?: string
 }
@@ -44,7 +45,7 @@ export interface Teacher {
   name: string
   email: string
   subject: string
-  assignedRooms: number
+  assignedRooms: string[]
   upcomingSchedules: number
   avatar?: string
 }

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import Sidebar from '@/components/TeacherSidebar.vue'; 
-import PCLayout from '@/components/Slab3_Layout.vue';   
+import PCLayout from '@/components/Slab3_Layout.vue'
+import Sidebar from '@/components/TeacherSidebar.vue'
 </script>
 
 <template>

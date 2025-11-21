@@ -12,7 +12,7 @@ const isAdminPage = computed(() => route.path.startsWith('/admin'))
   <div id="app" class="">
     <!-- GLOBAL HEADER - SHOWN ON ADMIN PAGE -->
     <GlobalHeader v-if="isAdminPage" />
-    
+
     <main>
       <RouterView />
     </main>
