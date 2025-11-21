@@ -1,39 +1,48 @@
 <script setup lang="ts">
 import { Calendar, FilePlus, Home, Plus, Upload, User, UserPlus, Users } from 'lucide-vue-next'
-// IMPORTS
-import { computed, defineAsyncComponent, onMounted } from 'vue'
+import { computed, defineAsyncComponent, onMounted } from 'vue' // Added onMounted
 import { useRouter } from 'vue-router'
 import { useDashboardStore } from '@/stores/dashboard'
-import { useNotificationStore } from '@/stores/notifications'
 
 const StatsCard = defineAsyncComponent(() => import('@/components/dashboard/StatsCard.vue'))
 const ScheduleCard = defineAsyncComponent(() => import('@/components/dashboard/ScheduleCard.vue'))
-const NotificationItem = defineAsyncComponent(() => import('@/components/dashboard/NotificationItem.vue'))
 const QuickActionButton = defineAsyncComponent(() => import('@/components/dashboard/QuickActionButton.vue'))
 
-// CONSTANTS
-const stats = [
+// ROUTER & STORE INITIALIZATION
+const router = useRouter()
+const dashboardStore = useDashboardStore()
+
+// LIFECYCLE: Fetch API Data on Load
+onMounted(() => {
+  dashboardStore.initDashboard()
+})
+
+// COMPUTED PROPERTIES
+const upcomingSchedules = computed(() => dashboardStore.upcomingSchedules)
+
+// Map Store Stats to UI Format
+const stats = computed(() => [
   {
     title: 'Total Rooms',
-    value: '12',
+    value: dashboardStore.stats.totalRooms.toString(), // Mapped from store
     icon: Home,
     color: 'primary',
   },
   {
     title: 'Total Students',
-    value: '240',
+    value: dashboardStore.stats.totalStudents.toString(), // Mapped from store
     icon: Users,
     color: 'green',
   },
   {
     title: 'Total Teachers',
-    value: '15',
+    value: dashboardStore.stats.totalTeachers.toString(), // Mapped from store
     icon: User,
     color: 'yellow',
   },
   {
     title: 'Active Schedules',
-    value: '8',
+    value: dashboardStore.stats.activeSchedules.toString(), // Mapped from store
     icon: Calendar,
     color: 'purple',
   },
@@ -122,42 +131,44 @@ function handleQuickAction(action: string) {
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-      <!-- UPOMING SCHEDULES -->
       <div class="lg:col-span-2 bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
         <div class="flex items-center justify-between mb-4">
           <h3 class="text-lg font-medium text-gray-800">
             Upcoming Schedule
           </h3>
-          <button class="flex items-center text-sm text-blue-600hover:text-blue-800 transition-colors">
+          <button class="flex items-center text-sm text-blue-600 hover:text-blue-800 transition-colors">
             <Plus class="mr-1 w-4 h-4" />
             Add Schedule
           </button>
         </div>
-        <div class="space-y-4">
+
+        <div v-if="dashboardStore.isLoading" class="text-center py-4 text-gray-400">
+          Loading schedules...
+        </div>
+        <div v-else-if="upcomingSchedules.length === 0" class="text-center py-4 text-gray-400">
+          No upcoming schedules.
+        </div>
+        <div v-else class="space-y-4">
           <ScheduleCard
-            v-for="Schedule in upcomingSchedules"
-            :key="Schedule.id"
-            :schedule="Schedule"
+            v-for="schedule in upcomingSchedules"
+            :key="schedule.id"
+            :Schedule="schedule"
           />
         </div>
       </div>
 
-      <!-- NOTIFICATIONS -->
       <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
         <h3 class="text-lg font-medium text-gray-800 mb-4">
           Notifications
         </h3>
         <div class="space-y-3">
-          <NotificationItem
-            v-for="notification in recentNotifications"
-            :key="notification.id"
-            :notification="notification"
-          />
+          <p class="text-gray-400 text-sm">
+            No new notifications.
+          </p>
         </div>
       </div>
     </div>
 
-    <!-- QUICK ACTIONS -->
     <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
       <h3 class="text-lg font-medium text-gray-800 mb-4">
         Quick Actions
