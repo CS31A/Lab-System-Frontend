@@ -96,7 +96,7 @@ function handleBack() {
 }
 
 function handleSeatClick(seatId: string, isOccupied: boolean) {
-  emit('seatClick', seatId, isOccupied)
+  emit('seat-click', seatId, isOccupied)
 }
 </script>
 
