@@ -214,11 +214,11 @@ const toastType = ref<'assign' | 'update' | ''>('')
 const showToast = ref(false)
 let toastTimeout: number | null = null
 
-// SHOWS TOAST MESSAGE WHEN PC OR STUDENT DATA IS ASSIGNED OR UPDATED
+// SHOWS TOAST MESSAGE WHEN PC OR STUDENT DATA IS ASSIGNED / UNASSIGNED OR ONLY PC INFO IS UPDATED
 function triggerToast(type: 'assign' | 'update') {
   toastType.value = type
   toastMessage.value = type === 'assign'
-    ? 'Added PC information successfully.'
+    ? 'Seat assignment updated successfully.'
     : 'PC information updated.'
   showToast.value = true
   if (toastTimeout !== null)
@@ -345,51 +345,49 @@ function handleClosePcModal() {
   selectedSeatPc.value = null
 }
 
-// SAVES PC STATUS AND STUDENT INFO FROM MODAL AND TRIGGERS TOAST
+// SAVES PC STATUS AND STUDENT INFO FROM MODAL AND TRIGGERS TOAST 
 function handleSavePcModal(pc: { id: number; status: PcCondition; missingOrbrokenDetails?: string; studentName?: string; studentYear?: string; studentCourse?: string }) {
   const seat = seats.value.find(s => s.id === pc.id)
   if (seat) {
     const hadStudent = !!(seat.studentName && seat.studentName.trim().length > 0)
 
-    const noChange =
-      seat.pcStatus === pc.status &&
-      (seat.missingOrbrokenDetails || '') === (pc.missingOrbrokenDetails || '') &&
-      (seat.studentName || '') === (pc.studentName || '') &&
-      (seat.studentYear || '') === (pc.studentYear || '') &&
-      (seat.studentCourse || '') === (pc.studentCourse || '')
-
-    if (!noChange) {
-      seat.pcStatus = pc.status
-      seat.missingOrbrokenDetails = pc.missingOrbrokenDetails || ''
-      seat.studentName = (pc.studentName || '')
-      seat.studentYear = (pc.studentYear || '')
-      seat.studentCourse = (pc.studentCourse || '')
-      seat.status = (seat.studentName && seat.studentName.trim()) ? 'assigned' : 'unassigned'
-      triggerToast(hadStudent ? 'update' : 'assign')
-    }
-  }
-  seats.value = [...seats.value]
-  selectedSeatPc.value = null
-}
-
-// SAVES ONLY STUDENT INFORMATION INLINE AND TRIGGERS TOAST WHEN CHANGED
-function handleInlineStudentSave(pc: { id: number; status: PcCondition; missingOrbrokenDetails?: string; studentName?: string; studentYear?: string; studentCourse?: string }) {
-  const seat = seats.value.find(s => s.id === pc.id)
-  if (seat) {
-    const hadStudent = !!(seat.studentName && seat.studentName.trim().length > 0)
+    const pcChanged =
+      seat.pcStatus !== pc.status ||
+      (seat.missingOrbrokenDetails || '') !== (pc.missingOrbrokenDetails || '')
 
     const studentChanged =
       (seat.studentName || '') !== (pc.studentName || '') ||
       (seat.studentYear || '') !== (pc.studentYear || '') ||
       (seat.studentCourse || '') !== (pc.studentCourse || '')
 
+    if (pcChanged || studentChanged) {
+      seat.pcStatus = pc.status
+      seat.missingOrbrokenDetails = pc.missingOrbrokenDetails || ''
+      seat.studentName = (pc.studentName || '')
+      seat.studentYear = (pc.studentYear || '')
+      seat.studentCourse = (pc.studentCourse || '')
+      seat.status = (seat.studentName && seat.studentName.trim()) ? 'assigned' : 'unassigned'
+
+      if (studentChanged) {
+        triggerToast('assign')
+      }
+      else if (pcChanged) {
+        triggerToast('update')
+      }
+    }
+  }
+  seats.value = [...seats.value]
+  selectedSeatPc.value = null
+}
+
+// SAVES ONLY STUDENT INFORMATION INLINE WITHOUT TRIGGERING TOAST
+function handleInlineStudentSave(pc: { id: number; status: PcCondition; missingOrbrokenDetails?: string; studentName?: string; studentYear?: string; studentCourse?: string }) {
+  const seat = seats.value.find(s => s.id === pc.id)
+  if (seat) {
     seat.studentName = (pc.studentName || '')
     seat.studentYear = (pc.studentYear || '')
     seat.studentCourse = (pc.studentCourse || '')
     seat.status = (seat.studentName && seat.studentName.trim()) ? 'assigned' : 'unassigned'
-
-    if (studentChanged)
-      triggerToast(hadStudent ? 'update' : 'assign')
   }
   seats.value = [...seats.value]
 }
