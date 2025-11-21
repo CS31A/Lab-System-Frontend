@@ -68,36 +68,65 @@ export const useStudentStore = defineStore('students', () => {
   }
 
   // ADD NEW STUDENT
-  const addStudent = (student: Omit<Student, 'id'>) => {
-    const newStudent: Student = {
-      ...student,
-      id: Date.now().toString(),
+  const addStudent = async (student: {
+    firstname: string
+    lastname: string
+    student_id: string
+    section: string
+    course: string
+  }) => {
+    try {
+      const res = await api.post('/students', student)
+      const newStudent: Student = {
+        id: res.data.id || Date.now().toString(),
+        studentId: student.student_id,
+        name: `${student.firstname} ${student.lastname}`.trim(),
+        email: res.data.email || 'No email',
+        section: student.section,
+        course: student.course,
+        seat: 'No seat',
+        upcomingClasses: 0,
+        avatar: res.data.avatar || undefined,
+        firstname: student.firstname,
+        lastname: student.lastname,
+      }
+      students.value.unshift(newStudent)
     }
-    students.value.unshift(newStudent)
+    catch (error) {
+      console.error(error)
+    }
   }
 
   // UPDATE STUDENT DATA
-  const updateStudent = (id: string, updates: Partial<Student>) => {
-    const index = students.value.findIndex(student => student.id === id)
-    if (index > -1) {
-      students.value[index] = { ...students.value[index], ...updates }
+  const updateStudent = async (id: string, updates: Partial<Student>) => {
+    try {
+      const res = await api.patch(`/students/${id}`, updates)
+      const index = students.value.findIndex(student => student.id === id)
+      if (index > -1) {
+        students.value = [
+          ...students.value.slice(0, index),
+          { ...students.value[index], ...res.data, ...updates },
+          ...students.value.slice(index + 1),
+        ]
+      }
+    }
+    catch (error) {
+      console.error('Error updating student:', error)
     }
   }
 
   // REMOVE STUDENT BY ID
-  const removeStudent = (id: string) => {
-    const index = students.value.findIndex(student => student.id === id)
-    if (index > -1) {
-      students.value.splice(index, 1)
-    }
-  }
+  const removeStudent = async (id: string) => {
+    try {
+      await api.delete(`/students/${id}`)
 
-  // ASSIGN STUDENT TO ROOM AND SEAT
-  const assignStudentToSeat = (studentId: string, room: string, seat: string) => {
-    const student = getStudentById(studentId)
-    if (student) {
-      student.room = room
-      student.seat = seat
+      const index = students.value.findIndex(student => student.id === id)
+      if (index > -1) {
+        students.value.splice(index, 1)
+      }
+    }
+    catch (error) {
+      console.error('Error removing student:', error)
     }
   }
 
@@ -135,13 +164,13 @@ export const useStudentStore = defineStore('students', () => {
     try {
       const studentRes = await api.get('/students')
       const studentList: any[] = studentRes.data?.data || []
-
       students.value = studentList.map((s): Student => ({
         id: s.id,
         studentId: s.student_id ?? 'No ID',
         name: `${s.firstname ?? ''} ${s.lastname ?? ''}`.trim() || 'No name',
         email: s.email ?? 'No email',
         section: s.section ?? 'No section',
+        course: s.course ?? 'No course',
         seat: s.seat ?? 'No seat',
         upcomingClasses: s.upcomingClasses ?? 0,
         avatar: s.avatar || undefined,
@@ -163,7 +192,6 @@ export const useStudentStore = defineStore('students', () => {
     addStudent,
     updateStudent,
     removeStudent,
-    assignStudentToSeat,
     getStudentsByRoom,
     searchStudents,
     fetchStudents,
