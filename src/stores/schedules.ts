@@ -1,7 +1,7 @@
+import type { Schedule } from '@/interfaces/interfaces'
 // IMPORTS
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
-import type { Schedule } from '@/interfaces/interfaces'
+import { computed, ref } from 'vue'
 
 // SCHEDULE STORE DEFINITION
 export const useScheduleStore = defineStore('schedules', () => {
@@ -15,7 +15,7 @@ export const useScheduleStore = defineStore('schedules', () => {
       room: 'Slab 1',
       date: '2025-06-15',
       time: '9:00 AM - 10:30 AM',
-      color: 'primary'
+      color: 'primary',
     },
     {
       id: '2',
@@ -24,7 +24,7 @@ export const useScheduleStore = defineStore('schedules', () => {
       room: 'Slab 2',
       date: '2025-06-15',
       time: '10:00 AM - 11:30 AM',
-      color: 'primary'
+      color: 'primary',
     },
     {
       id: '3',
@@ -33,7 +33,7 @@ export const useScheduleStore = defineStore('schedules', () => {
       room: 'SCLAB',
       date: '2025-06-15',
       time: '11:00 AM - 12:30 PM',
-      color: 'green'
+      color: 'green',
     },
     {
       id: '4',
@@ -42,7 +42,7 @@ export const useScheduleStore = defineStore('schedules', () => {
       room: 'SCLAB',
       date: '2025-06-15',
       time: '3:00 PM - 4:30 PM',
-      color: 'green'
+      color: 'green',
     },
     {
       id: '5',
@@ -51,7 +51,7 @@ export const useScheduleStore = defineStore('schedules', () => {
       room: 'Slab 3',
       date: '2025-06-15',
       time: '2:00 PM - 3:30 PM',
-      color: 'yellow'
+      color: 'yellow',
     },
     {
       id: '6',
@@ -60,7 +60,7 @@ export const useScheduleStore = defineStore('schedules', () => {
       room: 'Linux',
       date: '2025-06-15',
       time: '4:00 PM - 5:30 PM',
-      color: 'purple'
+      color: 'purple',
     },
     {
       id: '7',
@@ -69,8 +69,8 @@ export const useScheduleStore = defineStore('schedules', () => {
       room: 'Slab 5',
       date: '2025-06-15',
       time: '1:00 PM - 2:30 PM',
-      color: 'red'
-    }
+      color: 'red',
+    },
   ])
 
   // METHODS
@@ -83,7 +83,7 @@ export const useScheduleStore = defineStore('schedules', () => {
   const addSchedule = (Schedule: Omit<Schedule, 'id'>) => {
     const newSchedule: Schedule = {
       ...Schedule,
-      id: Date.now().toString()
+      id: Date.now().toString(),
     }
     Schedules.value.push(newSchedule)
   }
@@ -121,28 +121,28 @@ export const useScheduleStore = defineStore('schedules', () => {
 
   // GET SCHEDULES BY TIME AND ROOM
   const getSchedulesForTimeAndRoom = (time: string, room: string) => {
-    return Schedules.value.filter(Schedule => 
-      Schedule.time.includes(time) && Schedule.room === room
+    return Schedules.value.filter(Schedule =>
+      Schedule.time.includes(time) && Schedule.room === room,
     )
   }
 
   // CHECK FOR SCHEDULE CONFLICTS
   const checkForConflicts = (room: string, date: string, startTime: string, endTime: string) => {
-    return Schedules.value.some(Schedule => 
-      Schedule.room === room && 
-      Schedule.date === date &&
-      Schedule.time.includes(startTime) || Schedule.time.includes(endTime)
+    return Schedules.value.some(Schedule =>
+      Schedule.room === room
+      && Schedule.date === date
+      && (Schedule.time.includes(startTime) || Schedule.time.includes(endTime)),
     )
   }
 
   // COMPUTED PROPERTIES
   // TOTAL COUNT OF ALL SCHEDULES
   const totalSchedules = computed(() => Schedules.value.length)
-  
+
   // COUNT SCHEDULES GROUPED BY ROOM
   const SchedulesByRoom = computed(() => {
     const roomCounts: Record<string, number> = {}
-    Schedules.value.forEach(Schedule => {
+    Schedules.value.forEach((Schedule) => {
       roomCounts[Schedule.room] = (roomCounts[Schedule.room] || 0) + 1
     })
     return roomCounts
@@ -151,7 +151,7 @@ export const useScheduleStore = defineStore('schedules', () => {
   // COUNT SCHEDULES GROUPED BY TEACHER
   const SchedulesByTeacher = computed(() => {
     const teacherCounts: Record<string, number> = {}
-    Schedules.value.forEach(Schedule => {
+    Schedules.value.forEach((Schedule) => {
       teacherCounts[Schedule.teacher] = (teacherCounts[Schedule.teacher] || 0) + 1
     })
     return teacherCounts
@@ -177,6 +177,6 @@ export const useScheduleStore = defineStore('schedules', () => {
     getSchedulesByRoom,
     getSchedulesByTeacher,
     getSchedulesForTimeAndRoom,
-    checkForConflicts
+    checkForConflicts,
   }
 })

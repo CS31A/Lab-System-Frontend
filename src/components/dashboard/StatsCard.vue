@@ -3,9 +3,8 @@
 import type { StatsCardProps } from '@/interfaces/interfaces'
 
 // PROPS & EMITS
-const props = defineProps<StatsCardProps>()
+defineProps<StatsCardProps>()
 </script>
-
 
 <template>
   <!-- STATS CARD  -->
@@ -27,4 +26,3 @@ const props = defineProps<StatsCardProps>()
     </div>
   </div>
 </template>
-

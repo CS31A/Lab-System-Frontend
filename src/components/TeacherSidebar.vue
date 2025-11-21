@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, nextTick, computed } from 'vue'
-import { Monitor, Calendar, Clock, User, Info, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-vue-next'
+import { Calendar, ChevronDown, ChevronLeft, ChevronRight, Clock, Info, Monitor, User } from 'lucide-vue-next'
+import { computed, nextTick, ref } from 'vue'
 
 // CALENDAR
 const isCalendarExpanded = ref(false)
@@ -14,7 +14,7 @@ const dayNames = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
 const allDays = ref(generateMonthDays(currentYear, currentMonth))
 
 const monthYear = computed(() =>
-  today.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+  today.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
 )
 
 const visibleDays = computed(() => {
@@ -27,7 +27,7 @@ const visibleDays = computed(() => {
 })
 
 function generateMonthDays(year: number, month: number) {
-  const days: { date: number; isToday: boolean; isCurrentMonth: boolean }[] = []
+  const days: { date: number, isToday: boolean, isCurrentMonth: boolean }[] = []
 
   const firstDayOfMonth = new Date(year, month, 1).getDay()
   const lastDateOfMonth = new Date(year, month + 1, 0).getDate()
@@ -41,10 +41,10 @@ function generateMonthDays(year: number, month: number) {
     days.push({
       date,
       isToday:
-        date === currentDate &&
-        month === currentMonth &&
-        year === currentYear,
-      isCurrentMonth: true
+        date === currentDate
+        && month === currentMonth
+        && year === currentYear,
+      isCurrentMonth: true,
     })
   }
 
@@ -125,7 +125,8 @@ function toggleEditPC() {
   nextTick(() => {
     if (!studentName.value) {
       studentNameRef.value?.focus()
-    } else if (!yearLevel.value) {
+    }
+    else if (!yearLevel.value) {
       yearLevelRef.value?.focus()
     }
   })
@@ -134,16 +135,19 @@ function toggleEditPC() {
 function confirmEditPC() {
   isEditingPC.value = false
   pcConfirmed.value = true
+  // eslint-disable-next-line no-alert
   alert('pc infor confirmed!')
 }
 </script>
 
 <template>
   <div class="w-full lg:w-[400px] bg-white shadow-xl flex flex-col border-r border-[#aeb9d4] h-full">
-    <aside class="w-full h-full overflow-y-auto" :class="{
-      'overflow-y-auto': !isCalendarExpanded,
-      'overflow-y-hidden': isCalendarExpanded
-    }">
+    <aside
+      class="w-full h-full overflow-y-auto" :class="{
+        'overflow-y-auto': !isCalendarExpanded,
+        'overflow-y-hidden': isCalendarExpanded,
+      }"
+    >
       <!-- Calendar -->
       <div class="p-4 w-full border-b border-[#aeb9d4] p-4 pb-5">
         <div class="flex justify-between items-center mb-4">
@@ -151,26 +155,35 @@ function confirmEditPC() {
             <div class="flex items-center justify-center w-8 h-8">
               <Calendar class="text-base text-[#5b8ae5]" />
             </div>
-            <h2 class="font-bold text-lg text-[#3C3939]">{{ monthYear }}</h2>
+            <h2 class="font-bold text-lg text-[#3C3939]">
+              {{ monthYear }}
+            </h2>
           </div>
-          <button @click="isCalendarExpanded = !isCalendarExpanded" class="flex items-center gap-1 px-3 py-1"
-            aria-label="Toggle calendar view">
-            <ChevronDown class="translate-y-[-3px] text-gray-400 hover:text-gray-600 cursor-pointer transition-transform duration-200"
-              :class="{ 'rotate-180': isCalendarExpanded }" />
+          <button
+            class="flex items-center gap-1 px-3 py-1" aria-label="Toggle calendar view"
+            @click="isCalendarExpanded = !isCalendarExpanded"
+          >
+            <ChevronDown
+              class="translate-y-[-3px] text-gray-400 hover:text-gray-600 cursor-pointer transition-transform duration-200"
+              :class="{ 'rotate-180': isCalendarExpanded }"
+            />
           </button>
         </div>
 
         <div class="grid grid-cols-7 place-items-center text-center font-semibold text-gray-600/80 mb-2 text-xs sm:text-sm">
-          <div v-for="day in dayNames" :key="day">{{ day }}</div>
+          <div v-for="day in dayNames" :key="day">
+            {{ day }}
+          </div>
         </div>
 
         <div class="grid grid-cols-7 gap-1 place-items-center text-center">
-          <div v-for="(day, index) in visibleDays" :key="index" :class="[
-            'inline-flex items-center justify-center rounded-full transition-colors duration-200 select-none leading-none w-9 h-9 sm:w-10 sm:h-10',
-            day.isToday
-              ? 'bg-[linear-gradient(to_bottom,#5b8ae5,#013aae)] text-white font-semibold hover:opacity-70'
-              : (day.isCurrentMonth ? 'text-gray-800 hover:bg-blue-200' : 'text-gray-400')
-          ]">
+          <div
+            v-for="(day, index) in visibleDays" :key="index" class="inline-flex items-center justify-center rounded-full transition-colors duration-200 select-none leading-none w-9 h-9 sm:w-10 sm:h-10" :class="[
+              day.isToday
+                ? 'bg-[linear-gradient(to_bottom,#5b8ae5,#013aae)] text-white font-semibold hover:opacity-70'
+                : (day.isCurrentMonth ? 'text-gray-800 hover:bg-blue-200' : 'text-gray-400'),
+            ]"
+          >
             {{ day.date }}
           </div>
         </div>
@@ -182,42 +195,56 @@ function confirmEditPC() {
           <div class="flex items-center justify-center w-8 h-8">
             <Clock class="text-base text-[#5b8ae5]" />
           </div>
-          <h2 class="font-bold text-lg text-[#3C3939]">Schedule</h2>
+          <h2 class="font-bold text-lg text-[#3C3939]">
+            Schedule
+          </h2>
         </div>
         <div class="flex flex-wrap items-center gap-2 justify-center pt-2">
-          <ChevronLeft class="text-base mr-2 text-gray-400 hover:text-gray-600 cursor-pointer"
-            :class="{ 'opacity-50 cursor-not-allowed': currentTimeSlotIndex === 0 }" @click="previousTimeSlot" />
+          <ChevronLeft
+            class="text-base mr-2 text-gray-400 hover:text-gray-600 cursor-pointer"
+            :class="{ 'opacity-50 cursor-not-allowed': currentTimeSlotIndex === 0 }" @click="previousTimeSlot"
+          />
           <div class="flex gap-2 items-center overflow-hidden">
-            <span v-for="(slot, idx) in timeSlots.slice(currentTimeSlotIndex, currentTimeSlotIndex + 3)" :key="idx"
-              @click="selectTimeSlot(slot)"
+            <span
+              v-for="(slot, idx) in timeSlots.slice(currentTimeSlotIndex, currentTimeSlotIndex + 3)" :key="idx"
               class="px-4 py-2 rounded-full text-sm cursor-pointer transition-all duration-200 text-center"
               :class="[
                 slot.isActive
                   ? 'font-semibold text-white shadow-md bg-[linear-gradient(to_bottom,#5b8ae5,#013aae)]'
-                  : 'font-medium bg-gray-200 text-black hover:bg-gray-300'
-              ]">
+                  : 'font-medium bg-gray-200 text-black hover:bg-gray-300',
+              ]"
+              @click="selectTimeSlot(slot)"
+            >
               {{ slot.time }}
             </span>
           </div>
-          <ChevronRight class="text-base ml-2 text-gray-400 hover:text-gray-600 cursor-pointer"
+          <ChevronRight
+            class="text-base ml-2 text-gray-400 hover:text-gray-600 cursor-pointer"
             :class="{ 'opacity-50 cursor-not-allowed': currentTimeSlotIndex + 3 >= timeSlots.length }"
-            @click="nextTimeSlot" />
+            @click="nextTimeSlot"
+          />
         </div>
       </div>
 
-      <!-- Instructor & Sub Info-->
+      <!-- Instructor & Sub Info -->
       <div class="flex items-center gap-2.5 px-4 pt-4">
         <div class="flex items-center justify-center w-8 h-8">
           <User class="text-base text-[#5b8ae5]" />
         </div>
-        <h2 class="font-bold text-lg text-[#3C3939]">Instructor & Subject</h2>
+        <h2 class="font-bold text-lg text-[#3C3939]">
+          Instructor & Subject
+        </h2>
       </div>
       <div class="border-b border-[#aeb9d4] px-12 pb-5 pt-2">
         <div class="bg-gray-100 rounded-lg shadow-md px-4">
-          <input class="font-semibold border-b border-[#9D9D9D] w-full mx-auto text-center text-[#013aae] p-2"
-            style="font-weight: bolder;" value="Noel Lehitimas" disabled />
-          <input class="font-semibold text-gray-600 w-full text-center p-2" value="Information Assurance"
-            disabled />
+          <input
+            class="font-semibold border-b border-[#9D9D9D] w-full mx-auto text-center text-[#013aae] p-2"
+            style="font-weight: bolder;" value="Noel Lehitimas" disabled
+          >
+          <input
+            class="font-semibold text-gray-600 w-full text-center p-2" value="Information Assurance"
+            disabled
+          >
         </div>
       </div>
 
@@ -227,28 +254,39 @@ function confirmEditPC() {
           <div class="flex items-center justify-center w-8 h-8">
             <Info class="text-base text-[#5b8ae5]" />
           </div>
-          <h2 class="font-bold text-lg text-[#3C3939]">PC Information</h2>
+          <h2 class="font-bold text-lg text-[#3C3939]">
+            PC Information
+          </h2>
         </div>
-        <button @click="isEditingPC ? confirmEditPC() : toggleEditPC()"
-          class="px-5 py-2 text-xs font-medium text-white bg-[linear-gradient(to_bottom,#5b8ae5,#013aae)] hover:border-[#2b6cb0] rounded-full transition-colors cursor-pointer shadow-md">{{
-            isEditingPC ? 'Confirm' : 'Edit' }}</button>
+        <button
+          class="px-5 py-2 text-xs font-medium text-white bg-[linear-gradient(to_bottom,#5b8ae5,#013aae)] hover:border-[#2b6cb0] rounded-full transition-colors cursor-pointer shadow-md"
+          @click="isEditingPC ? confirmEditPC() : toggleEditPC()"
+        >
+          {{
+            isEditingPC ? 'Confirm' : 'Edit' }}
+        </button>
       </div>
       <div class="mt-auto pb-4 border-b border-[#aeb9d4] p-4 px-12 pb-5 pt-2">
         <div class="text-center">
           <div class="flex flex-col items-center pt-3.5 translate-y-[-10px] ">
             <div class="bg-[#5b8ae5] text-white px-3 py-1 rounded-full absolute bottom-11 z-10">
-              <h3 class="text-xs font-bold">12</h3>
+              <h3 class="text-xs font-bold">
+                12
+              </h3>
             </div>
             <Monitor class=" h-16 w-18 text-[#5b8ae5]" />
           </div>
           <div class="bg-gray-100 rounded-lg shadow-md px-4">
-            <input ref="studentNameRef" v-model="studentName" placeholder="Student Name" :readonly="!isEditingPC"
-              class="font-bold border-b border-[#9D9D9D] w-full mx-auto text-center text-[#013aae] placeholder-[#013aae] p-2 focus:outline-none" />
-            <input ref="yearLevelRef" v-model="yearLevel" placeholder="Year & Level" :readonly="!isEditingPC"
-              class="font-bold text-gray-600 placeholder-gray-600 w-full text-center p-2 focus:outline-none"  />
+            <input
+              ref="studentNameRef" v-model="studentName" placeholder="Student Name" :readonly="!isEditingPC"
+              class="font-bold border-b border-[#9D9D9D] w-full mx-auto text-center text-[#013aae] placeholder-[#013aae] p-2 focus:outline-none"
+            >
+            <input
+              ref="yearLevelRef" v-model="yearLevel" placeholder="Year & Level" :readonly="!isEditingPC"
+              class="font-bold text-gray-600 placeholder-gray-600 w-full text-center p-2 focus:outline-none"
+            >
           </div>
         </div>
-
 
         <!-- <div class="flex flex-col sm:flex-row justify-evenly mt-3 gap-3 sm:gap-0">
           <button @click="toggleEditPC"
@@ -261,7 +299,6 @@ function confirmEditPC() {
           </button>
         </div> -->
       </div>
-
     </aside>
   </div>
 </template>

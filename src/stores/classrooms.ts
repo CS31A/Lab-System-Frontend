@@ -1,7 +1,7 @@
+import type { Classroom, Seat, SimpleStudent } from '@/interfaces/interfaces'
 // IMPORTS
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { Classroom, Seat, SimpleStudent } from '@/interfaces/interfaces'
 
 // CLASSROOM STORE DEFINITION
 export const useClassroomStore = defineStore('classrooms', () => {
@@ -17,8 +17,8 @@ export const useClassroomStore = defineStore('classrooms', () => {
       nextSchedule: {
         subject: 'Automata',
         time: '9:00 AM',
-        teacher: 'Donald Francisco'
-      }
+        teacher: 'Donald Francisco',
+      },
     },
     {
       id: '2',
@@ -29,8 +29,8 @@ export const useClassroomStore = defineStore('classrooms', () => {
       nextSchedule: {
         subject: 'Information Assurance',
         time: '11:00 AM',
-        teacher: 'Gojo Satoru'
-      }
+        teacher: 'Gojo Satoru',
+      },
     },
     {
       id: '3',
@@ -41,8 +41,8 @@ export const useClassroomStore = defineStore('classrooms', () => {
       nextSchedule: {
         subject: 'Pagsasalin',
         time: '2:00 PM',
-        teacher: 'Noel Lehitimas'
-      }
+        teacher: 'Noel Lehitimas',
+      },
     },
     {
       id: '4',
@@ -53,8 +53,8 @@ export const useClassroomStore = defineStore('classrooms', () => {
       nextSchedule: {
         subject: 'Computer Fundamentals',
         time: '10:00 AM',
-        teacher: 'Winslie Dada'
-      }
+        teacher: 'Winslie Dada',
+      },
     },
     {
       id: '5',
@@ -65,8 +65,8 @@ export const useClassroomStore = defineStore('classrooms', () => {
       nextSchedule: {
         subject: 'Data Structure',
         time: '1:00 PM',
-        teacher: 'Alice Mao'
-      }
+        teacher: 'Alice Mao',
+      },
     },
     {
       id: '6',
@@ -77,8 +77,8 @@ export const useClassroomStore = defineStore('classrooms', () => {
       nextSchedule: {
         subject: 'Information Assurance',
         time: '3:00 PM',
-        teacher: 'Gojo Satoru'
-      }
+        teacher: 'Gojo Satoru',
+      },
     },
     {
       id: '7',
@@ -89,9 +89,9 @@ export const useClassroomStore = defineStore('classrooms', () => {
       nextSchedule: {
         subject: 'Computer Fundamentals',
         time: '4:00 PM',
-        teacher: 'Winslie Dada'
-      }
-    }
+        teacher: 'Winslie Dada',
+      },
+    },
   ])
 
   // METHODS
@@ -100,12 +100,35 @@ export const useClassroomStore = defineStore('classrooms', () => {
     return classrooms.value.find(room => room.id === id)
   }
 
+  // GENERATE SEATS FOR A CLASSROOM
+  const generateSeats = (capacity: number): Seat[] => {
+    const seats: Seat[] = []
+    for (let i = 1; i <= capacity; i++) {
+      // RANDOMLY ASSIGN OCCUPIED STATUS
+      const isOccupied = Math.random() > 0.3
+      seats.push({
+        id: `seat-${i}`,
+        number: i,
+        isOccupied,
+        student: isOccupied
+          ? {
+              id: `student-${i}`,
+              name: `Student ${i}`,
+            }
+          : undefined,
+        // RANDOMLY ASSIGN CONFLICT STATUS
+        hasConflict: Math.random() > 0.95,
+      })
+    }
+    return seats
+  }
+
   // ADD NEW CLASSROOM
   const addClassroom = (classroom: Omit<Classroom, 'id' | 'seats'>) => {
     const newClassroom: Classroom = {
       ...classroom,
       id: Date.now().toString(),
-      seats: generateSeats(classroom.capacity)
+      seats: generateSeats(classroom.capacity),
     }
     classrooms.value.push(newClassroom)
   }
@@ -156,29 +179,8 @@ export const useClassroomStore = defineStore('classrooms', () => {
     }
   }
 
-  // GENERATE SEATS FOR A CLASSROOM
-  const generateSeats = (capacity: number): Seat[] => {
-    const seats: Seat[] = []
-    for (let i = 1; i <= capacity; i++) {
-      // RANDOMLY ASSIGN OCCUPIED STATUS
-      const isOccupied = Math.random() > 0.3
-      seats.push({
-        id: `seat-${i}`,
-        number: i,
-        isOccupied,
-        student: isOccupied ? {
-          id: `student-${i}`,
-          name: `Student ${i}`
-        } : undefined,
-        // RANDOMLY ASSIGN CONFLICT STATUS
-        hasConflict: Math.random() > 0.95
-      })
-    }
-    return seats
-  }
-
   // INITIALIZE SEATS FOR EXISTING CLASSROOMS
-  classrooms.value.forEach(room => {
+  classrooms.value.forEach((room) => {
     if (!room.seats || room.seats.length === 0) {
       room.seats = generateSeats(room.capacity)
     }
@@ -191,6 +193,6 @@ export const useClassroomStore = defineStore('classrooms', () => {
     updateClassroom,
     removeClassroom,
     assignStudentToSeat,
-    unassignStudentFromSeat
+    unassignStudentFromSeat,
   }
 })

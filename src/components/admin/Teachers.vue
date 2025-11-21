@@ -32,6 +32,17 @@ const todaySchedule = [
 
 // REFS & REACTIVE STATE
 const searchQuery = ref('')
+const showEditModal = ref(false)
+const showAddModal = ref(false)
+const editingTeacher = ref<any>(null)
+
+const newTeacher = ref({
+  name: '',
+  email: '',
+  subject: '',
+  assignedRooms: [] as string[],
+  upcomingSchedules: 0,
+})
 
 const newSchedule = ref({
   teacherId: '',
@@ -67,14 +78,62 @@ const filteredTeachers = computed(() => {
 // METHODS
 // EDIT TEACHER INFORMATION
 function editTeacher(teacher: any) {
-  console.log('Edit teacher:', teacher)
+  // Populate edit form with teacher data
+  editingTeacher.value = { ...teacher }
+  showEditModal.value = true
+}
+
+function saveTeacher() {
+  if (editingTeacher.value && editingTeacher.value.id) {
+    teacherStore.updateTeacher(editingTeacher.value.id, editingTeacher.value)
+    showEditModal.value = false
+    editingTeacher.value = null
+  }
+}
+
+function cancelEdit() {
+  showEditModal.value = false
+  editingTeacher.value = null
 }
 
 // DELETE TEACHER FROM STORE
 function deleteTeacher(teacherId: string) {
   // CONFIRM BEFORE DELETION
+  // eslint-disable-next-line no-alert
   if (confirm('Are you sure you want to delete this teacher?')) {
     teacherStore.removeTeacher(teacherId)
+  }
+}
+
+// OPEN ADD TEACHER MODAL
+function openAddTeacherModal() {
+  showAddModal.value = true
+}
+
+// ADD NEW TEACHER
+function addTeacherSubmit() {
+  if (newTeacher.value.name && newTeacher.value.email && newTeacher.value.subject) {
+    teacherStore.addTeacher(newTeacher.value)
+    showAddModal.value = false
+    // Reset form
+    newTeacher.value = {
+      name: '',
+      email: '',
+      subject: '',
+      assignedRooms: [],
+      upcomingSchedules: 0,
+    }
+  }
+}
+
+function cancelAddTeacher() {
+  showAddModal.value = false
+  newTeacher.value = {
+    name: '',
+    email: '',
+    subject: '',
+    assignedRooms: [],
+    upcomingSchedules: 0,
   }
 }
 
@@ -82,6 +141,8 @@ function deleteTeacher(teacherId: string) {
 function addSchedule() {
   // VALIDATE ALL REQUIRED FIELDS
   if (newSchedule.value.teacherId && newSchedule.value.room && newSchedule.value.startTime && newSchedule.value.endTime) {
+    // TODO: Integrate with schedules store when available
+    // eslint-disable-next-line no-console
     console.log('Adding Schedule:', newSchedule.value)
 
     // RESET FORM FIELDS
@@ -102,7 +163,7 @@ function addSchedule() {
         Teacher Management
       </h2>
       <div class="flex space-x-2">
-        <button class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-[#2b6cb0] flex items-center transition-colors">
+        <button class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-[#2b6cb0] flex items-center transition-colors" @click="openAddTeacherModal">
           <Plus class="mr-2 w-4 h-4" />
           Add Teacher
         </button>
@@ -269,6 +330,107 @@ function addSchedule() {
           >
             Add Schedule
           </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADD TEACHER MODAL -->
+    <div v-if="showAddModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+        <h3 class="text-lg font-medium text-gray-800 mb-4">
+          Add New Teacher
+        </h3>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+            <input
+              v-model="newTeacher.name"
+              type="text"
+              class="block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#4299e1] focus:border-[#4299e1]"
+              placeholder="Enter teacher name"
+            >
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <input
+              v-model="newTeacher.email"
+              type="email"
+              class="block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#4299e1] focus:border-[#4299e1]"
+              placeholder="Enter email address"
+            >
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Subject</label>
+            <input
+              v-model="newTeacher.subject"
+              type="text"
+              class="block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#4299e1] focus:border-[#4299e1]"
+              placeholder="Enter subject"
+            >
+          </div>
+          <div class="flex justify-end space-x-2 mt-6">
+            <button
+              class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+              @click="cancelAddTeacher"
+            >
+              Cancel
+            </button>
+            <button
+              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              @click="addTeacherSubmit"
+            >
+              Add Teacher
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EDIT TEACHER MODAL -->
+    <div v-if="showEditModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+        <h3 class="text-lg font-medium text-gray-800 mb-4">
+          Edit Teacher
+        </h3>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+            <input
+              v-model="editingTeacher.name"
+              type="text"
+              class="block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#4299e1] focus:border-[#4299e1]"
+            >
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <input
+              v-model="editingTeacher.email"
+              type="email"
+              class="block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#4299e1] focus:border-[#4299e1]"
+            >
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Subject</label>
+            <input
+              v-model="editingTeacher.subject"
+              type="text"
+              class="block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#4299e1] focus:border-[#4299e1]"
+            >
+          </div>
+          <div class="flex justify-end space-x-2 mt-6">
+            <button
+              class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+              @click="cancelEdit"
+            >
+              Cancel
+            </button>
+            <button
+              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              @click="saveTeacher"
+            >
+              Save Changes
+            </button>
+          </div>
         </div>
       </div>
     </div>

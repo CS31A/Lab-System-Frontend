@@ -46,28 +46,67 @@ const stats = computed(() => [
     icon: Calendar,
     color: 'purple',
   },
-])
-
-const quickActions = [
-  { label: 'Add Schedule', icon: Plus, action: 'add-Schedule' },
-  { label: 'Assign Students', icon: UserPlus, action: 'assign-students' },
-  { label: 'Export Data', icon: FilePlus, action: 'create-report' },
-  { label: 'Import Data', icon: Upload, action: 'import-data' },
 ]
 
+const quickActions = [
+  {
+    label: 'Add Schedule',
+    icon: Plus,
+    action: 'add-Schedule',
+  },
+  {
+    label: 'Assign Students',
+    icon: UserPlus,
+    action: 'assign-students',
+  },
+  {
+    label: 'Export Data',
+    icon: FilePlus,
+    action: 'create-report',
+  },
+  {
+    label: 'Import Data',
+    icon: Upload,
+    action: 'import-data',
+  },
+]
+
+// ROUTER & STORE INITIALIZATION
+const router = useRouter()
+const notificationStore = useNotificationStore()
+
+// FETCH NOTIFICATIONS WHEN DASHBOARD MOUNTS
+onMounted(() => {
+  notificationStore.forceFetchNotifications()
+})
+const dashboardStore = useDashboardStore()
+
+// COMPUTED PROPERTIES
+const upcomingSchedules = computed(() => dashboardStore.upcomingSchedules)
+
+// GET RECENT 3 NOTIFICATIONS
+const recentNotifications = computed(() => notificationStore.notifications.slice(0, 3))
+
 // METHODS
+// HANDLE QUICK ACTION BUTTON CLICKS
 function handleQuickAction(action: string) {
   switch (action) {
     case 'add-Schedule':
-      router.push('/schedules?action=add')
+      // NAVIGATE TO SCHEDULES PAGE WITH ADD ACTION
+      router.push('/admin/schedules?action=add')
       break
     case 'assign-students':
-      router.push('/students?action=assign')
+      // NAVIGATE TO STUDENTS PAGE WITH ASSIGN ACTION
+      router.push('/admin/students?action=assign')
       break
     case 'create-report':
+      // EXPORT DATA FUNCTIONALITY
+      // eslint-disable-next-line no-console
       console.log('Creating report...')
       break
     case 'import-data':
+      // IMPORT DATA FUNCTIONALITY
+      // eslint-disable-next-line no-console
       console.log('Importing data...')
       break
   }
@@ -80,6 +119,7 @@ function handleQuickAction(action: string) {
       Dashboard Overview
     </h2>
 
+    <!-- STATS CARDS -->
     <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 mb-8">
       <StatsCard
         v-for="stat in stats"
