@@ -98,7 +98,11 @@ export const useTeacherStore = defineStore('teachers', () => {
         name: `${t.firstname ?? ''} ${t.lastname ?? ''}`.trim() || 'No name',
         email: userMap.get(t.user_id) ?? 'No email',
         subject: t.subject ?? 'No subject',
-        assignedRooms: t.assignedRooms ?? 'No rooms assigned',
+        assignedRooms: Array.isArray(t.assignedRooms)
+          ? t.assignedRooms
+          : typeof t.assignedRooms === 'number'
+            ? [t.assignedRooms]
+            : [],
         upcomingSchedules: t.upcomingSchedules ?? 0,
         avatar: t.avatar || undefined,
       }))

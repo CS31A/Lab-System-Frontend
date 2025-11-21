@@ -16,10 +16,10 @@ export const useDashboardStore = defineStore('dashboard', () => {
   const upcomingSchedules = ref<Schedule[]>([])
 
   const stats = ref({
-    totalRooms: 0, // [cite: 3]
-    totalStudents: 0, // [cite: 6]
-    totalTeachers: 0, // [cite: 9]
-    activeSchedules: 0, // [cite: 12]
+    totalRooms: 0, 
+    totalStudents: 0, 
+    totalTeachers: 0, 
+    activeSchedules: 0, 
   })
 
   const isLoading = ref(false)

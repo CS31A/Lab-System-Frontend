@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import { Monitor } from 'lucide-vue-next'
+import { ref } from 'vue'
 
 defineOptions({
   name: 'PCLayout',
@@ -85,13 +85,12 @@ function getStatusColor(status: string) {
         <Monitor
           v-for="pc in pcStatus"
           :key="pc.id"
-          @click="selectPC(pc)"
-          :class="[
+          class="w-9 h-9 cursor-pointer transition-all duration-200 hover:scale-110" :class="[
             `div${pc.id}`,
-            'w-9 h-9 cursor-pointer transition-all duration-200 hover:scale-110',
-            getStatusColor(pc.status)
+            getStatusColor(pc.status),
           ]"
           :title="`PC ${pc.id}`"
+          @click="selectPC(pc)"
         />
       </div>
 

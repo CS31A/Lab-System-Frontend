@@ -1,9 +1,9 @@
 <script setup lang="ts">
+import type { Classroom, Seat } from '@/interfaces/interfaces'
+import { Download, UserPlus, X } from 'lucide-vue-next'
 // IMPORTS
 import { computed } from 'vue'
-import { UserPlus, X, Download } from 'lucide-vue-next'
 import SeatButton from './SeatButton.vue'
-import type { Classroom, Seat } from '@/interfaces/interfaces'
 
 // PROPS & EMITS
 interface Props {
@@ -12,7 +12,7 @@ interface Props {
 
 const props = defineProps<Props>()
 const emit = defineEmits<{
-  'seat-click': [seatId: string, isOccupied: boolean]
+  seatClick: [seatId: string, isOccupied: boolean]
 }>()
 
 // COMPUTED PROPERTIES
@@ -21,7 +21,7 @@ const seats = computed(() => props.room.seats || generateSeats(props.room.capaci
 
 // METHODS
 // GENERATE DEMO SEATS FOR TESTING
-const generateSeats = (capacity: number): Seat[] => {
+function generateSeats(capacity: number): Seat[] {
   const seats: Seat[] = []
   for (let i = 1; i <= capacity; i++) {
     // RANDOM OCCUPATION FOR DEMO
@@ -30,23 +30,24 @@ const generateSeats = (capacity: number): Seat[] => {
       id: `seat-${i}`,
       number: i,
       isOccupied,
-      student: isOccupied ? {
-        id: `student-${i}`,
-        name: `Student ${i}`
-      } : undefined,
+      student: isOccupied
+        ? {
+            id: `student-${i}`,
+            name: `Student ${i}`,
+          }
+        : undefined,
       // RANDOM CONFLICTS FOR DEMO
-      hasConflict: Math.random() > 0.9
+      hasConflict: Math.random() > 0.9,
     })
   }
   return seats
 }
 
 // HANDLE SEAT CLICK EVENT AND EMIT TO PARENT
-const handleSeatClick = (seat: Seat) => {
-  emit('seat-click', seat.id, seat.isOccupied)
+function handleSeatClick(seat: Seat) {
+  emit('seatClick', seat.id, seat.isOccupied)
 }
 </script>
-
 
 <template>
   <!-- SEAT MAP -->
@@ -70,15 +71,15 @@ const handleSeatClick = (seat: Seat) => {
       <!-- SEAT STATUS LEGEND -->
       <div class="flex space-x-2">
         <div class="flex items-center">
-          <div class="w-3 h-3 rounded-full bg-[#ebf8ff]0 mr-1"></div>
+          <div class="w-3 h-3 rounded-full bg-[#ebf8ff]0 mr-1" />
           <span class="text-xs">Occupied</span>
         </div>
         <div class="flex items-center">
-          <div class="w-3 h-3 rounded-full bg-gray-200 mr-1"></div>
+          <div class="w-3 h-3 rounded-full bg-gray-200 mr-1" />
           <span class="text-xs">Available</span>
         </div>
         <div class="flex items-center">
-          <div class="w-3 h-3 rounded-full bg-red-500 mr-1"></div>
+          <div class="w-3 h-3 rounded-full bg-red-500 mr-1" />
           <span class="text-xs">Conflict</span>
         </div>
       </div>

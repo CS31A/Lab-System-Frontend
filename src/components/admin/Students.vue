@@ -26,8 +26,8 @@ const currentPage = ref(1)
 // COMPUTED PROPERTIES
 const students = computed(() => studentStore.students)
 
-// FILTER AND PAGINATE STUDENTS BASED ON SEARCH AND ROOM FILTER
-const filteredStudents = computed(() => {
+// FILTER STUDENTS BASED ON SEARCH AND ROOM FILTER (WITHOUT PAGINATION)
+const filteredStudentsUnpaginated = computed(() => {
   let filtered = students.value
 
   // FILTER BY SEARCH QUERY (NAME, EMAIL, OR STUDENT ID)
@@ -45,12 +45,16 @@ const filteredStudents = computed(() => {
     filtered = filtered.filter(student => student.room === filters.room)
   }
 
-  // PAGINATE RESULTS
-  const start = (currentPage.value - 1) * itemsPerPage
-  return filtered.slice(start, start + itemsPerPage)
+  return filtered
 })
 
-const totalStudents = computed(() => filteredStudents.value.length)
+// PAGINATE THE FILTERED RESULTS
+const filteredStudents = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage
+  return filteredStudentsUnpaginated.value.slice(start, start + itemsPerPage)
+})
+
+const totalStudents = computed(() => filteredStudentsUnpaginated.value.length)
 
 const totalPages = computed(() => Math.ceil(totalStudents.value / itemsPerPage))
 
