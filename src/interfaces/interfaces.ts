@@ -150,3 +150,31 @@ export interface FilterConfig {
   label?: string
   options: Option[]
 }
+
+// LAB INTERFACES
+export interface Lab {
+  id: string
+  name: string
+  status: string
+}
+
+export interface ApiLab {
+  id: string
+  name: string
+  status: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface ApiResponse {
+  message: string
+  data: ApiLab[]
+  pagination: {
+    page: number
+    limit: number
+    total: number
+    totalPages: number
+    hasNext: boolean
+    hasPrev: boolean
+  }
+}
