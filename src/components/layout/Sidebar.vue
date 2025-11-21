@@ -73,7 +73,8 @@ function isActive(name: string) {
 function navigate(name: string) {
   // LABORATORY ROUTES
   if (name.startsWith('slab')) {
-    router.push({ name })
+    const id = name.replace('slab', '')
+    router.push({ name: 'laboratory', params: { id } })
     return
   }
   // ADMIN ROUTES
@@ -199,16 +200,6 @@ function handleLogout() {
               <div v-if="!isLoading && laboratories.length === 0" class="px-3 py-2 text-sm text-gray-500">
                 No laboratories found
               </div>
-              <button
-                class="group w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors text-gray-700 hover:bg-blue-100 cursor-pointer"
-                :class="isActive('slab4') ? 'bg-blue-50 text-blue-700 ring-1 ring-blue-200' : ''"
-                @click="navigate('slab4')"
-              >
-                <svg class="w-5 h-5 transition-colors group-hover:text-blue-600" :class="iconColor('slab4')" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path d="M7 3a1 1 0 0 0-1 1v4H4a1 1 0 0 0-1 1v10h18V9a1 1 0 0 0-1-1h-2V4a1 1 0 0 0-1-1H7zm1 2h8v3H8V5zm-3 5h14v6H5v-6z" />
-                </svg>
-                <span v-show="isSidebarOpen" class="transition-colors group-hover:text-blue-700">Lab 4</span>
-              </button>
             </div>
           </transition>
         </div>
