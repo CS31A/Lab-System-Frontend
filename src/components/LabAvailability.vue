@@ -137,7 +137,7 @@ function closeModal() {
               Status Board
             </span>
 
-            <div class="lab-table-container bg-[#fcfcfc] rounded-lg shadow p-6 w-full max-w-4xl">
+            <div class="lab-table-container bg-[#fcfcfc] rounded-lg bg-gray-100/50 shadow p-6 w-full max-w-4xl">
               <table class="min-w-full border border-b-blue-900 rounded-lg overflow-hidden">
                 <thead class="bg-[#ffffff] border-b border-gray-300">
                   <tr class="bg-[#ffffff] border-b border-gray-200 dark:border-gray-700">
