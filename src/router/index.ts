@@ -33,29 +33,14 @@ const router = createRouter({
       component: () => import('../views/ForgotPasswordView.vue'),
     },
     {
-      path: '/ChangePassword',
-      name: 'ChangePassword',
-      component: () => import('../views/ChangePasswordView.vue'),
+      path: '/reset-password',
+      name: 'ResetPassword',
+      component: () => import('../views/ResetPasswordView.vue'),
     },
     {
-      path: '/laboratory/1',
-      name: 'slab1',
-      component: () => import('../views/Slab1.vue'),
-    },
-    {
-      path: '/laboratory/2',
-      name: 'slab2',
-      component: () => import('../views/Slab2.vue'),
-    },
-    {
-      path: '/laboratory/3',
-      name: 'slab3',
-      component: () => import('../views/Slab3.vue'),
-    },
-    {
-      path: '/laboratory/4',
-      name: 'slab4',
-      component: () => import('../views/Slab4.vue'),
+      path: '/laboratory/:id',
+      name: 'laboratory',
+      component: () => import('../views/Slab.vue'),
     },
     {
       path: '/admin',

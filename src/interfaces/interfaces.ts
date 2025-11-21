@@ -72,6 +72,7 @@ export interface Classroom {
   assigned: number
   nextSchedule?: NextSchedule
   seats?: Seat[]
+  layout?: boolean[]
 }
 
 // SCHEDULE INTERFACES
@@ -198,6 +199,17 @@ export interface ApiSchedule {
   start_time: string
   end_time: string
   status: string | null
+// LAB LAYOUT LOCAL STORAGE & BACKEND MODELS
+export interface LocalLab {
+  id: string
+  name: string
+  layout: boolean[]
+}
+
+export interface BackendLab {
+  id: string
+  name: string
+  status: boolean
   created_at: string
   updated_at: string
 }
@@ -226,4 +238,34 @@ export interface ApiTeacher {
   attendance: string
   created_at: string
   updated_at: string
+// SLAB LAYOUT INTERFACES
+export type PcCondition = 'complete' | 'missing' | 'broken'
+
+export interface SlabSeat {
+  id: number
+  row: number
+  col: number
+}
+
+export interface SlabStudentInfo {
+  pcLabel: string
+  studentName: string
+  studentYear: string
+  studentCourse: string
+}
+
+export type SeatCell = null | string
+
+export interface LayoutConfig {
+  layout: SeatCell[][]
+}
+
+export type SeatStatus = SlabSeat & {
+  status: 'assigned' | 'selected' | 'unassigned'
+  pcStatus: PcCondition
+  missingOrbrokenDetails?: string
+  studentName?: string
+  studentYear?: string
+  studentCourse?: string
+  pcLabel?: string
 }
