@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // IMPORTS
-import { ref, computed, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { computed, onMounted, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import api from '@/boot/axios'
 
 // ROUTER INITIALIZATION
@@ -41,13 +41,15 @@ const currentSection = computed(() => {
 })
 
 // FETCH LABORATORIES
-const fetchLaboratories = async () => {
+async function fetchLaboratories() {
   try {
     const res = await api.get('/laboratories')
     laboratories.value = res.data.data
-  } catch (err) {
+  }
+  catch (err) {
     console.error('Failed to fetch laboratories:', err)
-  } finally {
+  }
+  finally {
     isLoading.value = false
   }
 }
@@ -179,12 +181,12 @@ function handleLogout() {
                 </svg>
                 <span v-show="isSidebarOpen" class="transition-colors group-hover:text-blue-700">All Labs</span>
               </button>
-              
+
               <!-- LOADING STATE -->
               <div v-if="isLoading" class="flex justify-center py-2">
-                <div class="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-blue-500"></div>
+                <div class="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-blue-500" />
               </div>
-              
+
               <!-- LABORATORY LIST -->
               <button
                 v-for="lab in laboratories"
@@ -198,7 +200,7 @@ function handleLogout() {
                 </svg>
                 <span v-show="isSidebarOpen" class="transition-colors group-hover:text-blue-700">{{ lab.name }}</span>
               </button>
-              
+
               <!-- NO LABS MESSAGE -->
               <div v-if="!isLoading && laboratories.length === 0" class="px-3 py-2 text-sm text-gray-500">
                 No laboratories found

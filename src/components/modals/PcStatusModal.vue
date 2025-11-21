@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, ref, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
-import { Monitor, ChevronDown } from 'lucide-vue-next'
+import { ChevronDown, Monitor } from 'lucide-vue-next'
+import { computed, nextTick, ref, watch } from 'vue'
 
 type PcCondition = 'complete' | 'missing' | 'broken'
 
@@ -18,8 +18,8 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  close: []
-  save: [pc: PcInfo]
+  'close': []
+  'save': [pc: PcInfo]
   'student-save': [pc: PcInfo]
 }>()
 
@@ -37,9 +37,12 @@ let studentErrorTimeout: number | null = null
 // COMPUTES LABEL AND COLORS FOR CURRENT PC STATUS CHIP
 const statusChip = computed(() => {
   const s = localPc.value?.status
-  if (s === 'complete') return { label: 'Complete', bg: 'bg-green-50', fg: 'text-green-700', ring: 'ring-green-200' }
-  if (s === 'missing') return { label: 'Missing', bg: 'bg-yellow-50', fg: 'text-yellow-800', ring: 'ring-yellow-200' }
-  if (s === 'broken') return { label: 'Broken', bg: 'bg-red-50', fg: 'text-red-700', ring: 'ring-red-200' }
+  if (s === 'complete')
+    return { label: 'Complete', bg: 'bg-green-50', fg: 'text-green-700', ring: 'ring-green-200' }
+  if (s === 'missing')
+    return { label: 'Missing', bg: 'bg-yellow-50', fg: 'text-yellow-800', ring: 'ring-yellow-200' }
+  if (s === 'broken')
+    return { label: 'Broken', bg: 'bg-red-50', fg: 'text-red-700', ring: 'ring-red-200' }
   return { label: 'Unknown', bg: 'bg-gray-50', fg: 'text-gray-700', ring: 'ring-gray-200' }
 })
 
@@ -160,10 +163,10 @@ function handleStudentEditClick() {
       return
     }
     studentError.value = ''
-    const noChange =
-      localPc.value.studentName === studentName.value &&
-      localPc.value.studentYear === studentYear.value &&
-      localPc.value.studentCourse === studentCourse.value
+    const noChange
+      = localPc.value.studentName === studentName.value
+        && localPc.value.studentYear === studentYear.value
+        && localPc.value.studentCourse === studentCourse.value
 
     if (noChange)
       return
@@ -224,7 +227,7 @@ function handleStudentUnassignClick() {
 function handleClose() {
   emit('close')
 }
- </script>
+</script>
 
 <template>
   <div
@@ -253,18 +256,23 @@ function handleClose() {
                 <Monitor class="w-5 h-5 text-white" />
               </div>
               <div>
-                <h1 class="text-white text-2xl leading-tight font-extrabold tracking-tight">PC {{ localPc?.id }}</h1>
-                <p class="text-white/85 text-xs">Computer Status</p>
+                <h1 class="text-white text-2xl leading-tight font-extrabold tracking-tight">
+                  PC {{ localPc?.id }}
+                </h1>
+                <p class="text-white/85 text-xs">
+                  Computer Status
+                </p>
               </div>
             </div>
             <div class="flex items-center gap-3">
               <span
                 class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-semibold ring-1 bg-white/10 text-white ring-white/30"
               >
-                <span :class="[
-                  'inline-block w-2 h-2 rounded-full',
-                  statusChip.label === 'Complete' ? 'bg-green-300' : statusChip.label === 'Missing' ? 'bg-yellow-300' : statusChip.label === 'Broken' ? 'bg-red-300' : 'bg-gray-300'
-                ]" />
+                <span
+                  class="inline-block w-2 h-2 rounded-full" :class="[
+                    statusChip.label === 'Complete' ? 'bg-green-300' : statusChip.label === 'Missing' ? 'bg-yellow-300' : statusChip.label === 'Broken' ? 'bg-red-300' : 'bg-gray-300',
+                  ]"
+                />
                 {{ statusChip.label }}
               </span>
               <button
@@ -281,7 +289,9 @@ function handleClose() {
         <div class="px-6 py-6 space-y-7">
           <div class="space-y-3">
             <div class="flex items-center justify-between">
-              <h3 class="text-xs font-semibold tracking-wide uppercase text-gray-500">Student</h3>
+              <h3 class="text-xs font-semibold tracking-wide uppercase text-gray-500">
+                Student
+              </h3>
               <div class="flex items-center gap-2">
                 <button
                   v-if="hasExistingStudent"
@@ -334,20 +344,31 @@ function handleClose() {
                   <select
                     v-model="studentYear"
                     :disabled="hasExistingStudent && !isEditingStudent"
-                    :class="[
-                      'w-full border border-gray-300 rounded-lg px-3 pr-9 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5b8ae5]/60 focus:border-[#5b8ae5] appearance-none',
+                    class="w-full border border-gray-300 rounded-lg px-3 pr-9 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5b8ae5]/60 focus:border-[#5b8ae5] appearance-none" :class="[
                       studentYear ? 'text-gray-700' : 'text-gray-400',
                       hasExistingStudent && !isEditingStudent
                         ? 'bg-white text-gray-500 cursor-default'
-                        : 'bg-white text-gray-800 cursor-pointer'
+                        : 'bg-white text-gray-800 cursor-pointer',
                     ]"
                   >
-                    <option value="" class="text-gray-400">Year</option>
-                    <option value="1st Year">1st Year</option>
-                    <option value="2nd Year">2nd Year</option>
-                    <option value="3rd Year">3rd Year</option>
-                    <option value="4th Year">4th Year</option>
-                    <option value="TESDA">TESDA</option>
+                    <option value="" class="text-gray-400">
+                      Year
+                    </option>
+                    <option value="1st Year">
+                      1st Year
+                    </option>
+                    <option value="2nd Year">
+                      2nd Year
+                    </option>
+                    <option value="3rd Year">
+                      3rd Year
+                    </option>
+                    <option value="4th Year">
+                      4th Year
+                    </option>
+                    <option value="TESDA">
+                      TESDA
+                    </option>
                   </select>
                   <ChevronDown
                     v-if="!(hasExistingStudent && !isEditingStudent)"
@@ -358,19 +379,28 @@ function handleClose() {
                   <select
                     v-model="studentCourse"
                     :disabled="hasExistingStudent && !isEditingStudent"
-                    :class="[
-                      'w-full border border-gray-300 rounded-lg px-3 pr-9 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5b8ae5]/60 focus:border-[#5b8ae5] appearance-none',
+                    class="w-full border border-gray-300 rounded-lg px-3 pr-9 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5b8ae5]/60 focus:border-[#5b8ae5] appearance-none" :class="[
                       studentCourse ? 'text-gray-700' : 'text-gray-400',
                       hasExistingStudent && !isEditingStudent
                         ? 'bg-white text-gray-500 cursor-default'
-                        : 'bg-white text-gray-800 cursor-pointer'
+                        : 'bg-white text-gray-800 cursor-pointer',
                     ]"
                   >
-                    <option value="" class="text-gray-400">Course</option>
-                    <option value="BSIT">BSIT</option>
-                    <option value="BSCS">BSCS</option>
-                    <option value="BSA">BSA</option>
-                    <option value="BSHM">BSHM</option>
+                    <option value="" class="text-gray-400">
+                      Course
+                    </option>
+                    <option value="BSIT">
+                      BSIT
+                    </option>
+                    <option value="BSCS">
+                      BSCS
+                    </option>
+                    <option value="BSA">
+                      BSA
+                    </option>
+                    <option value="BSHM">
+                      BSHM
+                    </option>
                   </select>
                   <ChevronDown
                     v-if="!(hasExistingStudent && !isEditingStudent)"
@@ -382,31 +412,39 @@ function handleClose() {
           </div>
 
           <div class="space-y-3">
-            <h3 class="text-xs font-semibold tracking-wide uppercase text-gray-500">PC Status</h3>
+            <h3 class="text-xs font-semibold tracking-wide uppercase text-gray-500">
+              PC Status
+            </h3>
             <div class="space-y-4 items-start bg-gray-50/60 p-4 rounded-xl border border-gray-100">
               <div>
                 <div class="relative">
                   <select
                     :value="localPc?.status"
-                    @change="setStatus(($event.target as HTMLSelectElement).value)"
                     class="w-full border rounded-lg px-3 pr-9 py-2 text-sm bg-white focus:outline-none focus:ring-2 appearance-none cursor-pointer"
                     :class="[
-                      localPc?.status === 'complete' ? 'border-green-300 focus:ring-green-200 focus:border-green-300' :
-                      localPc?.status === 'missing' ? 'border-yellow-300 focus:ring-yellow-200 focus:border-yellow-300' :
-                      localPc?.status === 'broken' ? 'border-red-300 focus:ring-red-200 focus:border-red-300' :
-                      'border-gray-300 focus:ring-[#5b8ae5]/60 focus:border-[#5b8ae5]'
+                      localPc?.status === 'complete' ? 'border-green-300 focus:ring-green-200 focus:border-green-300'
+                      : localPc?.status === 'missing' ? 'border-yellow-300 focus:ring-yellow-200 focus:border-yellow-300'
+                        : localPc?.status === 'broken' ? 'border-red-300 focus:ring-red-200 focus:border-red-300'
+                          : 'border-gray-300 focus:ring-[#5b8ae5]/60 focus:border-[#5b8ae5]',
                     ]"
+                    @change="setStatus(($event.target as HTMLSelectElement).value)"
                   >
-                    <option value="complete">Complete</option>
-                    <option value="missing">Missing</option>
-                    <option value="broken">Broken</option>
+                    <option value="complete">
+                      Complete
+                    </option>
+                    <option value="missing">
+                      Missing
+                    </option>
+                    <option value="broken">
+                      Broken
+                    </option>
                   </select>
                   <ChevronDown class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 </div>
                 <div class="mt-2 flex items-center gap-3 text-xs text-gray-500">
-                  <span class="inline-flex items-center gap-1"><span class="inline-block w-2 h-2 rounded-full bg-green-500"></span>Complete</span>
-                  <span class="inline-flex items-center gap-1"><span class="inline-block w-2 h-2 rounded-full bg-yellow-400"></span>Missing</span>
-                  <span class="inline-flex items-center gap-1"><span class="inline-block w-2 h-2 rounded-full bg-red-500"></span>Broken</span>
+                  <span class="inline-flex items-center gap-1"><span class="inline-block w-2 h-2 rounded-full bg-green-500" />Complete</span>
+                  <span class="inline-flex items-center gap-1"><span class="inline-block w-2 h-2 rounded-full bg-yellow-400" />Missing</span>
+                  <span class="inline-flex items-center gap-1"><span class="inline-block w-2 h-2 rounded-full bg-red-500" />Broken</span>
                 </div>
               </div>
 

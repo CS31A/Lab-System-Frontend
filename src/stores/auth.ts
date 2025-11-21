@@ -43,7 +43,7 @@ export const useAuthStore = defineStore('auth', () => {
         }
 
         // Wait before retry (exponential backoff)
-        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000))
+        await new Promise(resolve => setTimeout(resolve, 2 ** attempt * 1000))
       }
       finally {
         isLoading.value = false

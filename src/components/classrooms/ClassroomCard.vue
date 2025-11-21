@@ -1,8 +1,8 @@
 <script setup lang="ts">
+import type { Classroom } from '@/interfaces/interfaces'
+import { Eye, MoreVertical } from 'lucide-vue-next'
 // IMPORTS
 import { ref } from 'vue'
-import { Eye, MoreVertical } from 'lucide-vue-next'
-import type { Classroom } from '@/interfaces/interfaces'
 import ClassroomDeleteModal from '@/components/modals/ClassroomDeleteModal.vue'
 
 // PROPS & EMITS
@@ -20,25 +20,25 @@ const emit = defineEmits<{
 const isMenuOpen = ref(false)
 const isDeleteModalOpen = ref(false)
 
-const toggleMenu = () => {
+function toggleMenu() {
   isMenuOpen.value = !isMenuOpen.value
 }
 
-const handleEdit = (id: string) => {
+function handleEdit(id: string) {
   emit('edit-classroom', id)
   isMenuOpen.value = false
 }
 
-const handleDeleteClick = () => {
+function handleDeleteClick() {
   isDeleteModalOpen.value = true
   isMenuOpen.value = false
 }
 
-const handleCloseDeleteModal = () => {
+function handleCloseDeleteModal() {
   isDeleteModalOpen.value = false
 }
 
-const handleConfirmDelete = (id: string) => {
+function handleConfirmDelete(id: string) {
   emit('delete-classroom', id)
   isDeleteModalOpen.value = false
 }
@@ -48,7 +48,9 @@ const handleConfirmDelete = (id: string) => {
   <!-- CLASSROOM CARD -->
   <div class="bg-white rounded-lg shadow overflow-hidden">
     <div class="p-4 border-b border-gray-200 bg-[#ebf8ff] flex items-start justify-between">
-      <h3 class="font-medium text-[#2b6cb0]">{{ classroom.name }}</h3>
+      <h3 class="font-medium text-[#2b6cb0]">
+        {{ classroom.name }}
+      </h3>
       <div class="relative">
         <button
           class="p-1 rounded-full hover:bg-blue-100 text-[#2b6cb0] transition-colors cursor-pointer"
@@ -101,8 +103,8 @@ const handleConfirmDelete = (id: string) => {
   </div>
   <ClassroomDeleteModal
     v-if="isDeleteModalOpen"
-    :classroom-name="classroom.name"
     :id="classroom.id"
+    :classroom-name="classroom.name"
     @close="handleCloseDeleteModal"
     @confirm="handleConfirmDelete(classroom.id)"
   />

@@ -1,7 +1,7 @@
+import type { BackendLab, Classroom, LocalLab } from '@/interfaces/interfaces'
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { computed, ref } from 'vue'
 import api from '@/boot/axios'
-import type { Classroom, LocalLab, BackendLab } from '@/interfaces/interfaces'
 
 const LOCAL_LABS_KEY = 'local-laboratories'
 
@@ -15,7 +15,7 @@ export const useLaboratoryStore = defineStore('laboratory', () => {
   const isBuildingLayout = ref<boolean>(false)
 
   const selectedRoom = computed(() =>
-    selectedRoomId.value ? laboratories.value.find(lab => lab.id === selectedRoomId.value) ?? null : null
+    selectedRoomId.value ? laboratories.value.find(lab => lab.id === selectedRoomId.value) ?? null : null,
   )
 
   // FETCHES LABORATORIES FROM API AND MERGES LOCAL STORAGE LAYOUTS
@@ -42,7 +42,8 @@ export const useLaboratoryStore = defineStore('laboratory', () => {
           if (Array.isArray(parsed)) {
             localLabs = parsed
           }
-        } catch (err) {
+        }
+        catch (err) {
           console.error('Failed to parse local laboratories from localStorage:', err)
         }
       }
@@ -57,10 +58,12 @@ export const useLaboratoryStore = defineStore('laboratory', () => {
       }))
 
       laboratories.value = [...apiLabs, ...mappedLocalLabs]
-    } catch (err) {
+    }
+    catch (err) {
       console.error('Failed to fetch laboratory data:', err)
       error.value = 'Failed to load laboratories. Please try again later.'
-    } finally {
+    }
+    finally {
       isLoading.value = false
     }
   }
@@ -77,7 +80,7 @@ export const useLaboratoryStore = defineStore('laboratory', () => {
   }
 
   // SAVES NEW LABORATORY LAYOUT TO LOCAL STORAGE AND STORE STATE
-  const saveLayout = (payload: { name: string; layout: boolean[] }) => {
+  const saveLayout = (payload: { name: string, layout: boolean[] }) => {
     const id = `local-${Date.now()}`
     const layoutSnapshot = [...payload.layout]
 
@@ -90,7 +93,8 @@ export const useLaboratoryStore = defineStore('laboratory', () => {
         if (Array.isArray(parsed)) {
           existing = parsed
         }
-      } catch (err) {
+      }
+      catch (err) {
         console.error('Failed to parse existing local laboratories:', err)
       }
     }
@@ -103,7 +107,8 @@ export const useLaboratoryStore = defineStore('laboratory', () => {
 
     try {
       localStorage.setItem(LOCAL_LABS_KEY, JSON.stringify(existing))
-    } catch (err) {
+    }
+    catch (err) {
       console.error('Failed to save local laboratories to localStorage:', err)
     }
 

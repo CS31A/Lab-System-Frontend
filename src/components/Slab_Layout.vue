@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, computed, watchEffect } from 'vue'
+import type { LayoutConfig, PcCondition, SeatCell, SeatStatus, SlabStudentInfo } from '@/interfaces/interfaces'
 import { Monitor } from 'lucide-vue-next'
+import { computed, ref, watchEffect } from 'vue'
 import PcStatusModal from './modals/PcStatusModal.vue'
-import type { PcCondition, SeatStatus, SeatCell, LayoutConfig, SlabStudentInfo } from '@/interfaces/interfaces'
 
 defineOptions({
   name: 'SlabLayout',
@@ -18,7 +18,7 @@ const props = withDefaults(defineProps<{
 
 const emit = defineEmits<{
   'seat-selected-change': [hasSelected: boolean]
-  'students-change': [students: { id: number; name: string }[]]
+  'students-change': [students: { id: number, name: string }[]]
 }>()
 
 const title = computed(() => props.title ?? 'SLAB LAYOUT')
@@ -115,14 +115,16 @@ const currentLayout = computed(() => {
   let firstRow = 0
   while (firstRow < totalRows) {
     const row = rawLayout[firstRow] ?? []
-    if (row.some(cell => cell !== null)) break
+    if (row.some(cell => cell !== null))
+      break
     firstRow++
   }
 
   let lastRow = totalRows - 1
   while (lastRow >= firstRow) {
     const row = rawLayout[lastRow] ?? []
-    if (row.some(cell => cell !== null)) break
+    if (row.some(cell => cell !== null))
+      break
     lastRow--
   }
 
@@ -214,8 +216,8 @@ watchEffect(() => {
 
   const newSeats: SeatStatus[] = []
   const existingSeatMap = new Map<number, SeatStatus>()
-  
-  seats.value.forEach(seat => {
+
+  seats.value.forEach((seat) => {
     existingSeatMap.set(seat.id, seat)
   })
 
@@ -225,7 +227,8 @@ watchEffect(() => {
     for (let colIndex = 0; colIndex < cols; colIndex++) {
       const cell = row[colIndex] ?? null
 
-      if (!cell) continue
+      if (!cell)
+        continue
 
       const seatId = rowIndex * cols + colIndex + 1
       const existingSeat = existingSeatMap.get(seatId)
@@ -271,9 +274,9 @@ watchEffect(() => {
 
   const studentsForSidebar = seats.value
     .filter(seat => seat.studentName && seat.studentName.trim().length > 0)
-    .map(seat => {
+    .map((seat) => {
       const label = seat.pcLabel || ''
-      const parsedNumber = parseInt(label.replace('PC', ''), 10)
+      const parsedNumber = Number.parseInt(label.replace('PC', ''), 10)
       const id = Number.isFinite(parsedNumber) && parsedNumber > 0 ? parsedNumber : seat.id
       return { id, name: seat.studentName as string }
     })
@@ -285,7 +288,7 @@ watchEffect(() => {
 function toggleSeat(seat: SeatStatus) {
   const wasSelected = seat.status === 'selected'
 
-  seats.value.forEach(s => {
+  seats.value.forEach((s) => {
     if (s.id !== seat.id && s.status === 'selected') {
       s.status = (s.studentName && s.studentName.trim()) ? 'assigned' : 'unassigned'
     }
@@ -323,20 +326,20 @@ function handleClosePcModal() {
   selectedSeatPc.value = null
 }
 
-// SAVES PC STATUS AND STUDENT INFO FROM MODAL AND TRIGGERS TOAST 
-function handleSavePcModal(pc: { id: number; status: PcCondition; missingOrbrokenDetails?: string; studentName?: string; studentYear?: string; studentCourse?: string }) {
+// SAVES PC STATUS AND STUDENT INFO FROM MODAL AND TRIGGERS TOAST
+function handleSavePcModal(pc: { id: number, status: PcCondition, missingOrbrokenDetails?: string, studentName?: string, studentYear?: string, studentCourse?: string }) {
   const seat = seats.value.find(s => s.id === pc.id)
   if (seat) {
     const hadStudent = !!(seat.studentName && seat.studentName.trim().length > 0)
 
-    const pcChanged =
-      seat.pcStatus !== pc.status ||
-      (seat.missingOrbrokenDetails || '') !== (pc.missingOrbrokenDetails || '')
+    const pcChanged
+      = seat.pcStatus !== pc.status
+        || (seat.missingOrbrokenDetails || '') !== (pc.missingOrbrokenDetails || '')
 
-    const studentChanged =
-      (seat.studentName || '') !== (pc.studentName || '') ||
-      (seat.studentYear || '') !== (pc.studentYear || '') ||
-      (seat.studentCourse || '') !== (pc.studentCourse || '')
+    const studentChanged
+      = (seat.studentName || '') !== (pc.studentName || '')
+        || (seat.studentYear || '') !== (pc.studentYear || '')
+        || (seat.studentCourse || '') !== (pc.studentCourse || '')
 
     if (pcChanged || studentChanged) {
       seat.pcStatus = pc.status
@@ -359,7 +362,7 @@ function handleSavePcModal(pc: { id: number; status: PcCondition; missingOrbroke
 }
 
 // SAVES ONLY STUDENT INFORMATION INLINE WITHOUT TRIGGERING TOAST
-function handleInlineStudentSave(pc: { id: number; status: PcCondition; missingOrbrokenDetails?: string; studentName?: string; studentYear?: string; studentCourse?: string }) {
+function handleInlineStudentSave(pc: { id: number, status: PcCondition, missingOrbrokenDetails?: string, studentName?: string, studentYear?: string, studentCourse?: string }) {
   const seat = seats.value.find(s => s.id === pc.id)
   if (seat) {
     seat.studentName = (pc.studentName || '')
@@ -438,18 +441,16 @@ function getPcDotColor(status: PcCondition): string {
           >
             <div v-if="seatMap.has(`${row}-${col}`)" class="relative inline-block">
               <span
-                :class="[
-                  'absolute top-0.7 -right-0.5 w-2.5 h-2.5 rounded-full ring-2 ring-white z-10',
+                class="absolute top-0.7 -right-0.5 w-2.5 h-2.5 rounded-full ring-2 ring-white z-10" :class="[
                   getPcDotColor(seatMap.get(`${row}-${col}`)!.pcStatus),
                 ]"
               />
               <Monitor
-                :class="[
-                  'pc-icon w-9 h-9 cursor-pointer transition-all duration-200 hover:scale-110',
+                class="pc-icon w-9 h-9 cursor-pointer transition-all duration-200 hover:scale-110" :class="[
                   getSeatColor(seatMap.get(`${row}-${col}`)!.status),
                 ]"
-                @click="handleSeatClick(seatMap.get(`${row}-${col}`)!)"
                 :title="`Seat ${seatMap.get(`${row}-${col}`)!.id}`"
+                @click="handleSeatClick(seatMap.get(`${row}-${col}`)!)"
               />
             </div>
           </div>

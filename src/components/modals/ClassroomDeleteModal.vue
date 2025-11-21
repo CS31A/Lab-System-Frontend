@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import { AlertTriangle } from 'lucide-vue-next'
 // IMPORTS
 import { ref } from 'vue'
-import { AlertTriangle } from 'lucide-vue-next'
 import api from '@/boot/axios'
 
 // PROPS & EMITS
@@ -22,12 +22,13 @@ const isDeleting = ref(false)
 const errorMessage = ref('')
 
 // METHODS
-const handleClose = () => {
-  if (isDeleting.value) return
+function handleClose() {
+  if (isDeleting.value)
+    return
   emit('close')
 }
 
-const handleConfirm = async () => {
+async function handleConfirm() {
   if (confirmationText.value.trim().toLowerCase() !== 'delete') {
     errorMessage.value = 'Please type "delete" to confirm.'
     return
@@ -38,10 +39,12 @@ const handleConfirm = async () => {
     errorMessage.value = ''
     await api.delete(`/laboratories/${props.id}`)
     emit('confirm')
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Failed to delete laboratory:', error)
     errorMessage.value = 'Failed to delete. Please try again.'
-  } finally {
+  }
+  finally {
     isDeleting.value = false
   }
 }
@@ -58,7 +61,9 @@ const handleConfirm = async () => {
           <div class="p-2 rounded-full bg-red-100 text-red-600 mr-3">
             <AlertTriangle :size="20" />
           </div>
-          <h3 class="text-lg font-medium text-gray-900">Delete Classroom</h3>
+          <h3 class="text-lg font-medium text-gray-900">
+            Delete Classroom
+          </h3>
         </div>
         <p class="text-sm text-gray-500 mb-6">
           Are you sure you want to delete
@@ -75,9 +80,11 @@ const handleConfirm = async () => {
               type="text"
               class="flex-1 px-3 py-1.5 rounded-md border border-gray-300 text-sm focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500"
               placeholder="delete"
-            />
+            >
           </div>
-          <p v-if="errorMessage" class="mt-1 text-xs text-red-600">{{ errorMessage }}</p>
+          <p v-if="errorMessage" class="mt-1 text-xs text-red-600">
+            {{ errorMessage }}
+          </p>
         </div>
         <div class="flex justify-end space-x-3">
           <button

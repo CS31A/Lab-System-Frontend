@@ -1,16 +1,22 @@
-<<script setup lang="ts">
-// IMPORTS
-import { defineAsyncComponent, computed } from 'vue'
-import { ArrowLeft, RefreshCw, Monitor } from 'lucide-vue-next'
+<script setup lang="ts">
 import type { Classroom } from '@/interfaces/interfaces'
+import { ArrowLeft, Monitor, RefreshCw } from 'lucide-vue-next'
+// IMPORTS
+import { computed, defineAsyncComponent } from 'vue'
+
+const props = defineProps<Props>()
+
+const emit = defineEmits<{
+  'back': []
+  'seat-click': [seatId: string, isOccupied: boolean]
+}>()
+
 const SeatMap = defineAsyncComponent(() => import('@/components/Slab_Layout.vue'))
 
 // PROPS & EMITS
 interface Props {
   room: Classroom
 }
-
-const props = defineProps<Props>()
 
 // CHECK IF ROOM IS LOCAL
 const isLocalRoom = computed(() => props.room.id.startsWith('local-'))
@@ -24,18 +30,26 @@ const layoutKey = computed(() => {
 
   const numericId = Number(room.id)
   if (!Number.isNaN(numericId)) {
-    if (numericId === 1) return 'slab1'
-    if (numericId === 2) return 'slab2'
-    if (numericId === 3) return 'slab3'
-    if (numericId === 4) return 'slab4'
+    if (numericId === 1)
+      return 'slab1'
+    if (numericId === 2)
+      return 'slab2'
+    if (numericId === 3)
+      return 'slab3'
+    if (numericId === 4)
+      return 'slab4'
   }
 
   const match = room.name.match(/\d+/)
-  const num = match ? Number(match[0]) : NaN
-  if (num === 1) return 'slab1'
-  if (num === 2) return 'slab2'
-  if (num === 3) return 'slab3'
-  if (num === 4) return 'slab4'
+  const num = match ? Number(match[0]) : Number.NaN
+  if (num === 1)
+    return 'slab1'
+  if (num === 2)
+    return 'slab2'
+  if (num === 3)
+    return 'slab3'
+  if (num === 4)
+    return 'slab4'
 
   return 'slab1'
 })
@@ -49,14 +63,15 @@ const localSeats = computed(() => {
   const rows = 10
   const cols = 10
 
-  const seats: { id: number; row: number; col: number }[] = []
+  const seats: { id: number, row: number, col: number }[] = []
   let seatId = 0
 
   for (let row = 0; row < rows; row++) {
     for (let col = 0; col < cols; col++) {
       const index = row * cols + col
       const hasPc = cells[index]
-      if (!hasPc) continue
+      if (!hasPc)
+        continue
 
       seatId += 1
       seats.push({ id: seatId, row: row + 1, col: col + 1 })
@@ -68,17 +83,12 @@ const localSeats = computed(() => {
 
 // CREATE A MAP OF SEAT POSITIONS
 const localSeatMap = computed(() => {
-  const map = new Map<string, { id: number; row: number; col: number }>()
-  localSeats.value.forEach(seat => {
+  const map = new Map<string, { id: number, row: number, col: number }>()
+  localSeats.value.forEach((seat) => {
     map.set(`${seat.row}-${seat.col}`, seat)
   })
   return map
 })
-
-const emit = defineEmits<{
-  'back': []
-  'seat-click': [seatId: string, isOccupied: boolean]
-}>()
 
 // METHODS
 function handleBack() {
@@ -95,8 +105,8 @@ function handleSeatClick(seatId: string, isOccupied: boolean) {
     <div class="flex justify-between items-center">
       <div class="flex items-center space-x-4">
         <button
-          @click="handleBack"
           class="flex items-center text-gray-600 hover:text-gray-800 transition-colors cursor-pointer"
+          @click="handleBack"
         >
           <ArrowLeft class="mr-2 w-4 h-4" />
           Back to Classrooms
@@ -180,8 +190,8 @@ function handleSeatClick(seatId: string, isOccupied: boolean) {
               <Monitor
                 v-if="localSeatMap.has(`${row}-${col}`)"
                 class="w-9 h-9 cursor-pointer transition-all duration-200 hover:scale-110 text-gray-400"
-                @click="handleSeatClick(`seat-${localSeatMap.get(`${row}-${col}`)!.id}`, false)"
                 :title="`Seat ${localSeatMap.get(`${row}-${col}`)!.id}`"
+                @click="handleSeatClick(`seat-${localSeatMap.get(`${row}-${col}`)!.id}`, false)"
               />
             </div>
           </div>

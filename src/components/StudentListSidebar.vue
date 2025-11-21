@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { User, Menu } from 'lucide-vue-next'
+import { Menu, User } from 'lucide-vue-next'
+import { computed, ref } from 'vue'
 
 interface Student {
   id: number
@@ -21,9 +21,8 @@ function toggleSidebar() {
 
 <template>
   <div
-    :class="[
-      'relative h-full border-l border-[#aeb9d4] bg-white transition-[width] duration-200 ease-out',
-      isCollapsed ? 'w-0 lg:w-0' : 'w-full lg:w-[320px]'
+    class="relative h-full border-l border-[#aeb9d4] bg-white transition-[width] duration-200 ease-out" :class="[
+      isCollapsed ? 'w-0 lg:w-0' : 'w-full lg:w-[320px]',
     ]"
   >
     <div class="h-full overflow-hidden">
@@ -42,9 +41,9 @@ function toggleSidebar() {
           </div>
           <button
             type="button"
-            @click="toggleSidebar"
             class="p-2 rounded-full hover:bg-gray-100 text-gray-600 focus:outline-none focus:ring-2 focus:ring-[#5b8ae5] focus:ring-offset-2 cursor-pointer"
             :aria-label="isCollapsed ? 'Expand student panel' : 'Collapse student panel'"
+            @click="toggleSidebar"
           >
             <Menu class="w-5 h-5" />
           </button>
@@ -78,9 +77,9 @@ function toggleSidebar() {
     <button
       v-if="isCollapsed"
       type="button"
-      @click="toggleSidebar"
       class="absolute top-4 left-0 -translate-x-full bg-[linear-gradient(to_bottom,#5b8ae5,#013aae)] text-white px-3 py-4 rounded-l-full shadow-lg text-xs font-semibold flex items-center justify-center cursor-pointer"
       aria-label="Expand student panel"
+      @click="toggleSidebar"
     >
       <User class="w-5 h-5" />
     </button>

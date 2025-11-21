@@ -23,11 +23,11 @@ export const api: AxiosInstance = axios.create({
 
 let isRefreshing = false
 
-type FailedRequest = { resolve: (value?: unknown) => void, reject: (reason?: any) => void }
+interface FailedRequest { resolve: (value?: unknown) => void, reject: (reason?: any) => void }
 
 let failedRequestsQueue: FailedRequest[] = []
 
-const processQueue = (error: any = null) => {
+function processQueue(error: any = null) {
   failedRequestsQueue.forEach((promise) => {
     if (error) {
       promise.reject(error)
