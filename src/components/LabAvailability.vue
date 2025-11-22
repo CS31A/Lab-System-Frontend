@@ -9,7 +9,7 @@ defineOptions({
 })
 
 // Column names for the lab management table
-const ColumnName = ref(['Laboratory Name', 'Status'])
+const ColumnName = ref(['Laboratory Name', 'Status', 'Actions'])
 const TIME_INTERVAL = 300000 // 5 minutes in milliseconds
 const MAX_RETRIES = 3
 
@@ -103,11 +103,9 @@ onBeforeUnmount(() => {
     clearTimeout(timeoutId)
 })
 
-function handleLabClick(lab: Lab) {
-  if (lab.status === 'Occupied') {
-    selectedLab.value = lab
-    showModal.value = true
-  }
+function openDetails(lab: Lab) {
+  selectedLab.value = lab
+  showModal.value = true
 }
 
 function closeModal() {
@@ -138,26 +136,34 @@ function closeModal() {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(lab, index) in LabData" :key="index" class="border-b border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50" @click="handleLabClick(lab)">
-                    <td class="p-4 text-gray-900 dark:text-black font-semibold text-base text-center">
-                      {{ lab.name }}
-                    </td>
-                    <td class="p-4 text-gray-900 dark:text-black text-center">
-                      <span
-                        class="px-4 py-1 rounded-full text-sm font-medium"
-                        :class="lab.status === 'Available'
-                          ? 'bg-[#C9F6CB] text-[#39A249]'
-                          : 'bg-[#FDE68A] text-[#B45309]'"
-                      >
-                        {{ lab.status }}
-                      </span>
-                    </td>
-                  </tr>
-                  <tr v-if="LabData.length === 0">
-                    <td colspan="2" class="text-center p-4 text-gray-500">
-                      No laboratories found
-                    </td>
-                  </tr>
+<tr v-for="(lab, index) in LabData" :key="index" class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50">
+  <td class="p-4 text-gray-900 dark:text-black font-semibold text-base text-center">
+    {{ lab.name }}
+  </td>
+  <td class="p-4 text-gray-900 dark:text-black text-center">
+    <span
+      class="px-4 py-1 rounded-full text-sm font-medium"
+      :class="lab.status === 'Available'
+        ? 'bg-[#C9F6CB] text-[#39A249]'
+        : 'bg-[#FDE68A] text-[#B45309]'"
+    >
+      {{ lab.status }}
+    </span>
+  </td>
+  <td class="p-4 text-center">
+    <button
+      class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition-colors text-sm font-semibold"
+      @click="openDetails(lab)"
+    >
+      Details
+    </button>
+  </td>
+</tr>
+<tr v-if="LabData.length === 0">
+  <td colspan="3" class="text-center p-4 text-gray-500">
+    No laboratories found
+  </td>
+</tr>
                 </tbody>
               </table>
             </div>
