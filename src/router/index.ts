@@ -99,6 +99,35 @@ const router = createRouter({
       ],
     },
     {
+      path: '/teacher',
+      name: 'teacher',
+      component: () => import('../views/TeacherView.vue'),
+      redirect: '/teacher/dashboard',
+      meta: { requiresAuth: true, roles: ['teacher'] },
+      children: [
+        {
+          path: 'dashboard',
+          name: 'teacher-dashboard',
+          component: () => import('../components/teacher/Dashboard.vue'),
+        },
+        {
+          path: 'classrooms',
+          name: 'teacher-classrooms',
+          component: () => import('../components/admin/Classrooms.vue'),
+        },
+        {
+          path: 'students',
+          name: 'teacher-students',
+          component: () => import('../components/admin/Students.vue'),
+        },
+        {
+          path: 'schedules',
+          name: 'teacher-schedules',
+          component: () => import('../components/admin/Schedules.vue'),
+        },
+      ],
+    },
+    {
       path: '/lab_availability',
       name: 'lab_availability',
       component: () => import('../components/LabAvailability.vue'),
@@ -142,7 +171,7 @@ router.beforeEach(async (to, _from, next) => {
 
   // Handle authenticated users trying to access login page
   if (redirectIfAuthenticated && authStore.isAuthenticated) {
-    const redirectPath = authStore.isAdmin ? '/admin/dashboard' : '/home'
+    const redirectPath = authStore.isAdmin ? '/admin/dashboard' : authStore.isTeacher ? '/teacher/dashboard' : '/home'
     return next(redirectPath)
   }
 
@@ -168,7 +197,7 @@ router.beforeEach(async (to, _from, next) => {
     )
 
     // Redirect to appropriate home page based on role
-    const fallbackPath = authStore.isAdmin ? '/admin/dashboard' : '/home'
+    const fallbackPath = authStore.isAdmin ? '/admin/dashboard' : authStore.isTeacher ? '/teacher/dashboard' : '/home'
     return next(fallbackPath)
   }
 

@@ -1,12 +1,16 @@
 <script setup lang="ts">
+import { ArrowLeft } from 'lucide-vue-next'
 import { computed, onMounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import SlabLayout from '@/components/Slab_Layout.vue'
 import StudentSidebar from '@/components/StudentListSidebar.vue'
 import Sidebar from '@/components/TeacherInfoSidebar.vue'
+import { useAuthStore } from '@/stores/auth'
 import { useLaboratoryStore } from '@/stores/laboratory'
 
 const route = useRoute()
+const router = useRouter()
+const authStore = useAuthStore()
 
 const laboratoryStore = useLaboratoryStore()
 
@@ -95,10 +99,34 @@ function handleSeatSelectedChange(hasSelected: boolean) {
 function handleStudentsChange(students: { id: number, name: string }[]) {
   studentsForSidebar.value = students
 }
+
+// Navigate back to dashboard based on user role
+function goBackToDashboard() {
+  if (authStore.isTeacher) {
+    router.push({ name: 'teacher-dashboard' })
+  } else if (authStore.isAdmin) {
+    router.push({ name: 'admin-dashboard' })
+  } else {
+    // Fallback to home
+    router.push({ name: 'home' })
+  }
+}
 </script>
 
 <template>
-  <div class="flex h-screen overflow-hidden">
+  <div class="flex h-screen overflow-hidden bg-gray-50 relative">
+    <!-- Back to Dashboard Button - Positioned in top-left area after sidebar -->
+    <div class="absolute top-4 z-50 left-[420px]">
+      <button
+        type="button"
+        class="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200 text-gray-700 hover:text-blue-600 border border-gray-200 hover:border-blue-300"
+        @click="goBackToDashboard"
+      >
+        <ArrowLeft class="w-4 h-4" />
+        <span class="font-medium text-sm">Back to Dashboard</span>
+      </button>
+    </div>
+
     <Sidebar
       class="flex-shrink-0"
       :has-selected-seat="hasSelectedSeat"
