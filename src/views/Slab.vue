@@ -104,9 +104,11 @@ function handleStudentsChange(students: { id: number, name: string }[]) {
 function goBackToDashboard() {
   if (authStore.isTeacher) {
     router.push({ name: 'teacher-dashboard' })
-  } else if (authStore.isAdmin) {
+  }
+  else if (authStore.isAdmin) {
     router.push({ name: 'admin-dashboard' })
-  } else {
+  }
+  else {
     // Fallback to home
     router.push({ name: 'home' })
   }

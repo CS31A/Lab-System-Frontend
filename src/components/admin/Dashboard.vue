@@ -26,7 +26,6 @@ onMounted(() => {
 
 // COMPUTED PROPERTIES
 const upcomingSchedules = computed(() => dashboardStore.upcomingSchedules.slice(0, 5))
-const recentNotifications = computed(() => notificationStore.notifications.slice(0, 3))
 
 // METHOD TO OPEN MODAL
 function openAllSchedulesModal() {
@@ -37,7 +36,6 @@ function openAllSchedulesModal() {
 function closeAllSchedulesModal() {
   showSchedulesModal.value = false
 }
-
 
 // Map Store Stats to UI Format
 const stats = computed(() => [
@@ -89,8 +87,6 @@ const quickActions = [
     action: 'import-data',
   },
 ]
-
-
 
 // HANDLE QUICK ACTION BUTTON CLICKS
 function handleQuickAction(action: string) {
@@ -160,17 +156,17 @@ function handleQuickAction(action: string) {
               :schedule="schedule"
             />
           </div>
-          
+
           <!-- View All / Show Less Button -->
-          <div 
-            v-if="dashboardStore.upcomingSchedules.length > 5" 
+          <div
+            v-if="dashboardStore.upcomingSchedules.length > 5"
             class="mt-4 text-center"
           >
             <button
-              @click="openAllSchedulesModal"
               class="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors duration-200"
+              @click="openAllSchedulesModal"
             >
-              View All ({{dashboardStore.upcomingSchedules.length}})
+              View All ({{ dashboardStore.upcomingSchedules.length }})
             </button>
           </div>
         </div>

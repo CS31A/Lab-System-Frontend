@@ -12,9 +12,9 @@ interface Props {
 
 defineProps<Props>()
 const emit = defineEmits<{
-  'view-seats': [roomId: string]
-  'edit-classroom': [roomId: string]
-  'delete-classroom': [roomId: string]
+  viewSeats: [roomId: string]
+  editClassroom: [roomId: string]
+  deleteClassroom: [roomId: string]
 }>()
 
 const isMenuOpen = ref(false)
@@ -25,7 +25,7 @@ function toggleMenu() {
 }
 
 function handleEdit(id: string) {
-  emit('edit-classroom', id)
+  emit('editClassroom', id)
   isMenuOpen.value = false
 }
 
@@ -39,7 +39,7 @@ function handleCloseDeleteModal() {
 }
 
 function handleConfirmDelete(id: string) {
-  emit('delete-classroom', id)
+  emit('deleteClassroom', id)
   isDeleteModalOpen.value = false
 }
 </script>
@@ -94,7 +94,7 @@ function handleConfirmDelete(id: string) {
       </div>
       <button
         class="w-full py-2 bg-primary-100 text-[#2b6cb0] rounded-md hover:bg-primary-200 flex items-center justify-center transition-colors cursor-pointer"
-        @click="$emit('view-seats', classroom.id)"
+        @click="$emit('viewSeats', classroom.id)"
       >
         <Eye class="mr-2 w-4 h-4" />
         View Seats

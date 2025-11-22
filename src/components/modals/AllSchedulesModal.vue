@@ -1,9 +1,7 @@
 <script setup lang="ts">
-import { Calendar, X } from 'lucide-vue-next'
-import { defineAsyncComponent, ref, computed } from 'vue'
 import type { Schedule } from '@/interfaces/interfaces'
-
-const ScheduleCard = defineAsyncComponent(() => import('@/components/dashboard/ScheduleCard.vue'))
+import { Calendar, X } from 'lucide-vue-next'
+import { computed, defineAsyncComponent, ref } from 'vue'
 
 // PROPS
 const props = defineProps<{
@@ -15,18 +13,21 @@ const emit = defineEmits<{
   close: []
 }>()
 
+const ScheduleCard = defineAsyncComponent(() => import('@/components/dashboard/ScheduleCard.vue'))
+
 // SEARCH STATE
 const searchQuery = ref('')
 
 // FILTERED SCHEDULES
 const filteredSchedules = computed(() => {
-  if (!searchQuery.value) return props.schedules
+  if (!searchQuery.value)
+    return props.schedules
   const q = searchQuery.value.toLowerCase()
   return props.schedules.filter((s) => {
     return (
-      (s.subject && s.subject.toLowerCase().includes(q)) ||
-      (s.teacher && s.teacher.toLowerCase().includes(q)) ||
-      (s.room && s.room.toLowerCase().includes(q))
+      (s.subject && s.subject.toLowerCase().includes(q))
+      || (s.teacher && s.teacher.toLowerCase().includes(q))
+      || (s.room && s.room.toLowerCase().includes(q))
     )
   })
 })
@@ -72,14 +73,16 @@ function handleClose() {
           type="text"
           placeholder="Search schedules..."
           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+        >
       </div>
 
       <!-- Content -->
       <div class="flex-1 overflow-y-auto p-6">
         <div v-if="filteredSchedules.length === 0" class="text-center py-12">
           <Calendar :size="48" class="text-gray-300 mx-auto mb-3" />
-          <p class="text-gray-500">No schedules match your search.</p>
+          <p class="text-gray-500">
+            No schedules match your search.
+          </p>
         </div>
         <div v-else class="space-y-4">
           <ScheduleCard

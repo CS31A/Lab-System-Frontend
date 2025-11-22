@@ -129,29 +129,33 @@ const currentLayout = computed(() => {
   }
 
   let firstCol = 0
-  outerFirstCol:
-  while (firstCol < totalCols) {
+  let foundFirstCol = false
+  while (firstCol < totalCols && !foundFirstCol) {
     for (let rowIndex = firstRow; rowIndex <= lastRow; rowIndex++) {
       const row = rawLayout[rowIndex] ?? []
       const cell = row[firstCol] ?? null
       if (cell !== null) {
-        break outerFirstCol
+        foundFirstCol = true
+        break
       }
     }
-    firstCol++
+    if (!foundFirstCol)
+      firstCol++
   }
 
   let lastCol = totalCols - 1
-  outerLastCol:
-  while (lastCol >= firstCol) {
+  let foundLastCol = false
+  while (lastCol >= firstCol && !foundLastCol) {
     for (let rowIndex = firstRow; rowIndex <= lastRow; rowIndex++) {
       const row = rawLayout[rowIndex] ?? []
       const cell = row[lastCol] ?? null
       if (cell !== null) {
-        break outerLastCol
+        foundLastCol = true
+        break
       }
     }
-    lastCol--
+    if (!foundLastCol)
+      lastCol--
   }
 
   const trimmedLayout = [] as SeatCell[][]
@@ -268,7 +272,7 @@ watchEffect(() => {
   seats.value = newSeats
 
   emit(
-    'seat-selected-change',
+    'seatSelectedChange',
     seats.value.some(seat => seat.status === 'selected'),
   )
 
@@ -281,7 +285,7 @@ watchEffect(() => {
       return { id, name: seat.studentName as string }
     })
 
-  emit('students-change', studentsForSidebar)
+  emit('studentsChange', studentsForSidebar)
 })
 
 // TOGGLES THE SELECTED STATE OF A SEAT AND UPDATES EMITTED SELECTION FLAG
@@ -301,7 +305,7 @@ function toggleSeat(seat: SeatStatus) {
   seats.value = [...seats.value]
 
   emit(
-    'seat-selected-change',
+    'seatSelectedChange',
     seats.value.some(s => s.status === 'selected'),
   )
 }
@@ -330,8 +334,6 @@ function handleClosePcModal() {
 function handleSavePcModal(pc: { id: number, status: PcCondition, missingOrbrokenDetails?: string, studentName?: string, studentYear?: string, studentCourse?: string }) {
   const seat = seats.value.find(s => s.id === pc.id)
   if (seat) {
-    const hadStudent = !!(seat.studentName && seat.studentName.trim().length > 0)
-
     const pcChanged
       = seat.pcStatus !== pc.status
         || (seat.missingOrbrokenDetails || '') !== (pc.missingOrbrokenDetails || '')

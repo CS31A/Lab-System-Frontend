@@ -7,8 +7,7 @@ import { apiService } from '@/services/api'
 // PROPS FOR PASSING CURRENT LABORATORY ID FROM PARENT COMPONENT
 const props = defineProps<{ laboratoryId?: string | null }>()
 // CALENDAR
-// STORES CALENDAR EXPANSION STATE AND CURRENT DATE METADATA
-const isCalendarExpanded = ref(true)
+// STORES CURRENT DATE METADATA
 const today = new Date()
 const currentYear = today.getFullYear()
 const currentMonth = today.getMonth()
@@ -64,6 +63,13 @@ function generateMonthDays(year: number, month: number) {
 // SCHEDULE
 // CONTROLS WHETHER THE ENTIRE SIDEBAR IS COLLAPSED OR VISIBLE
 const isCollapsed = ref(false)
+
+// HOLDS LABORATORY SCHEDULES FROM API
+const labSchedules = ref<LabScheduleItem[]>([])
+
+// INSTRUCTOR & SUBJECT NAMES
+const instructorName = ref('')
+const subjectName = ref('')
 
 // HOLDS LABORATORY SCHEDULE TIME SLOTS AND THEIR ACTIVE STATE
 const timeSlots = ref<{ id?: string, time: string, isActive: boolean }[]>([])
@@ -128,7 +134,7 @@ function formatScheduleLabel(start: string, end: string, section?: string) {
   const hasTime = (s: string) => /\d{2}:\d{2}/.test(s) || /T\d{2}:\d{2}/i.test(s)
   const parse = (s: string) => {
     const d = new Date(s)
-    return isNaN(d.getTime()) ? null : d
+    return Number.isNaN(d.getTime()) ? null : d
   }
   if (hasTime(start) || hasTime(end)) {
     const ds = parse(start)
@@ -189,9 +195,6 @@ watch(() => props.laboratoryId, (val) => {
 })
 
 // INSTRUCTOR & PC INFO
-// const instructorName = ref('')
-// const subjectName = ref('')
-
 // const isEditingInstructor = ref(false)
 
 // const instructorConfirmed = ref(false)

@@ -7,8 +7,8 @@ import { computed, defineAsyncComponent } from 'vue'
 const props = defineProps<Props>()
 
 const emit = defineEmits<{
-  'back': []
-  'seat-click': [seatId: string, isOccupied: boolean]
+  back: []
+  seatClick: [seatId: string, isOccupied: boolean]
 }>()
 
 const SeatMap = defineAsyncComponent(() => import('@/components/Slab_Layout.vue'))
@@ -96,7 +96,7 @@ function handleBack() {
 }
 
 function handleSeatClick(seatId: string, isOccupied: boolean) {
-  emit('seat-click', seatId, isOccupied)
+  emit('seatClick', seatId, isOccupied)
 }
 </script>
 

@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import { AlertTriangle } from 'lucide-vue-next'
 // IMPORTS
 import { nextTick } from 'vue'
-import { AlertTriangle } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 

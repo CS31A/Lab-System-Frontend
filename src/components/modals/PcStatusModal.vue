@@ -18,9 +18,9 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  'close': []
-  'save': [pc: PcInfo]
-  'student-save': [pc: PcInfo]
+  close: []
+  save: [pc: PcInfo]
+  studentSave: [pc: PcInfo]
 }>()
 
 const localPc = ref<PcInfo | null>(null)
@@ -231,7 +231,7 @@ function handleStudentEditClick() {
       studentYear: studentYear.value,
       studentCourse: studentCourse.value,
     }
-    emit('student-save', updated)
+    emit('studentSave', updated)
     localPc.value = updated
     studentSuccess.value = 'Student information updated.'
     if (studentSuccessTimeout !== null)
@@ -310,6 +310,7 @@ function handleClose() {
       leave-to-class="opacity-0 translate-y-3 scale-95"
     >
       <div
+        v-if="localPc"
         class="relative w-[92%] max-w-md mx-auto bg-white rounded-2xl shadow-2xl ring-1 ring-gray-100 overflow-hidden"
       >
         <div class="px-6 py-5 bg-gradient-to-r from-[#013aae] to-[#5b8ae5]">
