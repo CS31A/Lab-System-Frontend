@@ -61,10 +61,6 @@ const currentSection = computed(() => {
     const labNum = path.split('/')[2]
     return `slab${labNum}`
   }
-  // if (path === '/lab_availability') {
-  //   return 'lab_availability'
-  // }
-  // return ''
 })
 
 // CHECK IF CURRENT ROUTE IS TEACHER ROUTE
@@ -147,7 +143,10 @@ async function handleLogout() {
 }
 
 // Handle teacher tab change
-function setTeacherTab(tab: 'schedule' | 'classes') {
+async function setTeacherTab(tab: 'schedule' | 'classes') {
+  if (route.name !== 'teacher-dashboard') {
+    await router.push({ name: 'teacher-dashboard' })
+  }
   teacherActiveTab.value = tab
 }
 </script>
