@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Calendar, FilePlus, Home, Plus, Upload, User, UserPlus, Users } from 'lucide-vue-next'
-import { computed, defineAsyncComponent, onMounted } from 'vue'
+import { computed, defineAsyncComponent, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useDashboardStore } from '@/stores/dashboard'
 import { useNotificationStore } from '@/stores/notifications'
@@ -8,11 +8,15 @@ import { useNotificationStore } from '@/stores/notifications'
 const StatsCard = defineAsyncComponent(() => import('@/components/dashboard/StatsCard.vue'))
 const ScheduleCard = defineAsyncComponent(() => import('@/components/dashboard/ScheduleCard.vue'))
 const QuickActionButton = defineAsyncComponent(() => import('@/components/dashboard/QuickActionButton.vue'))
+const AllSchedulesModal = defineAsyncComponent(() => import('@/components/modals/AllSchedulesModal.vue'))
 
 // ROUTER & STORE INITIALIZATION
 const router = useRouter()
 const dashboardStore = useDashboardStore()
 const notificationStore = useNotificationStore()
+
+// STATE
+const showSchedulesModal = ref(false)
 
 // LIFECYCLE: Fetch API Data on Load
 onMounted(() => {
@@ -21,8 +25,19 @@ onMounted(() => {
 })
 
 // COMPUTED PROPERTIES
-const upcomingSchedules = computed(() => dashboardStore.upcomingSchedules)
+const upcomingSchedules = computed(() => dashboardStore.upcomingSchedules.slice(0, 5))
 const recentNotifications = computed(() => notificationStore.notifications.slice(0, 3))
+
+// METHOD TO OPEN MODAL
+function openAllSchedulesModal() {
+  showSchedulesModal.value = true
+}
+
+// METHOD TO CLOSE MODAL (passed to modal)
+function closeAllSchedulesModal() {
+  showSchedulesModal.value = false
+}
+
 
 // Map Store Stats to UI Format
 const stats = computed(() => [
@@ -75,7 +90,8 @@ const quickActions = [
   },
 ]
 
-// METHODS
+
+
 // HANDLE QUICK ACTION BUTTON CLICKS
 function handleQuickAction(action: string) {
   switch (action) {
@@ -102,7 +118,7 @@ function handleQuickAction(action: string) {
 </script>
 
 <template>
-  <div>
+  <div class="min-h-screen overflow-auto">
     <h2 class="text-2xl font-bold text-gray-800 mb-6">
       Dashboard Overview
     </h2>
@@ -133,17 +149,39 @@ function handleQuickAction(action: string) {
         <div v-if="dashboardStore.isLoading" class="text-center py-4 text-gray-400">
           Loading schedules...
         </div>
-        <div v-else-if="upcomingSchedules.length === 0" class="text-center py-4 text-gray-400">
+        <div v-else-if="dashboardStore.upcomingSchedules.length === 0" class="text-center py-4 text-gray-400">
           No upcoming schedules.
         </div>
-        <div v-else class="space-y-4">
-          <ScheduleCard
-            v-for="schedule in upcomingSchedules"
-            :key="schedule.id"
-            :schedule="schedule"
-          />
+        <div v-else>
+          <div class="space-y-4">
+            <ScheduleCard
+              v-for="schedule in upcomingSchedules"
+              :key="schedule.id"
+              :schedule="schedule"
+            />
+          </div>
+          
+          <!-- View All / Show Less Button -->
+          <div 
+            v-if="dashboardStore.upcomingSchedules.length > 5" 
+            class="mt-4 text-center"
+          >
+            <button
+              @click="openAllSchedulesModal"
+              class="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors duration-200"
+            >
+              View All ({{dashboardStore.upcomingSchedules.length}})
+            </button>
+          </div>
         </div>
       </div>
+
+      <!-- All Schedules Modal -->
+      <AllSchedulesModal
+        v-if="showSchedulesModal"
+        :schedules="dashboardStore.upcomingSchedules"
+        @close="closeAllSchedulesModal"
+      />
 
       <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
         <h3 class="text-lg font-medium text-gray-800 mb-4">

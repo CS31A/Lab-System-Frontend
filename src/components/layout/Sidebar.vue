@@ -1,12 +1,35 @@
 <script setup lang="ts">
 // IMPORTS
-import { computed, onMounted, ref } from 'vue'
+import { CalendarDays, LogOut, Users } from 'lucide-vue-next'
+import { computed, inject, nextTick, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '@/boot/axios'
+import { useAuthStore } from '@/stores/auth'
 
-// ROUTER INITIALIZATION
+// ROUTER & STORE INITIALIZATION
 const router = useRouter()
 const route = useRoute()
+const authStore = useAuthStore()
+
+// Check if user is teacher
+const isTeacher = computed(() => authStore.isTeacher)
+const currentUser = computed(() => authStore.currentUser)
+
+// Get user initials for avatar
+const userInitials = computed(() => {
+  if (!currentUser.value?.name) return 'TE'
+  const names = currentUser.value.name.split(' ')
+  if (names.length >= 2) {
+    return (names[0][0] + names[1][0]).toUpperCase()
+  }
+  return currentUser.value.name.substring(0, 2).toUpperCase()
+})
+
+// Get teacher tab state from parent (TeacherView) with fallback
+const teacherActiveTab = inject<Ref<'schedule' | 'classes'>>('teacherActiveTab', ref<'schedule' | 'classes'>('schedule'))
+
+// Optional logout modal inject
+const showModal = inject<((name: string) => void) | null>('showModal', null)
 
 // LABORATORY INTERFACE
 interface Laboratory {
@@ -30,6 +53,9 @@ const currentSection = computed(() => {
   if (path.startsWith('/admin/')) {
     return path.split('/')[2] || 'dashboard'
   }
+  if (path.startsWith('/teacher/')) {
+    return path.split('/')[2] || 'dashboard'
+  }
   if (path.startsWith('/laboratory/')) {
     const labNum = path.split('/')[2]
     return `slab${labNum}`
@@ -39,6 +65,9 @@ const currentSection = computed(() => {
   }
   return ''
 })
+
+// CHECK IF CURRENT ROUTE IS TEACHER ROUTE
+const isTeacherRoute = computed(() => route.path.startsWith('/teacher/'))
 
 // FETCH LABORATORIES
 async function fetchLaboratories() {
@@ -84,8 +113,14 @@ function navigate(name: string) {
   }
   // ADMIN ROUTES
   const adminSections = ['dashboard', 'classrooms', 'students', 'teachers', 'schedules', 'activity', 'settings']
-  if (adminSections.includes(name)) {
+  if (adminSections.includes(name) && route.path.startsWith('/admin/')) {
     router.push({ name: `admin-${name}` })
+    return
+  }
+  // TEACHER ROUTES
+  const teacherSections = ['dashboard', 'classrooms', 'students', 'schedules']
+  if (teacherSections.includes(name) && route.path.startsWith('/teacher/')) {
+    router.push({ name: `teacher-${name}` })
     return
   }
   // OTHER ROUTES (e.g., Login)
@@ -98,13 +133,21 @@ function iconColor(name: string) {
 }
 
 // HANDLE USER LOGOUT
-function handleLogout() {
-  // CLEAR AUTHENTICATION DATA
-  localStorage.removeItem('token')
-  localStorage.removeItem('user')
+async function handleLogout() {
+  if (showModal) {
+    showModal('logout')
+  }
+  else {
+    // Fallback to direct logout if modal not available
+    await authStore.logout()
+    await nextTick()
+    router.replace({ name: 'Login' })
+  }
+}
 
-  // REDIRECT TO LOGIN PAGE
-  router.push({ name: 'Login' })
+// Handle teacher tab change
+function setTeacherTab(tab: 'schedule' | 'classes') {
+  teacherActiveTab.value = tab
 }
 </script>
 
@@ -112,34 +155,139 @@ function handleLogout() {
   <aside
     class="h-full border-r border-gray-200 bg-white transition-all duration-300 flex flex-col"
     :class="[
-      isSidebarOpen ? 'w-60' : 'w-16',
+      isSidebarOpen ? 'w-64' : 'w-16',
     ]"
   >
-    <div class="p-3 flex flex-col h-full">
-      <!-- COLLAPSE TOGGLE -->
-      <div class="flex justify-end mb-4">
-        <button
-          class="p-1.5 rounded-lg hover:bg-gray-100 cursor-pointer"
-          @click="toggleSidebar"
-        >
-          <svg
-            class="w-5 h-5 text-gray-600"
-            :class="{ 'transform rotate-180': !isSidebarOpen }"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
+    <!-- TEACHER SIDEBAR -->
+    <template v-if="isTeacher && isTeacherRoute">
+      <!-- Teacher info header -->
+      <div class="p-4 pb-3 border-b border-gray-200">
+        <div class="flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3 flex-1 min-w-0">
+            <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+              <span class="text-blue-600 font-semibold text-sm">{{ userInitials }}</span>
+            </div>
+            <div v-show="isSidebarOpen" class="flex-1 min-w-0">
+              <p class="text-sm font-semibold text-gray-900 truncate">
+                {{ currentUser?.name || 'Teacher' }}
+              </p>
+              <p class="text-xs text-gray-500 truncate">
+                {{ currentUser?.email || '' }}
+              </p>
+            </div>
+          </div>
+          <!-- Collapse toggle for teacher -->
+          <button
+            v-show="isSidebarOpen"
+            class="p-1.5 rounded-lg hover:bg-gray-100 cursor-pointer flex-shrink-0"
+            @click="toggleSidebar"
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M4 6h16M4 12h16M4 18h16"
-            />
-          </svg>
-        </button>
+            <svg
+              class="w-4 h-4 text-gray-600"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+          <!-- Expand button when collapsed -->
+          <button
+            v-show="!isSidebarOpen"
+            class="p-1.5 rounded-lg hover:bg-gray-100 cursor-pointer flex-shrink-0"
+            @click="toggleSidebar"
+          >
+            <svg
+              class="w-4 h-4 text-gray-600"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+            </svg>
+          </button>
+        </div>
       </div>
 
-      <nav class="space-y-0.5 flex-1">
+      <div class="p-3 flex flex-col h-full">
+        <nav class="flex-1 mt-2">
+          <ul class="space-y-1">
+            <li>
+              <button
+                type="button"
+                class="group w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors"
+                :class="teacherActiveTab.value === 'schedule' ? 'bg-blue-50 text-blue-700 ring-1 ring-blue-200' : 'text-gray-700 hover:bg-blue-100'"
+                @click="setTeacherTab('schedule')"
+              >
+                <CalendarDays class="w-4 h-4" />
+                <span v-show="isSidebarOpen" class="group-hover:text-blue-700">Today's Schedule</span>
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                class="group w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors"
+                :class="teacherActiveTab.value === 'classes' ? 'bg-blue-50 text-blue-700 ring-1 ring-blue-200' : 'text-gray-700 hover:bg-blue-100'"
+                @click="setTeacherTab('classes')"
+              >
+                <Users class="w-4 h-4" />
+                <span v-show="isSidebarOpen" class="group-hover:text-blue-700">My Classes</span>
+              </button>
+            </li>
+          </ul>
+        </nav>
+
+        <!-- Logout -->
+        <div class="pt-3 mt-auto border-t border-gray-200">
+          <button
+            type="button"
+            class="group w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm text-gray-700 hover:bg-red-50 hover:text-red-700 transition-colors"
+            @click="handleLogout"
+          >
+            <LogOut class="w-4 h-4 transition-colors group-hover:text-red-600" />
+            <span v-show="isSidebarOpen" class="font-medium">Logout</span>
+          </button>
+        </div>
+      </div>
+    </template>
+
+    <!-- ADMIN/REGULAR SIDEBAR -->
+    <template v-else>
+      <div class="p-3 flex flex-col h-full">
+        <!-- COLLAPSE TOGGLE -->
+        <div class="flex justify-end mb-4">
+          <button
+            class="p-1.5 rounded-lg hover:bg-gray-100 cursor-pointer"
+            @click="toggleSidebar"
+          >
+            <svg
+              class="w-5 h-5 text-gray-600"
+              :class="{ 'transform rotate-180': !isSidebarOpen }"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+            </svg>
+          </button>
+        </div>
+
+        <nav class="space-y-0.5 flex-1">
         <!-- DASHBOARD -->
         <button
           class="group w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors text-gray-700 hover:bg-blue-100 cursor-pointer"
@@ -221,8 +369,9 @@ function handleLogout() {
             </svg>
             <span v-show="isSidebarOpen" class="transition-colors group-hover:text-blue-700">Students</span>
           </button>
-          <!-- TEACHERS -->
+          <!-- TEACHERS (Admin Only) -->
           <button
+            v-if="!isTeacherRoute"
             class="group w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors text-gray-700 hover:bg-blue-100 cursor-pointer"
             :class="isActive('teachers') ? 'bg-blue-50 text-blue-700 ring-1 ring-blue-200' : ''"
             @click="navigate('teachers')"
@@ -243,8 +392,9 @@ function handleLogout() {
             </svg>
             <span v-show="isSidebarOpen" class="transition-colors group-hover:text-blue-700">Schedules</span>
           </button>
-          <!-- ACTIVITY LOG -->
+          <!-- ACTIVITY LOG (Admin Only) -->
           <button
+            v-if="!isTeacherRoute"
             class="group w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors text-gray-700 hover:bg-blue-100 cursor-pointer"
             :class="isActive('activity') ? 'bg-blue-50 text-blue-700 ring-1 ring-blue-200' : ''"
             @click="navigate('activity')"
@@ -263,6 +413,7 @@ function handleLogout() {
           Support
         </h3>
         <button
+          v-if="!isTeacherRoute"
           class="group w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-blue-100 cursor-pointer"
           :class="isActive('settings') ? 'bg-blue-50 text-blue-700 ring-1 ring-blue-200' : ''"
           @click="navigate('settings')"
@@ -283,6 +434,7 @@ function handleLogout() {
         </button>
       </div>
     </div>
+    </template>
   </aside>
 </template>
 
