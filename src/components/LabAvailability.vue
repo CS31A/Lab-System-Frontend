@@ -1,10 +1,6 @@
 <script setup lang="ts">
 import type { ApiLab, ApiResponse, Lab } from '@/interfaces/interfaces'
 import { onBeforeUnmount, onMounted, provide, ref } from 'vue'
-import Footer from '@/components/global/Footer.vue'
-import TopHeader from '@/components/global/Header.vue'
-import Header from '@/components/layout/Header.vue'
-import Sidebar from '@/components/layout/Sidebar.vue'
 import LabOccupancyModal from '@/components/modals/LabOccupancyModal.vue'
 import { apiService } from '@/services/api'
 
@@ -122,11 +118,6 @@ function closeModal() {
 
 <template>
   <div class="min-h-screen bg-gray-50 flex flex-col">
-    <TopHeader />
-    <div class="flex flex-1">
-      <Sidebar />
-      <div class="flex-1 flex flex-col">
-        <Header />
         <main class="flex-1 p-6 bg-white flex flex-col items-center">
           <div class="mb-6 flex flex-col items-center w-full">
             <h2 class="text-4xl font-bold text-[#013aae] mb-1 text-center" style="font-family: var(--konkhmer-font);">
@@ -184,9 +175,6 @@ function closeModal() {
             </div>
           </div>
         </main>
-        <Footer />
-      </div>
-    </div>
 
     <!-- MODAL -->
     <LabOccupancyModal v-if="showModal" :lab="selectedLab" @close="closeModal" />

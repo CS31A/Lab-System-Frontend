@@ -61,10 +61,10 @@ const currentSection = computed(() => {
     const labNum = path.split('/')[2]
     return `slab${labNum}`
   }
-  if (path === '/lab_availability') {
-    return 'lab_availability'
-  }
-  return ''
+  // if (path === '/lab_availability') {
+  //   return 'lab_availability'
+  // }
+  // return ''
 })
 
 // CHECK IF CURRENT ROUTE IS TEACHER ROUTE
@@ -243,6 +243,17 @@ function setTeacherTab(tab: 'schedule' | 'classes') {
               >
                 <Users class="w-4 h-4" />
                 <span v-show="isSidebarOpen" class="group-hover:text-blue-700">My Classes</span>
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                class="group w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors"
+                :class="isActive('lab_availability') ? 'bg-blue-50 text-blue-700 ring-1 ring-blue-200' : 'text-gray-700 hover:bg-blue-100'"
+                @click="navigate('lab_availability')"
+              >
+                <CalendarDays class="w-4 h-4" />
+                <span v-show="isSidebarOpen" class="group-hover:text-blue-700">Lab Availability</span>
               </button>
             </li>
           </ul>
