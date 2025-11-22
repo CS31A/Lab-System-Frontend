@@ -107,18 +107,25 @@ export const useAuthStore = defineStore('auth', () => {
 
   /**
    * Logout user and clear session
+   * Calls POST /auth/logout endpoint to invalidate server session
    */
   const logout = async () => {
     try {
+      isLoading.value = true
       await api.post('/auth/logout')
+      // Logout successful - user session cleared on server
     }
     catch (error) {
       console.error('Logout API call failed:', error)
+      // Continue with logout even if API call fails
+      // This ensures user is logged out locally
     }
     finally {
       // Clear user data (memory only)
       user.value = null
-      isInitialized.value = false
+      // Keep isInitialized as true to prevent router guard from re-initializing
+      // This ensures smooth redirect to login page
+      isLoading.value = false
     }
   }
 

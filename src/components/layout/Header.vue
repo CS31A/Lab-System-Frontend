@@ -78,8 +78,23 @@ function handleSearch() {
     else if (currentRoute.includes('/admin/schedules')) {
       router.push(`/admin/schedules?search=${encodeURIComponent(searchQuery.value)}`)
     }
+    else if (currentRoute.includes('/admin/')) {
+      // Default admin: go to dashboard with search query
+      router.push(`/admin/dashboard?search=${encodeURIComponent(searchQuery.value)}`)
+    }
+    // If in teacher section, stay in teacher and apply search
+    else if (currentRoute.includes('/teacher/students')) {
+      router.push(`/teacher/students?search=${encodeURIComponent(searchQuery.value)}`)
+    }
+    else if (currentRoute.includes('/teacher/schedules')) {
+      router.push(`/teacher/schedules?search=${encodeURIComponent(searchQuery.value)}`)
+    }
+    else if (currentRoute.includes('/teacher/')) {
+      // Default teacher: go to dashboard with search query
+      router.push(`/teacher/dashboard?search=${encodeURIComponent(searchQuery.value)}`)
+    }
     else {
-      // Default: go to dashboard with search query
+      // Default: go to admin dashboard with search query
       router.push(`/admin/dashboard?search=${encodeURIComponent(searchQuery.value)}`)
     }
   }

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 // IMPORTS
+import { nextTick } from 'vue'
 import { AlertTriangle } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
@@ -18,10 +19,15 @@ function handleClose() {
   emit('close')
 }
 
-function handleLogout() {
-  authStore.logout()
+async function handleLogout() {
+  await authStore.logout()
   emit('close')
-  router.push('/login')
+
+  // Wait for Vue to process state changes
+  await nextTick()
+
+  // Use replace to prevent back navigation to protected routes
+  router.replace('/login')
 }
 </script>
 
