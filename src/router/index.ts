@@ -125,13 +125,14 @@ const router = createRouter({
           name: 'teacher-schedules',
           component: () => import('../components/admin/Schedules.vue'),
         },
+        {
+        path: 'lab_availability',
+        name: 'lab_availability',
+        component: () => import('../components/LabAvailability.vue'),
+        },
       ],
     },
-    {
-      path: '/lab_availability',
-      name: 'lab_availability',
-      component: () => import('../components/LabAvailability.vue'),
-    },
+
   ],
 })
 
