@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import type { LayoutConfig, PcCondition, SeatCell, SeatStatus, SlabStudentInfo } from '@/interfaces/interfaces'
-import { Monitor } from 'lucide-vue-next'
+import { Monitor, Printer } from 'lucide-vue-next'
 import { computed, ref, watchEffect } from 'vue'
 import PcStatusModal from './modals/PcStatusModal.vue'
+import PrinterStatusModal from './modals/PrinterStatusModal.vue'
 
 defineOptions({
   name: 'SlabLayout',
@@ -26,6 +27,8 @@ const title = computed(() => props.title ?? 'SLAB LAYOUT')
 const layoutConfigs: Record<string, LayoutConfig> = {
   slab1: {
     layout: [
+      [null, null, null, null, 'PC0', null, null, 'PRINTER1', null, null],
+      [null, null, null, null, null, null, null, null, null, null],
       ['PC1', 'PC2', 'PC3', null, null, 'PC4', 'PC5', 'PC6', null, null],
       ['PC7', 'PC8', 'PC9', null, 'PC10', 'PC11', 'PC12', 'PC13', null, null],
       ['PC14', 'PC15', 'PC16', null, 'PC17', 'PC18', 'PC19', 'PC20', null, null],
@@ -36,10 +39,13 @@ const layoutConfigs: Record<string, LayoutConfig> = {
       [null, null, null, null, null, null, null, null, null, null],
       [null, null, null, null, null, null, null, null, null, null],
       [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, 'PRINTER2', null, null],
     ],
   },
   slab2: {
     layout: [
+      [null, null, null, 'PC0', null, null, 'PRINTER1', null, null, null], 
+      [null, null, null, null, null, null, null, null, null, null],
       ['PC1', 'PC2', 'PC3', 'PC4', 'PC5', null, 'PC6', null, null, null],
       ['PC7', 'PC8', 'PC9', 'PC10', 'PC11', null, 'PC12', null, null, null],
       ['PC13', 'PC14', 'PC15', 'PC16', 'PC17', null, 'PC18', null, null, null],
@@ -50,10 +56,13 @@ const layoutConfigs: Record<string, LayoutConfig> = {
       ['PC37', 'PC38', null, 'PC39', 'PC40', 'PC41', 'PC42', null, null, null],
       ['PC43', 'PC44', null, 'PC45', 'PC46', 'PC47', 'PC48', null, null, null],
       [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, 'PRINTER2', null, null, null],
     ],
   },
   slab3: {
     layout: [
+      [null, null, null, null, 'PC0', null, null, 'PRINTER1', null, null],
+      [null, null, null, null, null, null, null, null, null, null],
       [null, 'PC1', 'PC2', null, 'PC3', 'PC4', 'PC5', 'PC6', null, null],
       ['PC7', 'PC8', 'PC9', null, 'PC10', 'PC11', 'PC12', 'PC13', null, null],
       ['PC14', 'PC15', 'PC16', null, 'PC17', 'PC18', 'PC19', 'PC20', null, null],
@@ -64,10 +73,13 @@ const layoutConfigs: Record<string, LayoutConfig> = {
       [null, null, null, null, null, null, null, null, null, null],
       [null, null, null, null, null, null, null, null, null, null],
       [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, 'PRINTER2', null, null],
     ],
   },
   slab4: {
     layout: [
+      [null, null, null, null, 'PC0', null, null, 'PRINTER1', null, null],
+      [null, null, null, null, null, null, null, null, null, null],
       ['PC1', 'PC2', 'PC3', null, 'PC4', 'PC5', 'PC6', 'PC7', 'PC8', null],
       ['PC9', 'PC10', null, null, null, 'PC11', 'PC12', 'PC13', 'PC14', null],
       ['PC15', 'PC16', null, null, null, 'PC17', 'PC18', 'PC19', 'PC20', null],
@@ -78,6 +90,7 @@ const layoutConfigs: Record<string, LayoutConfig> = {
       ['PC45', 'PC46', null, null, null, 'PC47', 'PC48', 'PC49', 'PC50', null],
       [null, null, null, null, null, null, null, null, null, null],
       [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, 'PRINTER2', null, null],
     ],
   },
 }
@@ -186,6 +199,12 @@ const selectedSeatPc = ref<{
   studentName?: string
   studentYear?: string
   studentCourse?: string
+  pcLabel?: string
+} | null>(null)
+const selectedPrinter = ref<{
+  id: number
+  status: PcCondition
+  label?: string
 } | null>(null)
 const seatMap = computed(() => {
   const map = new Map<string, SeatStatus>()
@@ -272,7 +291,7 @@ watchEffect(() => {
   seats.value = newSeats
 
   emit(
-    'seatSelectedChange',
+    'seat-selected-change',
     seats.value.some(seat => seat.status === 'selected'),
   )
 
@@ -285,7 +304,7 @@ watchEffect(() => {
       return { id, name: seat.studentName as string }
     })
 
-  emit('studentsChange', studentsForSidebar)
+  emit('students-change', studentsForSidebar)
 })
 
 // TOGGLES THE SELECTED STATE OF A SEAT AND UPDATES EMITTED SELECTION FLAG
@@ -305,7 +324,7 @@ function toggleSeat(seat: SeatStatus) {
   seats.value = [...seats.value]
 
   emit(
-    'seatSelectedChange',
+    'seat-selected-change',
     seats.value.some(s => s.status === 'selected'),
   )
 }
@@ -321,7 +340,16 @@ function handleSeatClick(seat: SeatStatus) {
       studentName: seat.studentName || '',
       studentYear: seat.studentYear || '',
       studentCourse: seat.studentCourse || '',
+      pcLabel: seat.pcLabel,
     }
+  }
+}
+
+function handlePrinterClick(seat: SeatStatus) {
+  selectedPrinter.value = {
+    id: seat.id,
+    status: seat.pcStatus,
+    label: seat.pcLabel,
   }
 }
 
@@ -363,6 +391,24 @@ function handleSavePcModal(pc: { id: number, status: PcCondition, missingOrbroke
   selectedSeatPc.value = null
 }
 
+function handleClosePrinterModal() {
+  selectedPrinter.value = null
+}
+
+function handleSavePrinterModal(printer: { id: number, status: PcCondition }) {
+  const seat = seats.value.find(s => s.id === printer.id)
+  if (seat) {
+    const pcChanged = seat.pcStatus !== printer.status
+
+    if (pcChanged) {
+      seat.pcStatus = printer.status
+      triggerToast('update')
+    }
+  }
+  seats.value = [...seats.value]
+  selectedPrinter.value = null
+}
+
 // SAVES ONLY STUDENT INFORMATION INLINE WITHOUT TRIGGERING TOAST
 function handleInlineStudentSave(pc: { id: number, status: PcCondition, missingOrbrokenDetails?: string, studentName?: string, studentYear?: string, studentCourse?: string }) {
   const seat = seats.value.find(s => s.id === pc.id)
@@ -398,6 +444,10 @@ function getPcDotColor(status: PcCondition): string {
       return 'bg-red-500'
   }
 }
+
+function isPrinterSeat(seat: SeatStatus): boolean {
+  return !!seat.pcLabel && seat.pcLabel.toUpperCase().startsWith('PRINTER')
+}
 </script>
 
 <template>
@@ -432,28 +482,39 @@ function getPcDotColor(status: PcCondition): string {
       <!-- Theater-style seating layout -->
       <div class="seating-container">
         <div
-          v-for="row in currentLayout.rows"
-          :key="`row-${row}`"
-          class="seating-row"
+          v-for="(rowData, rowIndex) in currentLayout.layout"
+          :key="`row-${rowIndex + 1}`"
         >
           <div
-            v-for="col in currentLayout.cols"
-            :key="`${row}-${col}`"
-            class="seat-slot"
+            v-if="rowData.some(cell => cell !== null)"
+            class="seating-row"
           >
-            <div v-if="seatMap.has(`${row}-${col}`)" class="relative inline-block">
-              <span
-                class="absolute top-0.7 -right-0.5 w-2.5 h-2.5 rounded-full ring-2 ring-white z-10" :class="[
-                  getPcDotColor(seatMap.get(`${row}-${col}`)!.pcStatus),
-                ]"
-              />
-              <Monitor
-                class="pc-icon w-9 h-9 cursor-pointer transition-all duration-200 hover:scale-110" :class="[
-                  getSeatColor(seatMap.get(`${row}-${col}`)!.status),
-                ]"
-                :title="`Seat ${seatMap.get(`${row}-${col}`)!.id}`"
-                @click="handleSeatClick(seatMap.get(`${row}-${col}`)!)"
-              />
+            <div
+              v-for="col in currentLayout.cols"
+              :key="`${rowIndex + 1}-${col}`"
+              class="seat-slot"
+            >
+              <div v-if="seatMap.has(`${rowIndex + 1}-${col}`)" class="relative inline-block">
+                <span
+                  class="absolute top-0.7 -right-0.5 w-2.5 h-2.5 rounded-full ring-2 ring-white z-10" :class="[
+                    getPcDotColor(seatMap.get(`${rowIndex + 1}-${col}`)!.pcStatus),
+                  ]"
+                />
+                <Printer
+                  v-if="isPrinterSeat(seatMap.get(`${rowIndex + 1}-${col}`)!)"
+                  class="pc-icon w-9 h-9 cursor-pointer transition-all duration-200 hover:scale-110 text-gray-600"
+                  :title="`Seat ${seatMap.get(`${rowIndex + 1}-${col}`)!.id}`"
+                  @click="handlePrinterClick(seatMap.get(`${rowIndex + 1}-${col}`)!)"
+                />
+                <Monitor
+                  v-else
+                  class="pc-icon w-9 h-9 cursor-pointer transition-all duration-200 hover:scale-110" :class="[
+                    getSeatColor(seatMap.get(`${rowIndex + 1}-${col}`)!.status),
+                  ]"
+                  :title="`Seat ${seatMap.get(`${rowIndex + 1}-${col}`)!.id}`"
+                  @click="handleSeatClick(seatMap.get(`${rowIndex + 1}-${col}`)!)"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -483,6 +544,11 @@ function getPcDotColor(status: PcCondition): string {
       @close="handleClosePcModal"
       @save="handleSavePcModal"
       @student-save="handleInlineStudentSave"
+    />
+    <PrinterStatusModal
+      :printer="selectedPrinter"
+      @close="handleClosePrinterModal"
+      @save="handleSavePrinterModal"
     />
   </div>
 </template>
