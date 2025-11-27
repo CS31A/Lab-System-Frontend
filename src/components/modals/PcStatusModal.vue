@@ -87,11 +87,12 @@ watch(
     const rawDetails = (newPc.missingOrbrokenDetails || '').toLowerCase()
     const parsed = hardwareOptions.filter(option => rawDetails.split(',').map(p => p.trim()).includes(option))
     selectedHardware.value = parsed
-    studentName.value = newPc.studentName || ''
-    studentYear.value = newPc.studentYear || ''
-    studentCourse.value = newPc.studentCourse || ''
+    
+    studentName.value = newPc.studentName || 'N/A'
+    studentYear.value = newPc.studentYear || 'N/A'
+    studentCourse.value = newPc.studentCourse || 'N/A'
 
-    const hadExistingStudent = !!(newPc.studentName && newPc.studentName.trim().length > 0)
+    const hadExistingStudent = !!(newPc.studentName && newPc.studentName.trim().length > 0 && newPc.studentName !== 'N/A')
     isEditingStudent.value = !hadExistingStudent
     isConfirmingUnassign.value = false
     unassignConfirmText.value = ''
@@ -103,6 +104,18 @@ watch(
   },
   { immediate: true },
 )
+
+function handleNameFocus() {
+  if (studentName.value === 'N/A') {
+    studentName.value = ''
+  }
+}
+
+function handleNameBlur() {
+  if (!studentName.value.trim()) {
+    studentName.value = 'N/A'
+  }
+}
 
 const hasPc = computed(() => !!localPc.value)
 
@@ -486,6 +499,8 @@ function handleClose() {
                   placeholder="Student's Name"
                   :disabled="hasExistingStudent && !isEditingStudent"
                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#5b8ae5]/60 focus:border-[#5b8ae5] placeholder:text-gray-400"
+                  @focus="handleNameFocus"
+                  @blur="handleNameBlur"
                 >
               </div>
               <div class="grid grid-cols-2 gap-4">
@@ -502,6 +517,9 @@ function handleClose() {
                   >
                     <option value="" class="text-gray-400">
                       Year
+                    </option>
+                    <option value="N/A">
+                      N/A
                     </option>
                     <option value="1st Year">
                       1st Year
@@ -537,6 +555,9 @@ function handleClose() {
                   >
                     <option value="" class="text-gray-400">
                       Course
+                    </option>
+                    <option value="N/A">
+                      N/A
                     </option>
                     <option value="BSIT">
                       BSIT
