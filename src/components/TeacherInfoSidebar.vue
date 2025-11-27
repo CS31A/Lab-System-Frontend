@@ -3,9 +3,15 @@ import { Calendar, ChevronLeft, ChevronRight, Clock, Info, Menu, User } from 'lu
 // TEACHER INFO SIDEBAR: DISPLAYS CALENDAR, LABORATORY SCHEDULE SLOTS, AND INSTRUCTOR/SUBJECT DETAILS IN A COLLAPSIBLE PANEL
 import { computed, onMounted, ref, watch } from 'vue'
 import { apiService } from '@/services/api'
+import { useAuthStore } from '@/stores/auth'
+
 
 // PROPS FOR PASSING CURRENT LABORATORY ID FROM PARENT COMPONENT
 const props = defineProps<{ laboratoryId?: string | null }>()
+
+// AUTH STORE FOR CHECKING USER ROLE
+const authStore = useAuthStore()
+
 // CALENDAR
 // STORES CURRENT DATE METADATA
 const today = new Date()
@@ -124,11 +130,6 @@ interface LabScheduleItem {
   laboratory: { id: string, name: string }
 }
 
-// STORES SCHEDULE LIST AND DISPLAYED INSTRUCTOR/SUBJECT INFORMATION
-const labSchedules = ref<LabScheduleItem[]>([])
-const instructorName = ref('')
-const subjectName = ref('')
-
 // FOR A SCHEDULE TIME RANGE AND SECTION
 function formatScheduleLabel(start: string, end: string, section?: string) {
   const hasTime = (s: string) => /\d{2}:\d{2}/.test(s) || /T\d{2}:\d{2}/i.test(s)
@@ -150,6 +151,7 @@ function formatScheduleLabel(start: string, end: string, section?: string) {
 }
 
 // LOADS LABORATORY SCHEDULES FROM API AND INITIALIZES TIME SLOTS AND LABELS
+// LOADS LABORATORY SCHEDULES FROM API AND INITIALIZES TIME SLOTS AND LABELS
 async function loadSchedules(labId?: string | null) {
   try {
     timeSlots.value = []
@@ -166,20 +168,60 @@ async function loadSchedules(labId?: string | null) {
       data: LabScheduleItem[]
     }>(`/teachers/laboratories/${labId}/schedule`)
 
-    const list = Array.isArray(res.data) ? res.data : []
-    labSchedules.value = list
+    const list: LabScheduleItem[] = Array.isArray(res.data) ? res.data : []
+    
+    const isTeacher = authStore.isTeacher
+    const now = new Date()
 
-    const slots = list.map((item) => {
+    const isCurrent = (item: LabScheduleItem) => {
+      const start = new Date(item.start_time)
+      const end = new Date(item.end_time)
+      return now >= start && now <= end
+    }
+
+    let filteredList = list
+
+    if (isTeacher) {
+      filteredList = list.filter(isCurrent)
+    }
+
+    labSchedules.value = filteredList
+
+    let slots: { id?: string, time: string, isActive: boolean }[] = filteredList.map((item: LabScheduleItem) => {
       const label = formatScheduleLabel(item.start_time, item.end_time, item.section)
       return { id: item.id, time: label, isActive: false }
     })
-    if (slots.length) {
-      slots[0].isActive = true
-      const first = list[0]
-      instructorName.value = `${first.teacher.firstname || ''} ${first.teacher.lastname || ''}`.trim() || 'Unknown'
-      subjectName.value = first.subject.name || 'N/A'
+
+    if (slots.length > 0) {
+      const currentItem = filteredList.find(isCurrent)
+      
+      if (currentItem) {
+        const slotIndex = slots.findIndex(s => s.id === currentItem.id)
+        if (slotIndex !== -1) {
+          slots[slotIndex].isActive = true
+          currentTimeSlotIndex.value = slotIndex
+          
+          instructorName.value = `${currentItem.teacher.firstname || ''} ${currentItem.teacher.lastname || ''}`.trim() || 'Unknown'
+          subjectName.value = currentItem.subject.name || 'N/A'
+        }
+      } else {
+        const noScheduleSlot = { id: undefined, time: 'No Schedule', isActive: true }
+        slots = [noScheduleSlot, ...slots]
+        
+        slots.forEach((s, index) => {
+          if (index > 0) s.isActive = false
+        })
+
+        currentTimeSlotIndex.value = 0
+        instructorName.value = 'N/A'
+        subjectName.value = 'N/A'
+      }
+      timeSlots.value = slots
+    } else {
+      timeSlots.value = [{ id: undefined, time: 'No Schedule', isActive: true }]
+      instructorName.value = 'N/A'
+      subjectName.value = 'N/A'
     }
-    timeSlots.value = slots
   }
   catch (e) {
     console.error('Failed to load schedules', e)
@@ -219,11 +261,24 @@ watch(() => props.laboratoryId, (val) => {
 //   alert('instructor and subject confirmed!')
 //
 // }
+// EXPOSE CURRENT SCHEDULE INFO FOR PARENT COMPONENT
+const currentScheduleInfo = computed(() => {
+  const activeSlot = timeSlots.value.find(s => s.isActive)
+  return {
+    time: activeSlot?.time || 'N/A',
+    instructor: instructorName.value || 'N/A',
+    subject: subjectName.value || 'N/A',
+  }
+})
+
+defineExpose({
+  currentScheduleInfo,
+})
 </script>
 
 <template>
   <div
-    class="relative h-full border-r border-[#aeb9d4] shadow-xl bg-white transition-[width] duration-200 ease-out" :class="[
+    class="relative min-h-full border-r border-[#aeb9d4] shadow-xl bg-white transition-[width] duration-200 ease-out" :class="[
       isCollapsed ? 'w-0 lg:w-0' : 'w-full lg:w-[400px]',
     ]"
   >
@@ -334,7 +389,7 @@ watch(() => props.laboratoryId, (val) => {
               disabled
             >
           </div>
-        </div>
+          </div>
       </aside>
     </div>
 
@@ -342,7 +397,7 @@ watch(() => props.laboratoryId, (val) => {
     <button
       v-if="isCollapsed"
       type="button"
-      class="absolute top-4 right-0 translate-x-full z-20 bg-[linear-gradient(to_bottom,#5b8ae5,#013aae)] text-white px-3 py-4 rounded-r-full shadow-lg text-xs font-semibold flex items-center justify-center cursor-pointer"
+      class="absolute top-20 right-0 translate-x-full z-20 bg-[linear-gradient(to_bottom,#5b8ae5,#013aae)] text-white px-3 py-4 rounded-r-full shadow-lg text-xs font-semibold flex items-center justify-center cursor-pointer"
       aria-label="Expand sidebar"
       @click="toggleSidebar"
     >
