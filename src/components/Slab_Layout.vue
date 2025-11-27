@@ -2,6 +2,7 @@
 import type { LayoutConfig, PcCondition, SeatCell, SeatStatus, SlabStudentInfo } from '@/interfaces/interfaces'
 import { Monitor, Printer } from 'lucide-vue-next'
 import { computed, ref, watchEffect } from 'vue'
+import { useAuthStore } from '@/stores/auth'
 import PcStatusModal from './modals/PcStatusModal.vue'
 import PrinterStatusModal from './modals/PrinterStatusModal.vue'
 
@@ -21,6 +22,21 @@ const emit = defineEmits<{
   'seat-selected-change': [hasSelected: boolean]
   'students-change': [students: { id: number, name: string }[]]
 }>()
+
+const authStore = useAuthStore()
+
+// ATTENDANCE STATUS
+const attendanceStatus = ref('')
+
+const attendanceOptions = computed(() => {
+  if (authStore.isAdmin) {
+    return ['Open', 'Close', 'On Maintenance']
+  }
+  if (authStore.isTeacher) {
+    return ['Attended', 'Unattended']
+  }
+  return [] // Fallback
+})
 
 const title = computed(() => props.title ?? 'SLAB LAYOUT')
 
@@ -395,13 +411,14 @@ function handleClosePrinterModal() {
   selectedPrinter.value = null
 }
 
-function handleSavePrinterModal(printer: { id: number, status: PcCondition }) {
+function handleSavePrinterModal(printer: { id: number, status: PcCondition, missingOrbrokenDetails?: string }) {
   const seat = seats.value.find(s => s.id === printer.id)
   if (seat) {
-    const pcChanged = seat.pcStatus !== printer.status
+    const pcChanged = seat.pcStatus !== printer.status || (seat.missingOrbrokenDetails || '') !== (printer.missingOrbrokenDetails || '')
 
     if (pcChanged) {
       seat.pcStatus = printer.status
+      seat.missingOrbrokenDetails = printer.missingOrbrokenDetails || ''
       triggerToast('update')
     }
   }
@@ -448,6 +465,11 @@ function getPcDotColor(status: PcCondition): string {
 function isPrinterSeat(seat: SeatStatus): boolean {
   return !!seat.pcLabel && seat.pcLabel.toUpperCase().startsWith('PRINTER')
 }
+
+defineExpose({
+  seats,
+  attendanceStatus,
+})
 </script>
 
 <template>
@@ -477,7 +499,32 @@ function isPrinterSeat(seat: SeatStatus): boolean {
       >
         {{ title }}
       </h2>
-      <span class="text-[#39A249] bg-[#C9F6CB] text-sm rounded-2xl py-1 px-3">Attended</span>
+      
+      <!-- Attendance Dropdown -->
+      <div class="mt-3 flex justify-center">
+        <div class="relative inline-block">
+          <select
+            v-model="attendanceStatus"
+            class="appearance-none bg-[#C9F6CB] text-[#39A249] text-sm rounded-2xl py-1 px-3 pr-8 cursor-pointer font-medium focus:outline-none focus:ring-2 focus:ring-[#39A249] focus:ring-opacity-50 transition-all"
+            :class="{ 'text-gray-400': !attendanceStatus }"
+          >
+            <option value="" disabled class="bg-white text-gray-400">Select Attendance</option>
+            <option 
+              v-for="opt in attendanceOptions" 
+              :key="opt" 
+              :value="opt"
+              class="bg-white text-gray-800"
+            >
+              {{ opt }}
+            </option>
+          </select>
+          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-[#39A249]">
+            <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+              <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
+            </svg>
+          </div>
+        </div>
+      </div>
 
       <!-- Theater-style seating layout -->
       <div class="seating-container">

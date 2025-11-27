@@ -7,12 +7,18 @@ import StudentSidebar from '@/components/StudentListSidebar.vue'
 import Sidebar from '@/components/TeacherInfoSidebar.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useLaboratoryStore } from '@/stores/laboratory'
+import { useReportsStore } from '@/stores/reports'
+import Header from '@/components/global/Header.vue'
 
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
 
 const laboratoryStore = useLaboratoryStore()
+const reportsStore = useReportsStore()
+
+const sidebarRef = ref<InstanceType<typeof Sidebar> | null>(null)
+const slabLayoutRef = ref<InstanceType<typeof SlabLayout> | null>(null)
 
 const hasSelectedSeat = ref(false)
 
@@ -113,37 +119,116 @@ function goBackToDashboard() {
     router.push({ name: 'home' })
   }
 }
+
+function submitReport() {
+  if (!slabLayoutRef.value || !sidebarRef.value || !room.value)
+    return
+
+  const attendanceStatus = slabLayoutRef.value.attendanceStatus
+
+  if (!attendanceStatus) {
+    alert('Please select an attendance status before submitting.')
+    return
+  }
+
+  const seats = slabLayoutRef.value.seats
+  const scheduleInfo = sidebarRef.value.currentScheduleInfo
+  const timestamp = new Date().toLocaleString()
+  
+  let finalAttendance = attendanceStatus
+  
+  if (authStore.isAdmin) {
+    if (attendanceStatus === 'On Maintenance') {
+      finalAttendance = 'On Maintenance'
+    } else {
+      const hasSchedule = scheduleInfo.time !== 'No Schedule' && scheduleInfo.time !== 'N/A'
+      
+      if (!hasSchedule) {
+        finalAttendance = "Not the teacher's schedule"
+      } else {
+        if (attendanceStatus === 'Open') {
+           finalAttendance = 'Attended (by Admin/Technical confirmation)'
+        } else if (attendanceStatus === 'Close') {
+           finalAttendance = 'Unattended'
+        }
+      }
+    }
+  }
+
+  const newReports = seats.map((seat, index) => ({
+    id: `${Date.now()}-${index}`,
+    laboratoryId: room.value!.id,
+    laboratoryName: room.value!.name,
+    pcNumber: seat.pcLabel || `PC${seat.id}`,
+    status: seat.pcStatus,
+    brokenDetails: seat.missingOrbrokenDetails,
+    studentName: seat.studentName || 'N/A',
+    studentYear: seat.studentYear || 'N/A',
+    studentCourse: seat.studentCourse || 'N/A',
+    schedule: scheduleInfo.time,
+    teacher: scheduleInfo.instructor,
+    timestamp,
+    submitterRole: authStore.currentUser?.role || 'Unknown',
+    submitterUsername: authStore.currentUser?.username || 'Unknown',
+    submitterName: authStore.currentUser?.name || authStore.currentUser?.username || 'Unknown',
+    attendanceStatus: finalAttendance
+  }))
+
+  reportsStore.addReports(newReports)
+  alert('Report submitted successfully!')
+  
+  if (slabLayoutRef.value) {
+    slabLayoutRef.value.attendanceStatus = ''
+  }
+}
 </script>
 
 <template>
-  <div class="flex h-screen overflow-hidden bg-gray-50 relative">
-    <!-- Back to Dashboard Button - Positioned in top-left area after sidebar -->
-    <div class="absolute top-4 z-50 left-[420px]">
-      <button
-        type="button"
-        class="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200 text-gray-700 hover:text-blue-600 border border-gray-200 hover:border-blue-300"
-        @click="goBackToDashboard"
-      >
-        <ArrowLeft class="w-4 h-4" />
-        <span class="font-medium text-sm">Back to Dashboard</span>
-      </button>
-    </div>
+  <div class="min-h-screen flex flex-col bg-gray-50">
+    <Header />
 
-    <Sidebar
-      class="flex-shrink-0"
-      :has-selected-seat="hasSelectedSeat"
-      :laboratory-id="room?.id"
-    />
-    <SlabLayout
-      class="flex-1"
-      :title="slabTitle"
-      :layout="layoutKey"
-      @seat-selected-change="handleSeatSelectedChange"
-      @students-change="handleStudentsChange"
-    />
-    <StudentSidebar
-      class="flex-shrink-0"
-      :students="studentsForSidebar"
-    />
+    <div class="flex flex-1 overflow-auto relative">
+      <Sidebar
+        ref="sidebarRef"
+        class="flex-shrink-0"
+        :has-selected-seat="hasSelectedSeat"
+        :laboratory-id="room?.id"
+      />
+      
+      <div class="flex-1 flex flex-col min-w-0 relative">
+        <div class="p-4 pb-0 bg-white flex items-center justify-between">
+          <button
+            type="button"
+            class="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200 text-gray-700 hover:text-blue-600 border border-gray-200 hover:border-blue-300 w-fit"
+            @click="goBackToDashboard"
+          >
+            <ArrowLeft class="w-4 h-4" />
+            <span class="font-medium text-sm">Back to Dashboard</span>
+          </button>
+
+          <button
+            type="button"
+            class="px-4 py-2 bg-gradient-to-r from-[#013aae] to-[#5b8ae5] text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200 font-medium text-sm cursor-pointer"
+            @click="submitReport"
+          >
+            Submit Report
+          </button>
+        </div>
+
+        <SlabLayout
+          ref="slabLayoutRef"
+          class="flex-1"
+          :title="slabTitle"
+          :layout="layoutKey"
+          @seat-selected-change="handleSeatSelectedChange"
+          @students-change="handleStudentsChange"
+        />
+      </div>
+
+      <StudentSidebar
+        class="flex-shrink-0"
+        :students="studentsForSidebar"
+      />
+    </div>
   </div>
 </template>
