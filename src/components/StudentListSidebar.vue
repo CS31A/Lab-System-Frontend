@@ -21,7 +21,7 @@ function toggleSidebar() {
 
 <template>
   <div
-    class="relative h-full border-l border-[#aeb9d4] bg-white transition-[width] duration-200 ease-out" :class="[
+    class="relative min-h-full border-l border-[#aeb9d4] bg-white transition-[width] duration-200 ease-out" :class="[
       isCollapsed ? 'w-0 lg:w-0' : 'w-full lg:w-[320px]',
     ]"
   >
@@ -49,7 +49,7 @@ function toggleSidebar() {
           </button>
         </div>
 
-        <div class="p-4 space-y-2 overflow-y-auto">
+        <div class="p-4 space-y-2 overflow-y-auto flex-1">
           <div
             v-for="(student, index) in students"
             :key="student.id"
@@ -77,7 +77,7 @@ function toggleSidebar() {
     <button
       v-if="isCollapsed"
       type="button"
-      class="absolute top-4 left-0 -translate-x-full bg-[linear-gradient(to_bottom,#5b8ae5,#013aae)] text-white px-3 py-4 rounded-l-full shadow-lg text-xs font-semibold flex items-center justify-center cursor-pointer"
+      class="absolute top-20 left-0 -translate-x-full bg-[linear-gradient(to_bottom,#5b8ae5,#013aae)] text-white px-3 py-4 rounded-l-full shadow-lg text-xs font-semibold flex items-center justify-center cursor-pointer"
       aria-label="Expand student panel"
       @click="toggleSidebar"
     >

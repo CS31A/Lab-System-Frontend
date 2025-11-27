@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 import api from '@/boot/axios'
 
 const emits = defineEmits<{
@@ -7,16 +7,46 @@ const emits = defineEmits<{
   save: [payload: { name: string, layout: boolean[] }]
 }>()
 
-const GRID_SIZE = 10
+type CellType = 'pc' | 'printer' | null
 
-const layoutCells = ref<boolean[]>(Array.from({ length: GRID_SIZE * GRID_SIZE }, () => false))
+const GRID_COLS = 10
+const GRID_ROWS = 13
+
+const layoutCells = ref<CellType[]>(Array.from({ length: GRID_COLS * GRID_ROWS }, () => null))
 const labName = ref('')
 
-const hasActiveCells = () => layoutCells.value.some(cell => cell)
+const isMouseDown = ref(false)
+const dragValue = ref<CellType | null>(null)
+
+const placementMode = ref<'pc' | 'printer'>('pc')
+
+const hasActiveCells = () => layoutCells.value.some(cell => cell !== null)
 
 // TOGGLES THE ACTIVE/INACTIVE STATE OF A SINGLE GRID CELL BY INDEX
 function toggleLayoutCell(index: number) {
-  layoutCells.value[index] = !layoutCells.value[index]
+  const current = layoutCells.value[index]
+  const next: CellType = current === placementMode.value ? null : placementMode.value
+  layoutCells.value[index] = next
+}
+
+function handleMouseDown(index: number) {
+  isMouseDown.value = true
+  const current = layoutCells.value[index]
+  const next: CellType = current === placementMode.value ? null : placementMode.value
+  dragValue.value = next
+  layoutCells.value[index] = next
+}
+
+function handleMouseEnter(index: number) {
+  if (!isMouseDown.value || dragValue.value === null)
+    return
+
+  layoutCells.value[index] = dragValue.value
+}
+
+function handleMouseUp() {
+  isMouseDown.value = false
+  dragValue.value = null
 }
 
 // EMITS A CANCEL EVENT TO GO BACK WITHOUT SAVING
@@ -30,7 +60,7 @@ async function handleSave() {
   if (!trimmedName || !hasActiveCells())
     return
 
-  const snapshot = [...layoutCells.value]
+  const snapshot = layoutCells.value.map(cell => cell !== null)
 
   try {
     await api.post('/laboratories', { name: trimmedName })
@@ -42,9 +72,17 @@ async function handleSave() {
   emits('save', { name: trimmedName, layout: snapshot })
 
   // RESETS GRID
-  layoutCells.value = Array.from({ length: GRID_SIZE * GRID_SIZE }, () => false)
+  layoutCells.value = Array.from({ length: GRID_COLS * GRID_ROWS }, () => null)
   labName.value = ''
 }
+
+onMounted(() => {
+  window.addEventListener('mouseup', handleMouseUp)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('mouseup', handleMouseUp)
+})
 </script>
 
 <template>
@@ -67,6 +105,17 @@ async function handleSave() {
             class="px-3 py-1.5 text-sm rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 min-w-[220px]"
             placeholder="Enter laboratory name"
           >
+        </div>
+        <div class="flex items-center gap-2">
+          <label class="text-sm text-gray-700" for="placement-mode">Place as</label>
+          <select
+            id="placement-mode"
+            v-model="placementMode"
+            class="px-3 py-1.5 text-sm rounded-md border border-gray-300 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
+          >
+            <option value="pc">PC</option>
+            <option value="printer">Printer</option>
+          </select>
         </div>
       </div>
       <div class="flex items-center gap-2 self-start md:self-auto">
@@ -93,9 +142,15 @@ async function handleSave() {
           v-for="(cell, index) in layoutCells"
           :key="index"
           class="layout-cell" :class="[
-            cell ? 'layout-cell--active' : 'layout-cell--inactive',
+            cell === 'pc'
+              ? 'layout-cell--pc'
+              : cell === 'printer'
+                ? 'layout-cell--printer'
+                : 'layout-cell--inactive',
           ]"
-          @click="toggleLayoutCell(index)"
+          @mousedown.prevent="handleMouseDown(index)"
+          @mouseenter="handleMouseEnter(index)"
+          @mouseup.prevent="handleMouseUp"
         />
       </div>
     </div>
@@ -106,7 +161,7 @@ async function handleSave() {
 .layout-grid {
   display: grid;
   grid-template-columns: repeat(10, 40px);
-  grid-template-rows: repeat(10, 40px);
+  grid-template-rows: repeat(13, 40px);
   grid-column-gap: 15px;
   grid-row-gap: 10px;
   width: fit-content;
@@ -133,5 +188,13 @@ async function handleSave() {
 
 .layout-cell--inactive {
   background-color: #e5e7eb;
+}
+
+.layout-cell--pc {
+  background-color: #5b8ae5;
+}
+
+.layout-cell--printer {
+  background-color: #f6ad55;
 }
 </style>

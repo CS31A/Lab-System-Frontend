@@ -96,6 +96,11 @@ const router = createRouter({
           name: 'admin-settings',
           component: () => import('../components/admin/Settings.vue'),
         },
+        {
+          path: 'reports',
+          name: 'admin-reports',
+          component: () => import('../views/LaboratoryReports.vue'),
+        },
       ],
     },
     {
@@ -129,6 +134,11 @@ const router = createRouter({
         path: 'lab_availability',
         name: 'lab_availability',
         component: () => import('../components/LabAvailability.vue'),
+        },
+        {
+          path: 'reports',
+          name: 'teacher-reports',
+          component: () => import('../views/LaboratoryReports.vue'),
         },
       ],
     },

@@ -11,6 +11,7 @@ interface PcInfo {
   studentName?: string
   studentYear?: string
   studentCourse?: string
+  pcLabel?: string
 }
 
 const props = defineProps<{
@@ -36,6 +37,13 @@ const studentSuccess = ref('')
 const wasUnassigned = ref(false)
 let studentErrorTimeout: number | null = null
 let studentSuccessTimeout: number | null = null
+
+const hardwareOptions = ['monitor', 'mouse', 'keyboard', 'system unit'] as const
+type HardwareOption = (typeof hardwareOptions)[number]
+const selectedHardware = ref<HardwareOption[]>([])
+const isHardwareDropdownOpen = ref(false)
+
+const isPc0 = computed(() => (localPc.value?.pcLabel || '').toUpperCase() === 'PC0')
 
 // COMPUTES LABEL AND COLORS FOR CURRENT PC STATUS CHIP
 const statusChip = computed(() => {
@@ -75,11 +83,16 @@ watch(
     const allowed = new Set(['complete', 'missing', 'broken'])
     const normalizedStatus = allowed.has(newPc.status) ? newPc.status : 'complete'
     localPc.value = { ...newPc, status: normalizedStatus, missingOrbrokenDetails: newPc.missingOrbrokenDetails || '' }
-    studentName.value = newPc.studentName || ''
-    studentYear.value = newPc.studentYear || ''
-    studentCourse.value = newPc.studentCourse || ''
 
-    const hadExistingStudent = !!(newPc.studentName && newPc.studentName.trim().length > 0)
+    const rawDetails = (newPc.missingOrbrokenDetails || '').toLowerCase()
+    const parsed = hardwareOptions.filter(option => rawDetails.split(',').map(p => p.trim()).includes(option))
+    selectedHardware.value = parsed
+    
+    studentName.value = newPc.studentName || 'N/A'
+    studentYear.value = newPc.studentYear || 'N/A'
+    studentCourse.value = newPc.studentCourse || 'N/A'
+
+    const hadExistingStudent = !!(newPc.studentName && newPc.studentName.trim().length > 0 && newPc.studentName !== 'N/A')
     isEditingStudent.value = !hadExistingStudent
     isConfirmingUnassign.value = false
     unassignConfirmText.value = ''
@@ -92,7 +105,56 @@ watch(
   { immediate: true },
 )
 
+function handleNameFocus() {
+  if (studentName.value === 'N/A') {
+    studentName.value = ''
+  }
+}
+
+function handleNameBlur() {
+  if (!studentName.value.trim()) {
+    studentName.value = 'N/A'
+  }
+}
+
 const hasPc = computed(() => !!localPc.value)
+
+const hardwareSummaryLabel = computed(() => {
+  if (!selectedHardware.value.length)
+    return 'Select items'
+
+  if (selectedHardware.value.length === hardwareOptions.length)
+    return 'All items selected'
+
+  return selectedHardware.value
+    .map(item => item === 'system unit' ? 'System Unit' : item.charAt(0).toUpperCase() + item.slice(1))
+    .join(', ')
+})
+
+const selectedHardwareCount = computed(() => selectedHardware.value.length)
+
+const isAllHardwareSelected = computed(() => selectedHardware.value.length === hardwareOptions.length)
+
+function toggleHardwareDropdown() {
+  if (!localPc.value || (localPc.value.status !== 'missing' && localPc.value.status !== 'broken'))
+    return
+
+  isHardwareDropdownOpen.value = !isHardwareDropdownOpen.value
+}
+
+function toggleHardware(option: HardwareOption) {
+  const exists = selectedHardware.value.includes(option)
+  selectedHardware.value = exists
+    ? selectedHardware.value.filter(o => o !== option)
+    : [...selectedHardware.value, option]
+}
+
+function toggleSelectAllHardware() {
+  if (isAllHardwareSelected.value)
+    selectedHardware.value = []
+  else
+    selectedHardware.value = [...hardwareOptions]
+}
 
 // UPDATES PC STATUS FROM DROPDOWN AND NORMALIZES VALUE TO VALID STATUS
 function setStatus(status: PcCondition | string) {
@@ -106,8 +168,11 @@ function setStatus(status: PcCondition | string) {
 
   localPc.value.status = normalizedStatus
 
-  if (normalizedStatus !== 'missing')
+  if (normalizedStatus !== 'missing' && normalizedStatus !== 'broken') {
     localPc.value.missingOrbrokenDetails = ''
+    selectedHardware.value = []
+    isHardwareDropdownOpen.value = false
+  }
 }
 
 // HANDLES MAIN SAVE ACTION FOR PC AND STUDENT INFO AND CLOSES MODAL
@@ -115,8 +180,7 @@ function handleDone() {
   if (!localPc.value)
     return
 
-  // If we didn't just unassign a student, enforce student info validation
-  if (!wasUnassigned.value && (!studentName.value.trim() || !studentYear.value || !studentCourse.value)) {
+  if (!isPc0.value && !wasUnassigned.value && (!studentName.value.trim() || !studentYear.value || !studentCourse.value)) {
     studentError.value = 'Please fill out student name, year, and course.'
     if (studentErrorTimeout !== null)
       window.clearTimeout(studentErrorTimeout)
@@ -127,13 +191,38 @@ function handleDone() {
     return
   }
 
+  if (localPc.value.status === 'missing' || localPc.value.status === 'broken') {
+    if (!selectedHardware.value.length) {
+      studentError.value = localPc.value.status === 'missing'
+        ? 'Please select what is missing for this PC.'
+        : 'Please select what is broken for this PC.'
+      if (studentErrorTimeout !== null)
+        window.clearTimeout(studentErrorTimeout)
+      studentErrorTimeout = window.setTimeout(() => {
+        studentError.value = ''
+        studentErrorTimeout = null
+      }, 3000)
+      return
+    }
+
+    const label = selectedHardware.value
+      .map(item => {
+        if (item === 'system unit')
+          return 'System Unit'
+        return item.charAt(0).toUpperCase() + item.slice(1)
+      })
+      .join(', ')
+
+    localPc.value.missingOrbrokenDetails = label
+  }
+
   if (
     (localPc.value.status === 'missing' || localPc.value.status === 'broken')
     && !localPc.value.missingOrbrokenDetails?.trim()
   ) {
     studentError.value = localPc.value.status === 'missing'
-      ? 'Please state what is missing for this PC.'
-      : 'Please state what is broken for this PC.'
+      ? 'Please select what is missing for this PC.'
+      : 'Please select what is broken for this PC.'
     if (studentErrorTimeout !== null)
       window.clearTimeout(studentErrorTimeout)
     studentErrorTimeout = window.setTimeout(() => {
@@ -145,9 +234,9 @@ function handleDone() {
 
   emit('save', {
     ...localPc.value,
-    studentName: studentName.value,
-    studentYear: studentYear.value,
-    studentCourse: studentCourse.value,
+    studentName: isPc0.value ? '' : studentName.value,
+    studentYear: isPc0.value ? '' : studentYear.value,
+    studentCourse: isPc0.value ? '' : studentCourse.value,
   })
 
   // If this Save is after an unassign, show the unassigned toast here
@@ -187,7 +276,7 @@ function handleStudentEditClick() {
       studentYear: studentYear.value,
       studentCourse: studentCourse.value,
     }
-    emit('student-save', updated)
+    emit('studentSave', updated)
     localPc.value = updated
     studentSuccess.value = 'Assigned student successfully.'
     if (studentSuccessTimeout !== null)
@@ -321,7 +410,7 @@ function handleClose() {
               </div>
               <div>
                 <h1 class="text-white text-2xl leading-tight font-extrabold tracking-tight">
-                  PC {{ localPc?.id }}
+                  {{ localPc?.pcLabel || `PC ${localPc?.id}` }}
                 </h1>
                 <p class="text-white/85 text-xs">
                   Computer Status
@@ -351,7 +440,10 @@ function handleClose() {
         </div>
 
         <div class="px-6 py-6 space-y-7">
-          <div class="space-y-3">
+          <div
+            v-if="!isPc0"
+            class="space-y-3"
+          >
             <div class="flex items-center justify-between">
               <h3 class="text-xs font-semibold tracking-wide uppercase text-gray-500">
                 Student
@@ -395,7 +487,7 @@ function handleClose() {
                 <input
                   v-model="unassignConfirmText"
                   type="text"
-                  placeholder="Type &quot;unassign&quot; to confirm"
+                  placeholder='Type "unassign" to confirm'
                   class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-300 placeholder:text-gray-400"
                 >
               </div>
@@ -407,6 +499,8 @@ function handleClose() {
                   placeholder="Student's Name"
                   :disabled="hasExistingStudent && !isEditingStudent"
                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#5b8ae5]/60 focus:border-[#5b8ae5] placeholder:text-gray-400"
+                  @focus="handleNameFocus"
+                  @blur="handleNameBlur"
                 >
               </div>
               <div class="grid grid-cols-2 gap-4">
@@ -423,6 +517,9 @@ function handleClose() {
                   >
                     <option value="" class="text-gray-400">
                       Year
+                    </option>
+                    <option value="N/A">
+                      N/A
                     </option>
                     <option value="1st Year">
                       1st Year
@@ -458,6 +555,9 @@ function handleClose() {
                   >
                     <option value="" class="text-gray-400">
                       Course
+                    </option>
+                    <option value="N/A">
+                      N/A
                     </option>
                     <option value="BSIT">
                       BSIT
@@ -517,15 +617,67 @@ function handleClose() {
                   <span class="inline-flex items-center gap-1"><span class="inline-block w-2 h-2 rounded-full bg-red-500" />Broken</span>
                 </div>
               </div>
+              <div v-if="localPc?.status === 'missing' || localPc?.status === 'broken'" class="mt-4">
+                <div class="relative">
+                  <button
+                    type="button"
+                    class="w-full flex items-center justify-between border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#f6ad55]/60 focus:border-[#f6ad55] cursor-pointer"
+                    @click="toggleHardwareDropdown"
+                  >
+                    <span class="truncate text-left" :class="selectedHardwareCount ? 'text-gray-800' : 'text-gray-400'">
+                      {{ hardwareSummaryLabel }}
+                    </span>
+                    <span class="flex items-center gap-2">
+                      <span
+                        v-if="selectedHardwareCount"
+                        class="inline-flex items-center justify-center min-w-[1.5rem] h-6 rounded-full bg-[#5b8ae5]/10 text-[11px] font-semibold text-[#013aae] px-2"
+                      >
+                        {{ selectedHardwareCount }}
+                      </span>
+                      <ChevronDown class="w-4 h-4 text-gray-400" />
+                    </span>
+                  </button>
 
-              <div v-if="localPc?.status === 'missing' || localPc?.status === 'broken'">
-                <input
-                  id="missingOrbrokenDetails"
-                  v-model="localPc!.missingOrbrokenDetails"
-                  type="text"
-                  :placeholder="localPc?.status === 'missing' ? 'Missing Items' : 'Broken Components'"
-                  class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#f6ad55]/60 focus:border-[#f6ad55] placeholder:text-gray-400"
-                >
+                  <div
+                    v-if="isHardwareDropdownOpen"
+                    class="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-24 overflow-y-auto custom-thin-scrollbar"
+                  >
+                    <ul class="py-1 text-sm text-gray-700">
+                      <li>
+                        <button
+                          type="button"
+                          class="flex w-full items-center justify-between px-3 py-2 hover:bg-gray-50 cursor-pointer"
+                          @click="toggleSelectAllHardware"
+                        >
+                          <span>Select all</span>
+                          <span
+                            class="inline-flex items-center justify-center w-4 h-4 rounded-full border"
+                            :class="isAllHardwareSelected ? 'bg-[#5b8ae5] border-[#5b8ae5]' : 'border-gray-300'"
+                          >
+                            <span v-if="isAllHardwareSelected" class="w-2 h-2 rounded-full bg-white" />
+                          </span>
+                        </button>
+                      </li>
+                      <li v-for="option in hardwareOptions" :key="option">
+                        <button
+                          type="button"
+                          class="flex w-full items-center justify-between px-3 py-2 hover:bg-gray-50 cursor-pointer"
+                          @click="toggleHardware(option)"
+                        >
+                          <span class="capitalize" :class="option === 'system unit' ? 'normal-case' : ''">
+                            {{ option === 'system unit' ? 'System Unit' : option }}
+                          </span>
+                          <span
+                            class="inline-flex items-center justify-center w-4 h-4 rounded-full border"
+                            :class="selectedHardware.includes(option) ? 'bg-[#5b8ae5] border-[#5b8ae5]' : 'border-gray-300'"
+                          >
+                            <span v-if="selectedHardware.includes(option)" class="w-2 h-2 rounded-full bg-white" />
+                          </span>
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -558,3 +710,27 @@ function handleClose() {
     </transition>
   </div>
 </template>
+
+<style scoped>
+.custom-thin-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #9ca3af transparent;
+}
+
+.custom-thin-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-thin-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-thin-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #9ca3af;
+  border-radius: 9999px;
+}
+
+.custom-thin-scrollbar::-webkit-scrollbar-button {
+  display: none;
+}
+</style>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // IMPORTS
-import { CalendarDays, LogOut, Users } from 'lucide-vue-next'
-import { computed, inject, nextTick, onMounted, ref } from 'vue'
+import { CalendarDays, FileText, LogOut, Users } from 'lucide-vue-next'
+import { computed, inject, nextTick, onMounted, ref, type Ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '@/boot/axios'
 import { useAuthStore } from '@/stores/auth'
@@ -43,6 +43,7 @@ interface Laboratory {
 
 // REFS & REACTIVE STATE
 const isLabsOpen = ref(false)
+const isReportsOpen = ref(false)
 const isSidebarOpen = ref(true)
 const laboratories = ref<Laboratory[]>([])
 const isLoading = ref(true)
@@ -92,6 +93,7 @@ function toggleSidebar() {
   // CLOSE LABS MENU WHEN SIDEBAR IS COLLAPSED
   if (!isSidebarOpen.value) {
     isLabsOpen.value = false
+    isReportsOpen.value = false
   }
 }
 
@@ -109,13 +111,13 @@ function navigate(name: string) {
     return
   }
   // ADMIN ROUTES
-  const adminSections = ['dashboard', 'classrooms', 'students', 'teachers', 'schedules', 'activity', 'settings']
+  const adminSections = ['dashboard', 'classrooms', 'students', 'teachers', 'schedules', 'activity', 'settings', 'reports']
   if (adminSections.includes(name) && route.path.startsWith('/admin/')) {
     router.push({ name: `admin-${name}` })
     return
   }
   // TEACHER ROUTES
-  const teacherSections = ['dashboard', 'classrooms', 'students', 'schedules']
+  const teacherSections = ['dashboard', 'classrooms', 'students', 'schedules', 'reports']
   if (teacherSections.includes(name) && route.path.startsWith('/teacher/')) {
     router.push({ name: `teacher-${name}` })
     return
@@ -153,7 +155,7 @@ async function setTeacherTab(tab: 'schedule' | 'classes') {
 
 <template>
   <aside
-    class="h-full border-r border-gray-200 bg-white transition-all duration-300 flex flex-col"
+    class="h-full min-h-0 border-r border-gray-200 bg-white transition-all duration-300 flex flex-col"
     :class="[
       isSidebarOpen ? 'w-64' : 'w-16',
     ]"
@@ -226,7 +228,7 @@ async function setTeacherTab(tab: 'schedule' | 'classes') {
               <button
                 type="button"
                 class="group w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors"
-                :class="teacherActiveTab.value === 'schedule' ? 'bg-blue-50 text-blue-700 ring-1 ring-blue-200' : 'text-gray-700 hover:bg-blue-100'"
+                :class="teacherActiveTab === 'schedule' ? 'bg-blue-50 text-blue-700 ring-1 ring-blue-200' : 'text-gray-700 hover:bg-blue-100'"
                 @click="setTeacherTab('schedule')"
               >
                 <CalendarDays class="w-4 h-4" />
@@ -237,7 +239,7 @@ async function setTeacherTab(tab: 'schedule' | 'classes') {
               <button
                 type="button"
                 class="group w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors"
-                :class="teacherActiveTab.value === 'classes' ? 'bg-blue-50 text-blue-700 ring-1 ring-blue-200' : 'text-gray-700 hover:bg-blue-100'"
+                :class="teacherActiveTab === 'classes' ? 'bg-blue-50 text-blue-700 ring-1 ring-blue-200' : 'text-gray-700 hover:bg-blue-100'"
                 @click="setTeacherTab('classes')"
               >
                 <Users class="w-4 h-4" />
@@ -254,6 +256,33 @@ async function setTeacherTab(tab: 'schedule' | 'classes') {
                 <CalendarDays class="w-4 h-4" />
                 <span v-show="isSidebarOpen" class="group-hover:text-blue-700">Lab Availability</span>
               </button>
+            </li>
+            <li>
+              <div class="mt-1">
+                <button
+                  class="group w-full flex items-center justify-between px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-blue-100 cursor-pointer"
+                  type="button"
+                  @click="isSidebarOpen ? isReportsOpen = !isReportsOpen : isSidebarOpen = true"
+                >
+                  <span class="flex items-center gap-3">
+                    <FileText class="w-4 h-4 transition-colors group-hover:text-blue-600" :class="isReportsOpen ? 'text-blue-600' : 'text-gray-600'" />
+                    <span v-show="isSidebarOpen" class="group-hover:text-blue-700">Reports</span>
+                  </span>
+                  <span v-show="isSidebarOpen" class="i-heroicons-chevron-down-20-solid transition-transform" :class="isReportsOpen ? 'rotate-180' : ''" @click.stop="isReportsOpen = !isReportsOpen" />
+                </button>
+
+                <transition name="fade">
+                  <div v-show="isSidebarOpen && isReportsOpen" class="mt-1 ml-3 border-l border-gray-200 pl-3 space-y-0.5">
+                    <button
+                      class="group w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors text-gray-700 hover:bg-blue-100 cursor-pointer"
+                      :class="isActive('reports') ? 'bg-blue-50 text-blue-700 ring-1 ring-blue-200' : ''"
+                      @click="navigate('reports')"
+                    >
+                      <span v-show="isSidebarOpen" class="transition-colors group-hover:text-blue-700">Laboratory Reports</span>
+                    </button>
+                  </div>
+                </transition>
+              </div>
             </li>
           </ul>
         </nav>
@@ -403,6 +432,32 @@ async function setTeacherTab(tab: 'schedule' | 'classes') {
               </svg>
               <span v-show="isSidebarOpen" class="transition-colors group-hover:text-blue-700">Schedules</span>
             </button>
+            <!-- REPORTS COLLAPSE SECTION -->
+            <div class="mt-1">
+              <button
+                class="group w-full flex items-center justify-between px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-blue-100 cursor-pointer"
+                type="button"
+                @click="isSidebarOpen ? isReportsOpen = !isReportsOpen : isSidebarOpen = true"
+              >
+                <span class="flex items-center gap-3">
+                  <FileText class="w-5 h-5 transition-colors group-hover:text-blue-600" :class="isReportsOpen ? 'text-blue-600' : 'text-gray-600'" />
+                  <span v-show="isSidebarOpen" class="transition-colors group-hover:text-blue-700">Reports</span>
+                </span>
+                <span v-show="isSidebarOpen" class="i-heroicons-chevron-down-20-solid transition-transform" :class="isReportsOpen ? 'rotate-180' : ''" @click.stop="isReportsOpen = !isReportsOpen" />
+              </button>
+
+              <transition name="fade">
+                <div v-show="isSidebarOpen && isReportsOpen" class="mt-1 ml-3 border-l border-gray-200 pl-3 space-y-0.5">
+                  <button
+                    class="group w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors text-gray-700 hover:bg-blue-100 cursor-pointer"
+                    :class="isActive('reports') ? 'bg-blue-50 text-blue-700 ring-1 ring-blue-200' : ''"
+                    @click="navigate('reports')"
+                  >
+                    <span v-show="isSidebarOpen" class="transition-colors group-hover:text-blue-700">Laboratory Reports</span>
+                  </button>
+                </div>
+              </transition>
+            </div>
             <!-- ACTIVITY LOG (Admin Only) -->
             <button
               v-if="!isTeacherRoute"
