@@ -30,6 +30,9 @@ provide('showModal', showModal)
 
 <template>
   <div class="flex flex-col h-screen bg-gray-50">
+    <!-- Layout Header -->
+    <LayoutHeader />
+
     <!-- BODY -->
     <div class="flex flex-1 overflow-hidden">
       <!-- SIDEBAR -->
@@ -37,9 +40,6 @@ provide('showModal', showModal)
 
       <!-- MAIN CONTENT AREA -->
       <div class="content-area flex-1 flex flex-col overflow-hidden">
-        <!-- Layout Header -->
-        <LayoutHeader />
-
         <!-- DYNAMIC CONTENT -->
         <main class="flex-1 overflow-auto p-6">
           <RouterView />
